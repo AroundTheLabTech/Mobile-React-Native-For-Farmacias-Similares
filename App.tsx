@@ -8,12 +8,18 @@ import LoginScreen from './src/screens/SessionScreen/Login'; // Importa la vista
 const Stack = createStackNavigator();
 
 export default function App() {
+
+  
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Login">
-          <Stack.Screen name="Login" component={LoginScreen} />
-          {/* Puedes agregar más pantallas aquí */}
+          <Stack.Screen 
+          name="Login"
+          component={LoginScreen} 
+          options = {{headerShown: false}} 
+          />
+
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>
