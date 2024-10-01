@@ -3,12 +3,8 @@ import { View, Text, Button, StyleSheet, Image, TouchableOpacity, TextInput } fr
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ScrollView } from 'react-native-gesture-handler';
 import loginStyles from './style/loginStyles'; // Importamos los estilos de login
+import { RootStackParamList } from '../../NavigationTypes'; 
 
-
-type RootStackParamList = {
-  Login: undefined;
-  Home: undefined;
-};
 
 type LoginScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -79,22 +75,26 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         {/* Container Button */}
         <View style={loginStyles.containerButtons}>
 
-          {/* Boton Register */}
-          <TouchableOpacity 
-          style={loginStyles.botonLogin}>
-            <Text
-              style={loginStyles.textoButtons}
-            >Login
-            </Text>
-          </TouchableOpacity>
-          {/* Boton Login */}
+             {/* Boton Login */}
           <TouchableOpacity
             style= {loginStyles.botonLogin}
           >
             <Text style={loginStyles.textoButtons}>
-              Register
+              Login
             </Text>
           </TouchableOpacity>
+
+          {/* Boton Register */}
+          <TouchableOpacity 
+              style={loginStyles.botonLogin}
+              onPress={() => navigation.navigate('Register')} // Asegúrate de que onPress esté dentro de TouchableOpacity
+            >
+              <Text style={loginStyles.textoButtons}>
+                Register
+              </Text>
+            </TouchableOpacity>
+
+       
 
         </View>
 
