@@ -8,6 +8,10 @@
     {
       "path": "assets/fonts/PressStart2P-Regular.ttf",
       "sha1": "59caa00e6aac4573f51943e0bdd20c758eddbf4a"
+    },
+    {
+      "path": "assets/fonts/Rubik-VariableFont_wght.ttf",
+      "sha1": "80fbecd6d6cb21096b3e0277222e696c77ceb7eb"
     }
   ]
 }

@@ -35,7 +35,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         const user = await loginWithEmailAndPassword(email, password);
         console.log("Usuario autenticado", user);
         // Aquí puedes redirigir a la pantalla principal o manejar el usuario logueado
-        navigation.navigate('Home');
+        navigation.navigate('MainTab', {
+          screen: 'Home',
+        });
       } catch (error) {
         console.error("Error de login:", error);
         // Manejar el error, por ejemplo, mostrando un mensaje de error en la UI

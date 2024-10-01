@@ -13,17 +13,17 @@ const responsiveHeight = (value: number) => {
 };
 
 export const colors = {
-  primary: '#fff',
-  secondary: '#000',
-  third: '#6A5AE0',
+  primary: '#fff', //Blanco
+  secondary: '#000', // Negro
+  third: '#6A5AE0',  //Azul
   fourd: '#f8FBE9',
   success400: '#59AC6B',
   bad: '#FF5959',
   button1: '#76777E',
   button2: '#601B4D',
   background1: '#000',
-  background2: '#FFF',
-  background3: '#000',
+  background2: '#6A5AE0',
+  background3: '#fff',
 };
 
 // Tamaños de fuente basados en la altura de la pantalla
@@ -57,5 +57,7 @@ export const spacing = {
 // Font Families, incluyendo la fuente PressStart2P-Regular
 export const fonts = {
   press: 'PressStart2P-Regular', // Fuente personalizada PressStart2P
-  bold: 'Inter-Bold', // Puedes agregar más fuentes si es necesario
+  bold: 'Inter-Bold', 
+  rubik: 'Rubik-VariableFont_wght', 
+
 };
