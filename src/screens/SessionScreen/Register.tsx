@@ -21,13 +21,14 @@ type RegisterScreenProps = {
     return (
     <ScrollView>
          <View style={loginStyles.headerContainer}>
-            <Image
-            source={require('../../../public/medallas/medal1.png')}
-            style={loginStyles.headerMedal}
+              <Image
+                source={require('../../../img/medallas/medal1.png')}
+                style={loginStyles.headerMedal}
             />
-             <Image
-            source={require('../../../public/medallas/medal2.png')}
-            style={loginStyles.headerMedal}
+
+            <Image
+                source={require('../../../img/medallas/medal1.png')}
+                style={loginStyles.headerMedal}
             />
         </View>
         <View style={loginStyles.containerLogin}>
@@ -158,15 +159,9 @@ type RegisterScreenProps = {
         </View> 
   
         <View style={loginStyles.headerContainer}>
-            <Image
-            source={require('../../../public/medallas/medal1.png')}
-            style={loginStyles.headerMedal}
-            />
-             <Image
-            source={require('../../../public/medallas/medal2.png')}
-            style={loginStyles.headerMedal}
-            />
-        </View>
+         
+          
+        </View> 
   
         </View>
       

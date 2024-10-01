@@ -1,9 +1,17 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { View, Text, Button, StyleSheet, Image, TouchableOpacity, TextInput } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ScrollView } from 'react-native-gesture-handler';
-import loginStyles from './style/loginStyles'; // Importamos los estilos de login
 import { RootStackParamList } from '../../NavigationTypes'; 
+
+
+//Styles
+
+import loginStyles from './style/loginStyles'; 
+
+//Services
+
+import { loginWithEmailAndPassword } from '../../services/authService';  
 
 
 type LoginScreenNavigationProp = StackNavigationProp<
@@ -16,19 +24,42 @@ type LoginScreenProps = {
 };
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+
+
+    const handleLogin = async () => {
+      try {
+        const user = await loginWithEmailAndPassword(email, password);
+        console.log("Usuario autenticado", user);
+        // Aquí puedes redirigir a la pantalla principal o manejar el usuario logueado
+        navigation.navigate('Home');
+      } catch (error) {
+        console.error("Error de login:", error);
+        // Manejar el error, por ejemplo, mostrando un mensaje de error en la UI
+      }
+    };
+
+
+  
   return (
       <View style={loginStyles.containerLogin}>
 
       
       <View style={loginStyles.headerContainer}>
-          <Image
-          source={require('../../../public/medallas/medal1.png')}
+      <Image
+          source={require('../../../img/medallas/medal1.png')}
           style={loginStyles.headerMedal}
-          />
-           <Image
-          source={require('../../../public/medallas/medal2.png')}
+      />
+
+      <Image
+          source={require('../../../img/medallas/medal1.png')}
           style={loginStyles.headerMedal}
-          />
+      />
+        
+
       </View>     
 
       <View style={loginStyles.containerTitle}>
@@ -36,9 +67,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         <Text style={loginStyles.titleLogin}>
           ¡GANAR NUNCA FUE MÁS DIVERTIDO! 
         </Text>  
+        {/* Container Forms */}
         <View 
         style={loginStyles.containerForms}>
-          {/* PlaceHolder */}
+          {/* Correo Electrónico */}
           <View
           style ={loginStyles.containerPlaceHolder}
           >
@@ -53,6 +85,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             placeholder="Correo electrónico"
             keyboardType="email-address"
             autoCapitalize="none"
+            value = {email}
+            onChangeText = {setEmail}
           />
           
           {/* Contraseña */}
@@ -70,6 +104,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             placeholder="Correo electrónico"
             keyboardType="email-address"
             autoCapitalize="none"
+
+            onChangeText={setPassword}
           />
         </View>
         {/* Container Button */}
@@ -78,8 +114,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
              {/* Boton Login */}
           <TouchableOpacity
             style= {loginStyles.botonLogin}
+            onPress={handleLogin}
           >
             <Text style={loginStyles.textoButtons}>
+
               Login
             </Text>
           </TouchableOpacity>
@@ -87,7 +125,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           {/* Boton Register */}
           <TouchableOpacity 
               style={loginStyles.botonLogin}
-              onPress={() => navigation.navigate('Register')} // Asegúrate de que onPress esté dentro de TouchableOpacity
+              onPress={() => navigation.navigate('Register')} 
             >
               <Text style={loginStyles.textoButtons}>
                 Register
@@ -102,12 +140,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
       <View style={loginStyles.headerContainer}>
           <Image
-          source={require('../../../public/medallas/medal1.png')}
-          style={loginStyles.headerMedal}
+              source={require('../../../img/medallas/medal1.png')}
+              style={loginStyles.headerMedal}
           />
-           <Image
-          source={require('../../../public/medallas/medal2.png')}
-          style={loginStyles.headerMedal}
+
+          <Image
+              source={require('../../../img/medallas/medal1.png')}
+              style={loginStyles.headerMedal}
           />
       </View>
 
