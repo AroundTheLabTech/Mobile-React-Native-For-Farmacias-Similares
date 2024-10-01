@@ -14,6 +14,10 @@ import ProfileScreen from './src/screens/HomeScreen/Profile';
 import StadisticsScreen from './src/screens/HomeScreen/Stadistics';
 import GamesScreen from './src/screens/HomeScreen/Games';
 
+//Contexto AuthContext
+import { AuthProvider } from './src/AuthContext';
+
+
 // Importar estilos globales
 import { colors } from './global-class';
 
@@ -70,6 +74,7 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer>
+        <AuthProvider>
         <Stack.Navigator initialRouteName="Login">
           <Stack.Screen
             name="Login"
@@ -87,6 +92,7 @@ export default function App() {
             options={{ headerShown: false }} // Sin header
           />
         </Stack.Navigator>
+        </AuthProvider>
       </NavigationContainer>
     </GestureHandlerRootView>
   );

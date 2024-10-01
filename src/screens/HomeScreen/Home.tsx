@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { View, Text, StyleSheet, Button, ScrollView, Image, TouchableOpacity} from 'react-native';
 
 // Styles
@@ -6,9 +6,21 @@ import HomeStyles from './style/HomeStyle';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faHome, faUser, faChartBar, faGamepad } from '@fortawesome/free-solid-svg-icons'; // Importar los íconos
 
+import { useAuth } from '../../AuthContext'; // Importa el hook useAuth
 
 
 const HomeScreen = () => {
+  // Obtener la variable del usuario
+  const { uid,displayName } = useAuth();
+
+
+  useEffect(() => {
+    if (uid) {
+      console.log("El UID del usuario es:", uid);
+      console.log("El nombre de usuario es:", displayName);
+    }
+  }, [uid]);
+
   return (
 
     <ScrollView style={HomeStyles.containerScroll}>
@@ -17,7 +29,7 @@ const HomeScreen = () => {
           <View style={HomeStyles.containerHeaderProfile}>
             <View>
                 <Text style={HomeStyles.textSaludo}>¡Hola!</Text>
-                <Text style={HomeStyles.textUsuario}>vicglezh</Text>
+                <Text style={HomeStyles.textUsuario}>{displayName || 'Usuario'}</Text>
             </View>
             <View>
                 <Image
