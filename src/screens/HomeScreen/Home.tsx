@@ -27,13 +27,16 @@ const HomeScreen = () => {
         <View style={HomeStyles.container}>
           {/* Header Profile */}
           <View style={HomeStyles.containerHeaderProfile}>
-            <View>
+            <View style={HomeStyles.containerInfo}>
                 <Text style={HomeStyles.textSaludo}>¡Hola!</Text>
                 <Text style={HomeStyles.textUsuario}>{displayName || 'Usuario'}</Text>
             </View>
-            <View>
+            <View style={HomeStyles.containerImage}>
                 <Image
+                  style={HomeStyles.PerfilImage}
+                  resizeMode='contain'
                   source={require('../../../img/profile/victorGonzales.png')}
+    
                 />
             </View>
           </View>

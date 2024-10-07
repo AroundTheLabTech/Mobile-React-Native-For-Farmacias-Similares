@@ -21,6 +21,18 @@ const HomeStyles = StyleSheet.create({
     containerHeaderProfile:{
         flexDirection: 'row',
         justifyContent: 'space-between',
+        width: '100%',
+    },
+    containerImage:{
+        width: '20%',
+        alignItems: 'flex-end',
+    },
+    containerInfo:{
+        width: '50%',
+    },
+    PerfilImage:{
+        resizeMode: 'contain',
+        height: 70,
     },
     textSaludo:{
         color: '#FFD6DD',
@@ -167,7 +179,11 @@ const HomeStyles = StyleSheet.create({
         fontFamily: fonts.rubik,
         fontSize: fontSizes.xl,
         color: colors.secondary,
-    }
+    },
+
+    //Dashboard
+
+   
 });
 
 export default HomeStyles;
