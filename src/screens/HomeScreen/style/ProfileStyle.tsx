@@ -109,7 +109,56 @@ const ProfileStyles = StyleSheet.create({
     medalStyle:{
       resizeMode: 'contain',
       width: '100%',
-    }
+    },
+
+    //Estadisticas
+
+    containerEstadistics:{
+      backgroundColor: '#D9D4F7',
+      width: '100%',
+      borderRadius: 15,
+      padding: spacing.md,
+      marginTop: spacing.md,
+    },
+    titleTotalGames:{
+      textAlign: 'center',
+      color: colors.secondary,
+      fontWeight: '700',
+      padding: spacing.md,
+      fontSize: fontSizes.xxl,
+    },
+
+    // Estadisticas
+    containerBoxStadistics:{
+      width: '45%',
+      backgroundColor: '#fff',
+      padding: spacing.sm,
+      marginTop: spacing.md,
+      borderRadius: 15,
+
+    },
+    // Up Number
+
+    containerUpNumber:{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+  
+    },
+    titleNumber:{
+      fontWeight: '800',
+      fontSize: fontSizes.xxxxl,
+      color: colors.secondary,
+    },
+    textBox:{
+      color: colors.secondary,
+      fontWeight: '500',
+    },
+    rowStadistics:{
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+
 
 });
 
