@@ -16,6 +16,9 @@ import {trophyImages} from './imageMapping';
 
 const ProfileScreen = () => {
 
+  const { scoreTotal } = useAuth();
+
+
   // Usar Las Variables de Contexto
   const { uid,displayName } = useAuth();
 
@@ -44,6 +47,9 @@ const ProfileScreen = () => {
       }
       return rows;
     };
+
+
+
 
   return (
 
@@ -83,7 +89,7 @@ const ProfileScreen = () => {
             </Text>
             {/* Puntos */}
             <Text style={ProfileStyles.puntajeNumber}>
-              590
+              {scoreTotal}
             </Text>
           </View>    
           

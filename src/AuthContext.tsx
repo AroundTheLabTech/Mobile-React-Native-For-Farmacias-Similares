@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth } from './lib/firebase'; // Importa el archivo Firebase.js
 import { onAuthStateChanged } from 'firebase/auth';
 import { getUserData } from './services/UserDatabase'; // Importa el servicio que consulta Firestore
+import { getUserScores } from './services/ScoreCollectionDatabase'; // Importa el servicio que consulta los puntajes
 
 type AuthContextType = {
   uid: string | null;
@@ -22,12 +23,12 @@ const AuthContext = createContext<AuthContextType>({
   gender: null,
   lastSession: null,
   scoreTotal: 0,
-  ubication: null
+  ubication: null,
 });
 
 export const useAuth = () => useContext(AuthContext);
 
-export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [uid, setUid] = useState<string | null>(null);
   const [age, setAge] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
@@ -50,11 +51,14 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
           setEmail(userData.email);
           setGender(userData.gender);
           setLastSession(userData.last_session);
-          setScoreTotal(userData.score_total);
           setUbication(userData.ubication);
         }
 
-        console.log("Datos del usuario obtenidos y guardados en el contexto");
+        // Obtener los puntajes del usuario desde Firestore
+        const userScoreTotal = await getUserScores(user.uid);
+        setScoreTotal(userScoreTotal);
+
+        console.log("Datos y puntaje del usuario obtenidos y guardados en el contexto");
       } else {
         setUid(null); // El usuario no está autenticado
         setAge(null);
@@ -71,7 +75,9 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
   }, []);
 
   return (
-    <AuthContext.Provider value={{ uid, age, displayName, email, gender, lastSession, scoreTotal, ubication }}>
+    <AuthContext.Provider
+      value={{ uid, age, displayName, email, gender, lastSession, scoreTotal, ubication }}
+    >
       {children}
     </AuthContext.Provider>
   );
