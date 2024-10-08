@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import ProfileStyles from './style/ProfileStyle';
@@ -8,14 +8,42 @@ import { faHome, faStar, faGlobe, faCube } from '@fortawesome/free-solid-svg-ico
 
 import { useAuth } from '../../AuthContext'; // Importa el hook useAuth
 
+//Services 
+
+import {getUserTrophies} from '../../services/StadisticsCollectionDatabase';
+import {trophyImages} from './imageMapping';
+
+
 const ProfileScreen = () => {
 
   // Usar Las Variables de Contexto
   const { uid,displayName } = useAuth();
 
   // Añadir estado para controlar la vista seleccionada
+  const [trophies, setTrophies] = useState<string[]>([]);
   const [selectedView, setSelectedView] = useState('insignias'); // 'insignias' o 'estadisticas'
 
+
+  // Efecto para cargar los trofeos del usuario al montar el componente
+  useEffect(() => {
+    const fetchTrophies = async () => {
+      if (uid) {
+        const userTrophies = await getUserTrophies(uid);
+        setTrophies(userTrophies); // Guardar los trofeos en el estado
+      }
+    };
+
+    fetchTrophies();
+  }, [uid]);
+
+    // Función para dividir los trofeos en filas de 3
+    const getRowsOfTrophies = () => {
+      const rows = [];
+      for (let i = 0; i < trophies.length; i += 3) {
+        rows.push(trophies.slice(i, i + 3));
+      }
+      return rows;
+    };
 
   return (
 
@@ -112,47 +140,21 @@ const ProfileScreen = () => {
           {/* Mostrar contenedores basados en la vista seleccionada */}
           {selectedView === 'insignias' ? (
             <View style={ProfileStyles.containerInsignias}>
-
-              {/* Row Insignias */}
-              <View style={ProfileStyles.rowInsignias}>
-                <View style={ProfileStyles.containerImage}>
-                  <Image source={require('../../../img/medallas/medal1.png')} resizeMode="contain" style={ProfileStyles.medalStyle} />
+              {getRowsOfTrophies().map((row, rowIndex) => (
+                <View key={rowIndex} style={ProfileStyles.rowInsignias}>
+                  {row.map((trophy, index) => (
+                    <View key={index} style={ProfileStyles.containerImage}>
+                      {trophyImages[trophy] && (
+                        <Image
+                          source={trophyImages[trophy]} // Usar el mapa de imágenes
+                          resizeMode="contain"
+                          style={ProfileStyles.medalStyle}
+                        />
+                      )}
+                    </View>
+                  ))}
                 </View>
-                <View style={ProfileStyles.containerImage}>
-                  <Image source={require('../../../img/medallas/medal2.png')} resizeMode="contain" style={ProfileStyles.medalStyle} />
-                </View>
-                <View style={ProfileStyles.containerImage}>
-                  <Image source={require('../../../img/medallas/medal3.png')} resizeMode="contain" style={ProfileStyles.medalStyle} />
-                </View>
-              </View>
-
-              {/* Row Insignias */}
-              <View style={ProfileStyles.rowInsignias}>
-                <View style={ProfileStyles.containerImage}>
-                  <Image source={require('../../../img/medallas/medal4.png')} resizeMode="contain" style={ProfileStyles.medalStyle} />
-                </View>
-                <View style={ProfileStyles.containerImage}>
-                  <Image source={require('../../../img/medallas/medal5.png')} resizeMode="contain" style={ProfileStyles.medalStyle} />
-                </View>
-                <View style={ProfileStyles.containerImage}>
-                  <Image source={require('../../../img/medallas/medal6.png')} resizeMode="contain" style={ProfileStyles.medalStyle} />
-                </View>
-              </View>
-
-              {/* Row Insignias */}
-              <View style={ProfileStyles.rowInsignias}>
-                <View style={ProfileStyles.containerImage}>
-                  <Image source={require('../../../img/medallas/medal7.png')} resizeMode="contain" style={ProfileStyles.medalStyle} />
-                </View>
-                <View style={ProfileStyles.containerImage}>
-                  <Image source={require('../../../img/medallas/medal8.png')} resizeMode="contain" style={ProfileStyles.medalStyle} />
-                </View>
-                <View style={ProfileStyles.containerImage}>
-                  <Image source={require('../../../img/medallas/medal9.png')} resizeMode="contain" style={ProfileStyles.medalStyle} />
-                </View>
-              </View>
-
-
+              ))}
             </View>
           ) : (
             <View style={ProfileStyles.containerEstadistics}>
