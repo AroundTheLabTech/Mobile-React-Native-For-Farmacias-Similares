@@ -14,9 +14,11 @@ const responsiveHeight = (value: number) => {
 
 export const colors = {
   primary: '#fff', //Blanco
+  primaryDegrad50: '#FFFFFF80',
   secondary: '#000', // Negro
   third: '#6A5AE0',  //Azul
   fourd: '#f8FBE9',
+  textThird: '#858494',
   success400: '#59AC6B',
   bad: '#FF5959',
   button1: '#76777E',
@@ -24,10 +26,16 @@ export const colors = {
   background1: '#000',
   background2: '#6A5AE0',
   background3: '#fff',
+  background4: '#9e95e6',
+  background5: '#FFB380',
+  background6: '#FF9B57',
+  background7: '#EFEEFC',
 };
 
 // Tamaños de fuente basados en la altura de la pantalla
 export const fontSizes = {
+  xxxs: responsiveHeight(9),
+  xxs: responsiveHeight(10),
   xs: responsiveHeight(12), // 1.5% de la altura de la pantalla
   sm: responsiveHeight(14), // 1.75% de la altura
   md: responsiveHeight(16), // 2% de la altura
@@ -52,6 +60,17 @@ export const spacing = {
   sxxl: responsiveWidth(60), // 12% del ancho
   xxxl: responsiveWidth(75), // 15% del ancho
   xxxxl: responsiveWidth(100), // 20% del ancho
+};
+
+export const fontWeight = {
+  sm: '100',  // Peso de fuente ligero, recomendado para subtítulos o texto de apoyo (2% del ancho).
+  md: '200',  // Peso de fuente delgado, ideal para etiquetas pequeñas (4% del ancho).
+  lg: '300',  // Peso de fuente regular, adecuado para texto de cuerpo (6% del ancho).
+  xl: '400',  // Peso de fuente seminegrita, ideal para énfasis en párrafos (8% del ancho).
+  xxl: '500', // Peso de fuente medio, adecuado para títulos secundarios (10% del ancho).
+  sxxl: '600', // Peso de fuente seminegrita, adecuado para títulos destacados (12% del ancho).
+  xxxl: '700', // Peso de fuente negrita, ideal para encabezados principales (15% del ancho).
+  xxxxl: '800', // Peso de fuente extra negrita, utilizado para títulos importantes (20% del ancho).
 };
 
 // Font Families, incluyendo la fuente PressStart2P-Regular

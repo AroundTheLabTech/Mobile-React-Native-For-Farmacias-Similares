@@ -76,3 +76,7 @@ yarn-error.log
 
 # Firebase 
 /src/lib
+
+
+# .env
+.env

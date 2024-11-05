@@ -1,3 +1,33 @@
 {
-  "extends": "@react-native/typescript-config/tsconfig.json"
+  "compilerOptions": {
+    "target": "esnext",
+    "lib": ["es6", "dom"],
+    "jsx": "react-native",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "strict": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "esnext",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "types": ["react-native", "i18next", "react"],
+    "baseUrl": ".",
+    "paths": {
+      "@components/*": ["src/components/*"],
+      "@screens/*": ["src/screens/*"],
+      "@services/*": ["src/services/*"],
+      "@assets/*": ["assets/*"],
+      "@img/*": ["img/*"]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js"
+  ],
+  "include": ["src/**/*"]
 }

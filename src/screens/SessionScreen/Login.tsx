@@ -1,17 +1,16 @@
 import React, {useState} from 'react';
-import { View, Text, Button, StyleSheet, Image, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, Image, TouchableOpacity, TextInput } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { ScrollView } from 'react-native-gesture-handler';
-import { RootStackParamList } from '../../NavigationTypes'; 
+import { RootStackParamList } from '../../NavigationTypes';
 
 
 //Styles
 
-import loginStyles from './style/loginStyles'; 
+import loginStyles from './style/loginStyles';
 
 //Services
 
-import { loginWithEmailAndPassword } from '../../services/authService';  
+import { loginWithEmailAndPassword } from '../../services/authService';
 
 
 type LoginScreenNavigationProp = StackNavigationProp<
@@ -33,23 +32,23 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     const handleLogin = async () => {
       try {
         const user = await loginWithEmailAndPassword(email, password);
-        console.log("Usuario autenticado", user);
+        console.log('Usuario autenticado', user);
         // Aquí puedes redirigir a la pantalla principal o manejar el usuario logueado
         navigation.navigate('MainTab', {
           screen: 'Home',
         });
       } catch (error) {
-        console.error("Error de login:", error);
+        console.error('Error de login:', error);
         // Manejar el error, por ejemplo, mostrando un mensaje de error en la UI
       }
     };
 
 
-  
+
   return (
       <View style={loginStyles.containerLogin}>
 
-      
+
       <View style={loginStyles.headerContainer}>
       <Image
           source={require('../../../img/medallas/medal1.png')}
@@ -60,17 +59,17 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           source={require('../../../img/medallas/medal1.png')}
           style={loginStyles.headerMedal}
       />
-        
 
-      </View>     
+
+      </View>
 
       <View style={loginStyles.containerTitle}>
         {/* Title */}
         <Text style={loginStyles.titleLogin}>
-          ¡GANAR NUNCA FUE MÁS DIVERTIDO! 
-        </Text>  
+          ¡GANAR NUNCA FUE MÁS DIVERTIDO!
+        </Text>
         {/* Container Forms */}
-        <View 
+        <View
         style={loginStyles.containerForms}>
           {/* Correo Electrónico */}
           <View
@@ -81,7 +80,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             >
               Correo Electrónico</Text>
           </View>
-     
+
            <TextInput
             style={loginStyles.input}
             placeholder="Correo electrónico"
@@ -90,7 +89,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             value = {email}
             onChangeText = {setEmail}
           />
-          
+
           {/* Contraseña */}
           <View
           style ={loginStyles.containerPlaceHolder}
@@ -125,20 +124,20 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           </TouchableOpacity>
 
           {/* Boton Register */}
-          <TouchableOpacity 
+          <TouchableOpacity
               style={loginStyles.botonLogin}
-              onPress={() => navigation.navigate('Register')} 
+              onPress={() => navigation.navigate('Register')}
             >
               <Text style={loginStyles.textoButtons}>
                 Register
               </Text>
             </TouchableOpacity>
 
-       
+
 
         </View>
 
-      </View> 
+      </View>
 
       <View style={loginStyles.headerContainer}>
           <Image
@@ -153,7 +152,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       </View>
 
       </View>
-    
+
   );
 };
 

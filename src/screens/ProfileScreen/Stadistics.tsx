@@ -1,0 +1,199 @@
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image } from 'react-native';
+
+// Styles
+import StadiscticsStyle from './style/StadiscticsStyle';
+
+
+import RingChart from '../../components/RingChartComponent/RingChart';
+
+import { calculatePercentage, getMaxScore, getMaxScorePerMonth, getMonthWithHighestScore, groupSessionsByMonth } from '../../utils/helpers';
+// import OptionSelect from '../../components/OptionSelectComponent/OptionSelect';
+
+import MedalIcon from '../../../img/iconos/medal.svg';
+import StadisticsIcon from '../../../img/iconos/stadistics.svg';
+import BarChart from '../../components/BarChartComponent/BarChart';
+import { TUserCurrentMonthSession, TUserLast3MonthInfo } from 'src/types/user';
+import { getUserCurrentMonthSession, getUserLast3MonthsInfo } from '../../services/backend';
+import { useAuth } from '../../AuthContext';
+
+
+interface IProgress {
+  total: number;
+  progress: number;
+  progressPercent: number;
+}
+
+type StatCategory = {
+  category: string;
+  stats: {
+    label: string;
+    value: number;
+    maxValue: number;
+  }[];
+};
+
+const StadisticsScreen: React.FC = () => {
+
+  const { uid } = useAuth();
+
+  const [progress, setProgress] = useState<IProgress>({
+    'total': 0,
+    'progress': 0,
+    'progressPercent': 0,
+  });
+
+  const [bestGame, setBestGame] = useState<number>();
+
+  const [last3MonthsInfo, setLast3MonthsInfo] = useState<StatCategory[]>();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const result: TUserCurrentMonthSession = await getUserCurrentMonthSession(uid);
+      const highScore = getMaxScore(result.sessions);
+      setBestGame(highScore);
+      setProgress({
+        'total': 120,
+        'progress': result.currentMonthSessions,
+        'progressPercent': calculatePercentage(120, result.currentMonthSessions),
+      });
+    };
+
+    fetchData();
+  }, [uid]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const result: TUserLast3MonthInfo = await getUserLast3MonthsInfo(uid);
+      const resultGroupByMonth = groupSessionsByMonth(result.sessions);
+      const last3MonthsScores = getMaxScorePerMonth(resultGroupByMonth);
+      const highestScoreMonth = getMonthWithHighestScore(last3MonthsScores);
+      const keys = Object.keys(last3MonthsScores);
+      setLast3MonthsInfo(
+        [
+          {
+            category: 'Puntajes',
+            stats: [
+              {
+                label: keys[0],
+                value: last3MonthsScores[keys[0]],
+                maxValue: last3MonthsScores[highestScoreMonth],
+              },
+            ],
+          },
+          {
+            category: null,
+            stats: [
+              {
+                label: keys[1],
+                value: last3MonthsScores[keys[1]],
+                maxValue: last3MonthsScores[highestScoreMonth],
+              },
+            ],
+          },
+          {
+            category: null,
+            stats: [
+              {
+                label: keys[2],
+                value: last3MonthsScores[keys[2]],
+                maxValue: last3MonthsScores[highestScoreMonth],
+              },
+            ],
+          },
+        ]
+      );
+    };
+
+    fetchData();
+  }, [uid]);
+
+  /*
+  const options = [
+    {
+      label: 'Monthly',
+      value: 'monthly',
+    },
+    {
+      label: 'Weekly',
+      value: 'weekly',
+    },
+  ];
+  */
+
+  const listOfColors = ['#FFD6DD', '#C4D0FB', '#A9ADF3'];
+
+  return (
+    <View style={StadiscticsStyle.container} >
+      <View style={StadiscticsStyle.containerEstadistics}>
+        {/**
+        <OptionSelect options={options} />
+        */}
+        <Text style={StadiscticsStyle.titleTotalGames}>
+          META MENSUAL DE PARTIDAS
+        </Text>
+
+        <View style={StadiscticsStyle.ringChartContainer} >
+          <RingChart
+            size={150}
+            strokeWidth={12}
+            progress={progress.progressPercent} // Asegúrate de pasar el porcentaje aquí
+            color="#6A5AE0"
+          >
+            <View style={StadiscticsStyle.ringChartView} >
+              <Text style={StadiscticsStyle.ringChartText}>{Math.round(progress.progress)}/{progress.total}</Text>
+              <Text >Total</Text>
+            </View>
+          </RingChart>
+        </View>
+
+        <View style={StadiscticsStyle.rowStadistics}>
+          {/* Box */}
+          <View style={StadiscticsStyle.containerBestPlay}>
+            <View style={StadiscticsStyle.containerUpNumber}>
+              <Text style={StadiscticsStyle.titleNumber}>
+                5
+              </Text>
+              <Image
+                source={require('../../../img/iconos/pastilla.png')} resizeMode="contain"
+              />
+            </View>
+
+            <View>
+              <Text style={StadiscticsStyle.textBox}>Mejor Juego</Text>
+            </View>
+          </View>
+
+          {/* Box                 */}
+          <View style={StadiscticsStyle.containerBestGame}>
+            <View style={StadiscticsStyle.containerUpNumber}>
+              <Text style={[StadiscticsStyle.titleNumber, StadiscticsStyle.colorPrimary]}>
+                {bestGame}
+              </Text>
+              <MedalIcon width={24} />
+            </View>
+
+            <View >
+              <Text style={[StadiscticsStyle.textBox, StadiscticsStyle.colorPrimary]}>Mejor Partida</Text>
+            </View>
+          </View>
+
+        </View>
+
+      </View>
+      <View style={StadiscticsStyle.containerChartStadistics}>
+        <View style={StadiscticsStyle.titleContainer} >
+          <Text style={StadiscticsStyle.titleStadisticsChart} >Estadisticas Mensuales</Text>
+          <View style={StadiscticsStyle.stadisticsIconContainer} >
+            <StadisticsIcon width={24} />
+          </View>
+        </View>
+        <View style={StadiscticsStyle.barChartContainer} >
+          <BarChart data={last3MonthsInfo} barColor="#3498db" listOfColors={listOfColors} />
+        </View>
+      </View>
+    </View>
+  );
+};
+
+export default StadisticsScreen;

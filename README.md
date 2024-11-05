@@ -38,6 +38,9 @@ yarn android
 # using npm
 npm run ios
 
+# Need to execute pod install:
+cd ios && pod install && cd ..
+
 # OR using Yarn
 yarn ios
 ```
