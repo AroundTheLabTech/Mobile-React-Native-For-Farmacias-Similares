@@ -8,43 +8,43 @@ const HomeStyles = StyleSheet.create({
         width: '100%',
         padding: spacing.md,
         fontFamily: fonts.bold,
-      },
+    },
 
-      containerScroll:{
+    containerScroll: {
         flex: 1,
         backgroundColor: colors.background2,
         width: '100%',
-      },
+    },
 
     //   Header Profile
 
-    containerHeaderProfile:{
+    containerHeaderProfile: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         width: '100%',
     },
-    containerImage:{
+    containerImage: {
         width: '20%',
         alignItems: 'flex-end',
     },
-    containerInfo:{
+    containerInfo: {
         width: '50%',
     },
-    PerfilImage:{
+    PerfilImage: {
         resizeMode: 'contain',
         height: 70,
     },
-    textSaludo:{
+    textSaludo: {
         color: '#FFD6DD',
-        fontWeight: '600',   
+        fontWeight: '600',
     },
-    textUsuario:{
+    textUsuario: {
         color: colors.primary,
         fontSize: fontSizes.xxl,
         fontWeight: '600',
     },
     // Juego Reciente
-    recienteContainer:{
+    recienteContainer: {
         backgroundColor: '#FFCCD5',
         padding: spacing.md,
         paddingTop: 10,
@@ -54,37 +54,37 @@ const HomeStyles = StyleSheet.create({
         flexDirection: 'row',
 
     },
-    nuevoJuego:{
-        color: '#660012', 
+    nuevoJuego: {
+        color: '#660012',
         fontFamily: fonts.rubik,
         fontWeight: '600',
         fontSize: fontSizes.lg,
     },
-    titleJuego:{
+    titleJuego: {
         color: '#660012',
         fontWeight: '700',
         fontSize: fontSizes.xxl,
         marginLeft: spacing.md,
     },
-    containerTitleGameNew:{
+    containerTitleGameNew: {
         flexDirection: 'row',
         width: '100%',
         marginTop: spacing.sm
     },
-    imageTitleGameNew:{
+    imageTitleGameNew: {
     },
-    columnLeft:{
+    columnLeft: {
         width: '85%',
     },
-    columnRight:{
+    columnRight: {
         width: '25%',
         justifyContent: 'center',
         alignItems: 'center',
-    }, 
+    },
 
     //Referidos Container
 
-    containerReferidos:{
+    containerReferidos: {
         backgroundColor: 'rgba(255, 255, 255, 0.3)',
         marginTop: spacing.md,
         padding: spacing.md,
@@ -92,18 +92,18 @@ const HomeStyles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    containerTitleReferidos:{
+    containerTitleReferidos: {
         justifyContent: 'center',
         alignItems: 'center',
     },
 
-    titleReferidos:{
+    titleReferidos: {
         color: colors.primary,
         fontFamily: fonts.rubik,
         fontWeight: '600',
         fontSize: fontSizes.xxl,
     },
-    subtitleReferidos:{
+    subtitleReferidos: {
         color: colors.primary,
         fontWeight: '700',
         textAlign: 'center',
@@ -112,7 +112,7 @@ const HomeStyles = StyleSheet.create({
     },
     // Boton Invitar
 
-    botonInvitar:{
+    botonInvitar: {
         width: '42%',
         backgroundColor: colors.background3,
         padding: spacing.md,
@@ -124,14 +124,14 @@ const HomeStyles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
     },
-    textoBoton:{
+    textoBoton: {
         color: colors.background2,
         fontFamily: fonts.rubik,
         fontWeight: '800',
         fontSize: fontSizes.lg
     },
     // Games Section
-    containerGamesSection:{
+    containerGamesSection: {
         backgroundColor: colors.background3,
         padding: spacing.md,
         borderTopLeftRadius: 15,
@@ -140,16 +140,16 @@ const HomeStyles = StyleSheet.create({
     },
     containerTitleGames: {
         flexDirection: 'row',
-        justifyContent: 'space-between',   
+        justifyContent: 'space-between',
     },
-    titleSectionGames:{
+    titleSectionGames: {
         fontWeight: '700',
         fontSize: fontSizes.lg,
         color: colors.secondary,
     },
 
     //ContainerGames
-    containerGame:{
+    containerGame: {
         width: '100%',
         padding: spacing.sm,
         flexDirection: 'row',
@@ -158,23 +158,23 @@ const HomeStyles = StyleSheet.create({
         borderColor: 'rgba(239, 238, 239, 1)', // Color #EFEEF con 90% de opacidad
         borderWidth: 1,
         borderRadius: 15,
-        marginTop: spacing.md,        
+        marginTop: spacing.md,
 
     },
 
-    titleGame:{
+    titleGame: {
         width: '70%',
     },
-    imageGame:{
+    imageGame: {
         width: '10%',
     },
-    imageGameImg:{
+    imageGameImg: {
         width: '14%',
     },
-    playIconContainer:{
+    playIconContainer: {
 
     },
-    gameTitle:{
+    gameTitle: {
         fontWeight: '800',
         fontFamily: fonts.rubik,
         fontSize: fontSizes.xl,
@@ -183,7 +183,7 @@ const HomeStyles = StyleSheet.create({
 
     //Dashboard
 
-   
+
 });
 
 export default HomeStyles;

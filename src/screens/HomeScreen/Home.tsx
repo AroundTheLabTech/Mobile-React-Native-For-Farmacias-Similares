@@ -7,7 +7,7 @@ import HomeStyles from './style/HomeStyle';
 import { useAuth } from '../../AuthContext'; // Importa el hook useAuth
 
 
-const HomeScreen = () => {
+const HomeScreen = ({navigation}) => {
   // Obtener la variable del usuario
   const { uid, displayName } = useAuth();
 
@@ -93,7 +93,9 @@ const HomeScreen = () => {
             ¡Nuevos Juegos Disponibles!
           </Text>
 
-          <Text>Ver Todos</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Games')} >
+            <Text>Ver Todos</Text>
+          </TouchableOpacity>
         </View>
         {/* Game-1 */}
         <View style={HomeStyles.containerGame}>

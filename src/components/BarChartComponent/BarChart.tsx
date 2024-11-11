@@ -1,5 +1,5 @@
-import React from 'react';
-import { View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, View } from 'react-native';
 import { Svg, Rect, G, Text as SVGText, Line, Ellipse } from 'react-native-svg';
 import { colors, fontSizes, fontWeight } from '../../../global-class';
 import BarChartStyles from './style/BarChartStyles';
@@ -24,6 +24,7 @@ interface GroupedBarChartProps {
 
 const BarChart: React.FC<GroupedBarChartProps> = ({ data, listOfColors }) => {
   const chartHeight = 150; // Altura total del gráfico
+  const { width: screenWidth } = Dimensions.get('window');
 
   if(!data) {
     return null;
@@ -35,7 +36,7 @@ const BarChart: React.FC<GroupedBarChartProps> = ({ data, listOfColors }) => {
         {data.map((e, index) => {
           const x = index * 100;
 
-          if(!e.category) {
+          if (!e.category) {
             return null;
           }
 
@@ -88,7 +89,9 @@ const BarChart: React.FC<GroupedBarChartProps> = ({ data, listOfColors }) => {
 
         {/* Barras de datos */}
         {data.map((categoryData, categoryIndex) => {
-          const groupOffset = categoryIndex > 0 ? categoryIndex * 80 : 5; // Espacio entre categorías
+          // const groupOffset = categoryIndex > 0 ? categoryIndex * 80 : 5; // Espacio entre categorías
+          const barWidth = ((screenWidth * 0.8) / 3) * 0.3;
+          const groupOffset = (categoryIndex > 0 ? (screenWidth * 0.16) * categoryIndex : screenWidth * 0.01) + barWidth; // Espacio entre categorías
 
           return (
             <G key={categoryIndex} x={groupOffset}>
@@ -97,7 +100,8 @@ const BarChart: React.FC<GroupedBarChartProps> = ({ data, listOfColors }) => {
               {categoryData.stats.map((stat, statIndex) => {
                 // const barHeight = (stat.value / stat.maxValue) * chartHeight;
                 const barHeight = (stat.value / stat.maxValue) * chartHeight;
-                const x = 60; // Espacio entre barras
+                // const x = barWidth * (categoryIndex > 0 ? categoryIndex * 2 : 1); // Espacio entre barras
+                const x =  groupOffset * 0.4;
                 const y = chartHeight - barHeight + 40;
 
                 return (
@@ -105,14 +109,14 @@ const BarChart: React.FC<GroupedBarChartProps> = ({ data, listOfColors }) => {
                     {/* Barra */}
                     <Rect
                       y={y}
-                      width="30"
+                      width={barWidth}
                       height={barHeight}
                       fill={listOfColors[categoryIndex]}
                       rx="5"
                     />
                     {/* Etiqueta de la métrica */}
                     <SVGText
-                      x="15"
+                      x={barWidth * 0.5}
                       y={y + barHeight + 20} // Ajusta la posición vertical de la etiqueta
                       fontSize={fontSizes.xxxs}
                       fill={colors.primary}
@@ -125,7 +129,7 @@ const BarChart: React.FC<GroupedBarChartProps> = ({ data, listOfColors }) => {
                       */}
                     </SVGText>
                     <SVGText
-                      x="15"
+                      x={barWidth * 0.5}
                       y={y + barHeight + 35} // Ajusta la posición vertical de la etiqueta
                       fontSize={fontSizes.xxxs}
                       fill={colors.primary}

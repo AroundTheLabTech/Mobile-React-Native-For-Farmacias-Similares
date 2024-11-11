@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { View, Text, Image, TouchableOpacity, Dimensions } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import ProfileStyles from './style/ProfileStyle';
 
@@ -21,8 +21,7 @@ import { getUserPoints } from '../../services/backend';
 import { TUserPoints } from 'src/types/user';
 
 
-
-const ProfileScreen: React.FC = () => {
+const ProfileScreen: React.FC = ({ navigation }) => {
 
   const { displayName, uid } = useAuth();
 
@@ -55,9 +54,11 @@ const ProfileScreen: React.FC = () => {
 
       {/* Header Profile */}
       <View style={ProfileStyles.headerProfile}>
-        <Image
-          source={require('../../../img/iconos/config.png')}
-        />
+        <TouchableOpacity onPress={() => navigation.navigate('Settings')} >
+          <Image
+            source={require('../../../img/iconos/config.png')}
+          />
+        </TouchableOpacity>
       </View>
 
 
