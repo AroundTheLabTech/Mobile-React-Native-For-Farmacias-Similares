@@ -51,3 +51,14 @@ export type TGroupedSessions = {
 export type TMaxScores = {
   [month: string]: number;
 }
+
+export type TUserInformation = {
+  name: string,
+  email: string,
+  state: string,
+  age: number
+}
+
+export type TUserPicture = {
+  url: string,
+}
