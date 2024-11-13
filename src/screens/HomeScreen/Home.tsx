@@ -5,9 +5,10 @@ import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
 import HomeStyles from './style/HomeStyle';
 
 import { useAuth } from '../../AuthContext'; // Importa el hook useAuth
+import CompetitionModal from '../../components/CompetitionComponent/CompetitionModal';
 
 
-const HomeScreen = () => {
+const HomeScreen = ({navigation}) => {
   // Obtener la variable del usuario
   const { uid, displayName } = useAuth();
 
@@ -70,16 +71,18 @@ const HomeScreen = () => {
             <Text style={HomeStyles.titleReferidos}>
               REFERIDOS
             </Text>
+            <CompetitionModal />
             <Text style={HomeStyles.subtitleReferidos}>
               ¡Compite con tus amigos para lograr mayor puntaje!
             </Text>
-
+            {/**
             <TouchableOpacity style={HomeStyles.botonInvitar}>
               <Image
                 source={require('../../../img/personajes/doctor-simi-invade.png')}
               />
               <Text style={HomeStyles.textoBoton}>Invitar</Text>
             </TouchableOpacity>
+            */}
           </View>
         </View>
 
@@ -93,7 +96,9 @@ const HomeScreen = () => {
             ¡Nuevos Juegos Disponibles!
           </Text>
 
-          <Text>Ver Todos</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Games')} >
+            <Text>Ver Todos</Text>
+          </TouchableOpacity>
         </View>
         {/* Game-1 */}
         <View style={HomeStyles.containerGame}>

@@ -16,7 +16,7 @@ const ProfileStyles = StyleSheet.create({
     width: '100%',
     alignItems: 'flex-end',
   },
-  
+
   profileImageContainer: {
     width: '100%',
     justifyContent: 'center',
@@ -30,7 +30,7 @@ const ProfileStyles = StyleSheet.create({
     zIndex: 1000,
   },
 
-  //Dashboard 
+  //Dashboard
   containerDashboard: {
     width: '97%',
     backgroundColor: colors.background3,

@@ -8,35 +8,41 @@ const loginStyles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
         color: '#fff',
-      },
-      containerLogin:{
+    },
+    containerMax: {
+        backgroundColor: colors.background3,
+    },
+    containerLogin: {
         flex: 1,
         backgroundColor: '#000',
         color: '#fff',
         justifyContent: 'space-between',
-      },
-    headerContainer:{
+        height: '100%',
+        borderWidth: 1,
+    },
+    headerContainer: {
         backgroundColor: colors.fourd,
         flexDirection: 'row',
         justifyContent: 'space-around',
         padding: spacing.md,
     },
-    headerMedal:{
+    headerMedal: {
         width: 35,
         height: 35,
     },
 
     //Title
 
-    containerTitle:{
-        flex:1,
+    containerTitle: {
+        flex: 1,
         display: 'flex',
         width: '100%',
         flexDirection: 'column',
         justifyContent: 'center',
         height: '100%',
+        marginTop: spacing.md,
     },
-    titleLogin:{
+    titleLogin: {
         fontSize: fontSizes.xl,
         color: colors.primary,
         fontFamily: fonts.press,
@@ -45,7 +51,7 @@ const loginStyles = StyleSheet.create({
 
     // Botones de Inicio de Sesion
 
-    botonLogin:{
+    botonLogin: {
         borderWidth: 1,
         borderColor: '#FFFFFF',
         width: '35%',
@@ -54,14 +60,14 @@ const loginStyles = StyleSheet.create({
         alignItems: 'center',
 
     },
-    containerButtons:{
+    containerButtons: {
         marginTop: spacing.lg,
         flexDirection: 'row',
         width: '100%',
         padding: spacing.md,
         justifyContent: 'space-evenly',
     },
-    textoButtons:{
+    textoButtons: {
         color: colors.primary,
         fontFamily: fonts.press,
         textAlign: 'center',
@@ -69,11 +75,11 @@ const loginStyles = StyleSheet.create({
     },
 
     // Forms
-    containerForms:{
+    containerForms: {
         alignItems: 'center',
         marginTop: spacing.xl,
     },
-    input:{
+    input: {
         width: '80%',
         color: colors.primary,
         borderColor: '#ccc',
@@ -84,13 +90,13 @@ const loginStyles = StyleSheet.create({
         fontFamily: fonts.press,
     },
 
-    placeHolder:{
+    placeHolder: {
         color: colors.primary,
-        textAlign: 'left',   
+        textAlign: 'left',
         fontFamily: fonts.press,
         fontSize: fontSizes.xs,
     },
-    containerPlaceHolder:{
+    containerPlaceHolder: {
         width: '80%',
     }
 

@@ -7,6 +7,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import LoginScreen from './src/screens/SessionScreen/Login';
 import RegisterScreen from './src/screens/SessionScreen/Register';
 import TabNavigator from './src/components/TabNavigatorComponent/TabNavigator';
+import SettingsStack from './src/screens/SettingsScreen/SettingsStack';
+import GamesStack from './src/screens/GamesScreen/GamesStack';
 
 //Contexto AuthContext
 import { AuthProvider } from './src/AuthContext';
@@ -38,6 +40,16 @@ export default function App() {
               name="MainTab" // Cambiamos el nombre de "Home" a "MainTab"
               component={TabNavigator} // Muestra la vista con el Tab Navigator
               options={{ headerShown: false }} // Sin header
+            />
+            <Stack.Screen
+              name="Settings"
+              component={SettingsStack}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Games"
+              component={GamesStack}
+              options={{ headerShown: false }}
             />
           </Stack.Navigator>
         </AuthProvider>

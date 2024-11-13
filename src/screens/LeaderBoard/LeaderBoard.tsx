@@ -1,5 +1,5 @@
-import React from 'react';
-import { ScrollView, View, Text, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ScrollView, View, Text, Image, Dimensions } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faHome, faUser, faChartBar, faGamepad } from '@fortawesome/free-solid-svg-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -176,30 +176,67 @@ const LeaderBoard: React.FC = () => {
     },
   ];
 
+  const [orientation, setOrientation] = useState('portrait');
+
+  useEffect(() => {
+    const updateOrientation = () => {
+      const { width, height } = Dimensions.get('window');
+      setOrientation(width > height ? 'landscape' : 'portrait');
+    };
+
+    const subscription = Dimensions.addEventListener('change', updateOrientation);
+
+    updateOrientation();
+
+    return () => {
+      subscription?.remove();
+    };
+  }, []);
+
   return (
     <ScrollView style={LeaderBoardStyles.containerScroll}>
       {/* Header */}
-      <View style={LeaderBoardStyles.containerTitle}>
-        <Text style={LeaderBoardStyles.title}>Leaderboard</Text>
-        <View style={LeaderBoardStyles.containerLeaderrboardTime}>
-          <Text style={LeaderBoardStyles.timeOption}>MENSUAL</Text>
-        </View>
-      </View>
-      <View style={LeaderBoardStyles.containerPosition}>
-        <Text style={LeaderBoardStyles.positionNumber}>#4</Text>
-        <Text style={LeaderBoardStyles.positionDescription}>Tu estas entre los 30% de mejores jugadores</Text>
-      </View>
+      <View style={orientation === 'landscape' ? LeaderBoardStyles.containerFull : null} >
+        <View style={orientation === 'landscape' ? LeaderBoardStyles.userLeaderboard : null}  >
+          <View style={LeaderBoardStyles.containerTitle}>
+            <Text style={LeaderBoardStyles.title}>Leaderboard</Text>
+            <View style={LeaderBoardStyles.containerLeaderrboardTime}>
+              <Text style={LeaderBoardStyles.timeOption}>MENSUAL</Text>
+            </View>
+          </View>
+          <View style={LeaderBoardStyles.containerPosition}>
+            <Text style={LeaderBoardStyles.positionNumber}>#4</Text>
+            <Text style={LeaderBoardStyles.positionDescription}>Tu estas entre los 30% de mejores jugadores</Text>
+          </View>
 
-      <PodiumChart />
-
-      <DraggableMenu>
-        <View>
-          {players.map((player, index) => (
-            <LeaderBoardCard key={index} player={player} />
-          ))}
+          <PodiumChart />
         </View>
-      </DraggableMenu>
-    </ScrollView>
+        {
+          orientation === 'landscape' ?
+            (
+              <View style={LeaderBoardStyles.containerPlayersList} >
+                <ScrollView style={LeaderBoardStyles.playersList}
+                  scrollEnabled={true} // Controla si el scroll está habilitado
+                  nestedScrollEnabled={true}
+                >
+                  {players.map((player, index) => (
+                    <LeaderBoardCard key={index} player={player} />
+                  ))}
+                </ScrollView>
+              </View>
+            ) :
+            (
+              <DraggableMenu>
+                <View>
+                  {players.map((player, index) => (
+                    <LeaderBoardCard key={index} player={player} />
+                  ))}
+                </View>
+              </DraggableMenu>
+            )
+        }
+      </View >
+    </ScrollView >
   );
 };
 
