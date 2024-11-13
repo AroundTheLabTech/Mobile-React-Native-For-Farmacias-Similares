@@ -185,6 +185,7 @@ const StadiscticsStyle = StyleSheet.create({
 
   ringChartContainer: {
     alignItems: 'center',
+    height: 200,
   },
   ringChartView: {
     alignItems: 'center',

@@ -34,11 +34,13 @@ export const colors = {
 
 // Tamaños de fuente basados en la altura de la pantalla
 export const fontSizes = {
+  xxxxs: responsiveHeight(8),
   xxxs: responsiveHeight(9),
   xxs: responsiveHeight(10),
   xs: responsiveHeight(12), // 1.5% de la altura de la pantalla
   sm: responsiveHeight(14), // 1.75% de la altura
   md: responsiveHeight(16), // 2% de la altura
+  xm: responsiveHeight(17), // 2% de la altura
   lg: responsiveHeight(18), // 2.25% de la altura
   xl: responsiveHeight(20), // 2.5% de la altura
   xxl: responsiveHeight(24), // 3% de la altura
@@ -76,7 +78,7 @@ export const fontWeight = {
 // Font Families, incluyendo la fuente PressStart2P-Regular
 export const fonts = {
   press: 'PressStart2P-Regular', // Fuente personalizada PressStart2P
-  bold: 'Inter-Bold', 
-  rubik: 'Rubik-VariableFont_wght', 
+  bold: 'Inter-Bold',
+  rubik: 'Rubik-VariableFont_wght',
 
 };

@@ -1,30 +1,30 @@
 import React from 'react';
-import { View, Image, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet, Dimensions } from 'react-native';
 import Svg, { Rect, Polygon, Text, Defs, LinearGradient, Stop } from 'react-native-svg';
 
 import { fontSizes } from '../../../global-class';
 import { formatNumber } from '../../utils/helpers';
 
-const CenteredTextWithBackground = ({ text, rectWidth, rectHeight, fillColor = 'white', positionX = 10, positionY = 10, textColor = 'black', fontWeight = '400' }) => {
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window'); // Ancho de la pantalla
+
+const CenteredTextWithBackground = ({ text, rectWidth, screenHeight, fillColor = 'white', positionX = 10, positionY = 10, textColor = 'black', fontWeight = '400', fontSize = fontSizes.xs }) => {
   return (
-    <Svg height={rectHeight + 20} width={rectWidth + 20}>
-      {/* Rectángulo con bordes redondeados */}
+    <Svg height={screenHeight + 20} width={rectWidth + 20}>
       <Rect
-        x={positionX} // Ajustar para que el rectángulo esté centrado
-        y={positionY} // Ajustar para que el rectángulo esté centrado
+        x={positionX}
+        y={positionY}
         width={rectWidth}
-        height={rectHeight}
-        rx="10" // Radio de los bordes redondeados
-        fill={fillColor} // Color de fondo
+        height={screenHeight}
+        rx="10"
+        fill={fillColor}
       />
-      {/* Texto centrado */}
       <Text
-        x={positionX + rectWidth / 2} // Centro horizontalmente
-        y={positionY + rectHeight / 2 + 2} // Centro verticalmente y ajustar un poco hacia abajo
-        fontSize={fontSizes.xs}
+        x={positionX + rectWidth / 2}
+        y={positionY + screenHeight / 2 + 2}
+        fontSize={fontSize}
         fill={textColor}
-        textAnchor="middle" // Centrar horizontalmente
-        alignmentBaseline="middle" // Centrar verticalmente
+        textAnchor="middle"
+        alignmentBaseline="middle"
         fontWeight={fontWeight}
       >
         {text}
@@ -34,202 +34,438 @@ const CenteredTextWithBackground = ({ text, rectWidth, rectHeight, fillColor = '
 };
 
 const PodiumChart = () => {
+  const svgWidth = screenWidth * 0.8; // SVG ajusta al 80% del ancho de la pantalla
 
+  let newWidth = screenWidth;
+  let newHeight = screenHeight;
+
+  let rectWidth = svgWidth / 3;
+  let rectHeight = screenHeight * 0.15;
+
+  let rect1Y = screenHeight * 0.2;
+  let polygon1X1 = rectWidth * 0.1;
+  let polygon1Y1 = rectHeight * 0.2;
+  let polygon1Y2 = rectHeight * 0.185;
+  let text1Size = rectWidth;
+  let text1X = rectWidth;
+  let text1Y = rectHeight;
+  let info1ContainerWidth = rectWidth;
+  let info1ContainerY = rectWidth;
+  let image1_20X = rectWidth;
+  let image1_20Y = rectWidth;
+  let textNameSize = 0;
+  let textNameY = 0;
+  let textNameX = 0;
+  let text1NameFontSize = 0;
+  let textPointSize = rectHeight;
+  let textPointY = rectHeight * 10;
+  let textPointX = rectHeight * 10;
+  let text1PointsFontSize = 10;
+
+  let rect2Y = screenHeight * 0.2;
+  let rect2X = screenHeight * 0.2;
+  let polygon2X1 = rectWidth * 0.1;
+  let polygon2X2 = rectWidth * 0.1;
+  let polygon2X3 = rectWidth * 0.1;
+  let polygon2Y1 = rectHeight * 0.2;
+  let polygon2Y2 = rectHeight * 0.185;
+  let text2Size = rectWidth;
+  let text2X = rectWidth;
+  let text2Y = rectHeight;
+  let info2ContainerY = rectWidth;
+  let info2ContainerX = rectWidth;
+  let image2_20X = rectWidth;
+  let image2_20Y = rectWidth;
+  let text2NameSize = rectWidth;
+  let text2NameY = rectHeight;
+  let text2PointSize = rectHeight * 0.8;
+  let text2PointY = rectHeight * 0.1;
+
+  let rect3Y = screenHeight * 0.4;
+  let rect3X = screenHeight * 0.4;
+  let polygon3X1 = rectWidth * 0.2;
+  let polygon3X2 = rectWidth * 0.2;
+  let polygon3X3 = rectWidth * 0.2;
+  let polygon3Y1 = rectHeight * 0.2;
+  let polygon3Y2 = rectHeight * 0.2;
+  let text3Size = rectWidth;
+  let text3X = rectWidth;
+  let text3Y = rectHeight;
+  let info3ContainerY = rectWidth;
+  let info3ContainerX = rectWidth;
+  let image3_20X = rectWidth;
+  let image3_20Y = rectWidth;
+  let text3NameSize = rectWidth;
+  let text3NameY = rectHeight;
+  let text3PointSize = rectHeight * 0.8;
+  let text3PointY = rectHeight * 0.1;
+
+  if (newWidth < 412 && newHeight < 915 && newWidth > 410 && newHeight > 913) {
+    newHeight = screenHeight * 0.6;
+
+    rectWidth = svgWidth / 3;
+    rectHeight = screenHeight * 0.25;
+
+    rect1Y = screenHeight * 0.15;
+    polygon1X1 = rectWidth * 0.1;
+    polygon1Y1 = rectHeight * 0.6;
+    polygon1Y2 = rectHeight * 0.53;
+    text1Size = rectWidth;
+    text1X = rectWidth * 0.5;
+    text1Y = rectHeight * 1.05;
+    info1ContainerWidth = rectWidth;
+    info1ContainerY = -30;
+    image1_20X = 30;
+    image1_20Y = 35;
+    textNameSize = rectWidth * 0.3;
+    text1NameFontSize = fontSizes.xs;
+    textNameY = rectHeight * 0.1;
+    textNameX = 10;
+    textPointSize = rectWidth * 0.8;
+    textPointY = 4;
+    textPointX = 10;
+    text1PointsFontSize = fontSizes.xs;
+
+    rect2Y = screenHeight * 0.11;
+    rect2X = rectWidth;
+    polygon2X1 = rectWidth * 1.08;
+    polygon2X2 = rectWidth * 1.88;
+    polygon2X3 = rectWidth * 2;
+    polygon2Y1 = rectHeight * 0.44;
+    polygon2Y2 = rectHeight * 0.38;
+    text2X = rectWidth * 1.5;
+    text2Y = rect2Y * 2.05;
+    info2ContainerY = -60;
+    info2ContainerX = rectWidth;
+    image2_20X = 30;
+    image2_20Y = 35;
+    text2NameSize = rectWidth * 0.3;
+    text2NameY = rectHeight * 0.1;
+    text2PointSize = rectWidth * 0.8;
+    text2PointY = 4;
+
+    rect3Y = screenHeight * 0.19;
+    rect3X = rectWidth * 2;
+    polygon3X1 = rectWidth * 2;
+    polygon3X2 = rectWidth * 2.88;
+    polygon3X3 = rectWidth * 3;
+    polygon3Y1 = rectHeight * 0.76;
+    polygon3Y2 = rectHeight * 0.69;
+    text3X = rect3X * 1.25;
+    text3Y = rect3Y * 1.6;
+    info3ContainerY = 8;
+    info3ContainerX = rectWidth * 2;
+    image3_20X = 30;
+    image3_20Y = 35;
+    text3NameSize = rectWidth * 0.3;
+    text3NameY = rectHeight * 0.1;
+    text3PointSize = rectWidth * 0.8;
+    text3PointY = 4;
+  } else if (newWidth < 541 && newHeight < 945 && newWidth > 539 && newHeight > 943) {
+    newHeight = screenHeight * 0.4;
+
+    rectWidth = svgWidth / 4;
+    rectHeight = newHeight;
+
+    rect1Y = screenHeight * 0.15;
+    polygon1X1 = rectWidth * 0.1;
+    polygon1Y1 = rectHeight * 0.374;
+    polygon1Y2 = rectHeight * 0.34;
+    text1Size = rectWidth * 0.5;
+    text1X = rectWidth * 0.5;
+    text1Y = rectHeight * 0.51;
+    info1ContainerWidth = svgWidth / 3;
+    info1ContainerY = 40;
+    image1_20X = 45;
+    image1_20Y = 35;
+    textNameSize = rectWidth * 0.2;
+    textNameY = 10;
+    textNameX = -5;
+    text1NameFontSize = rectWidth * 0.1;
+    textPointSize = rectWidth * 0.6;
+    textPointY = -1;
+    textPointX = 0;
+    text1PointsFontSize = rectWidth * 0.09;
+
+    rect2Y = screenHeight * 0.11;
+    rect2X = rectWidth;
+    polygon2X1 = rectWidth * 1.08;
+    polygon2X2 = rectWidth * 1.88;
+    polygon2X3 = rectWidth * 2;
+    polygon2Y1 = rectHeight * 0.44;
+    polygon2Y2 = rectHeight * 0.38;
+    text2X = rectWidth * 1.5;
+    text2Y = rect2Y * 2.05;
+    info2ContainerY = -60;
+    info2ContainerX = rectWidth;
+    image2_20X = 30;
+    image2_20Y = 35;
+    text2NameSize = rectWidth * 0.3;
+    text2NameY = rectHeight * 0.1;
+    text2PointSize = rectWidth * 0.8;
+    text2PointY = 4;
+
+    rect3Y = screenHeight * 0.19;
+    rect3X = rectWidth * 2;
+    polygon3X1 = rectWidth * 2;
+    polygon3X2 = rectWidth * 2.88;
+    polygon3X3 = rectWidth * 3;
+    polygon3Y1 = rectHeight * 0.76;
+    polygon3Y2 = rectHeight * 0.69;
+    text3X = rect3X * 1.25;
+    text3Y = rect3Y * 1.6;
+    info3ContainerY = 8;
+    info3ContainerX = rectWidth * 2;
+    image3_20X = 30;
+    image3_20Y = 35;
+    text3NameSize = rectWidth * 0.1;
+    text3NameY = rectHeight * 0.1;
+    text3PointSize = rectWidth * 0.1;
+    text3PointY = 4;
+  } else if (newWidth < 541 && newHeight < 937 && newWidth > 539 && newHeight > 935) {
+    console.log("Si?s")
+    newHeight = 0;
+
+    rectWidth = svgWidth / 4;
+    rectHeight = newHeight;
+
+    rect1Y = newHeight * 0.15;
+    polygon1X1 = rectWidth * 0.1;
+    polygon1Y1 = rectHeight * 0.6;
+    polygon1Y2 = rectHeight * 0.53;
+    text1Size = 1;
+    text1X = rectWidth * 0.5;
+    text1Y = rectHeight * 1.05;
+    info1ContainerY = -30;
+    image1_20X = 30;
+    image1_20Y = 35;
+    textNameSize = rectWidth * 0.3;
+    textNameY = rectHeight * 0.1;
+    textPointSize = rectWidth * 0.8;
+    textPointY = 4;
+
+    rect2Y = newHeight * 0.11;
+    rect2X = rectWidth;
+    polygon2X1 = rectWidth * 1.08;
+    polygon2X2 = rectWidth * 1.88;
+    polygon2X3 = rectWidth * 2;
+    polygon2Y1 = rectHeight * 0.44;
+    polygon2Y2 = rectHeight * 0.38;
+    text2X = rectWidth * 1.5;
+    text2Y = rect2Y * 2.05;
+    info2ContainerY = -60;
+    info2ContainerX = rectWidth;
+    image2_20X = 30;
+    image2_20Y = 35;
+    text2NameSize = rectWidth * 0.3;
+    text2NameY = rectHeight * 0.1;
+    text2PointSize = rectWidth * 0.8;
+    text2PointY = 4;
+
+    rect3Y = newHeight * 0.19;
+    rect3X = rectWidth * 2;
+    polygon3X1 = rectWidth * 2;
+    polygon3X2 = rectWidth * 2.88;
+    polygon3X3 = rectWidth * 3;
+    polygon3Y1 = rectHeight * 0.76;
+    polygon3Y2 = rectHeight * 0.69;
+    text3X = rect3X * 1.25;
+    text3Y = rect3Y * 1.6;
+    info3ContainerY = 8;
+    info3ContainerX = rectWidth * 2;
+    image3_20X = 30;
+    image3_20Y = 35;
+    text3NameSize = rectWidth * 0.3;
+    text3NameY = rectHeight * 0.1;
+    text3PointSize = rectWidth * 0.8;
+    text3PointY = 4;
+  }
+
+  console.log(screenWidth);
+  console.log(screenHeight);
   const top3Data = [
     {
-      "name": "Alena Donin",
-      "profilePicture": "https://via.placeholder.com/50",
-      "countriFlag": "https://via.placeholder.com/20",
-      "points": 1469,
+      name: "vicglezh",
+      profilePicture: "https://via.placeholder.com/50",
+      countriFlag: "https://via.placeholder.com/20",
+      points: 2569,
     },
     {
-      "name": "vicglezh",
-      "profilePicture": "https://via.placeholder.com/50",
-      "countriFlag": "https://via.placeholder.com/20",
-      "points": 2569,
+      name: "Alena Donin",
+      profilePicture: "https://via.placeholder.com/50",
+      countriFlag: "https://via.placeholder.com/20",
+      points: 1469,
     },
     {
-      "name": "Craig Gouse",
-      "profilePicture": "https://via.placeholder.com/50",
-      "countriFlag": "https://via.placeholder.com/20",
-      "points": 569,
-    }
-  ]
+      name: "Craig Gouse",
+      profilePicture: "https://via.placeholder.com/50",
+      countriFlag: "https://via.placeholder.com/20",
+      points: 569,
+    },
+  ];
+
 
   return (
-    <View style={{ alignItems: 'center', marginTop: 50 }}>
-      <Svg height="350" width="80%">
+    <View style={{ alignItems: 'center', marginTop: 50, borderWidth: 1}}>
+      <Svg height={newHeight} width={svgWidth}>
         {/* Segundo Lugar */}
-        {/* Cara principal */}
-        <Rect x="0" y="180" width="110" height="170" fill="#9087E5" />
-        {/* Cara superior para efecto 3D */}
-        <Polygon points="0,180 110,180 110,165 20,165" fill="#AEA7EC" />
-        {/* Texto para Segundo Lugar */}
+        <Rect x="0" y={rect1Y} width={rectWidth} height={rectHeight} fill="#9087E5" />
+        <Polygon
+          points={`
+            0,${polygon1Y1}
+            ${rectWidth},${polygon1Y1}
+            ${rectWidth},${polygon1Y2}
+            ${polygon1X1},${polygon1Y2}
+          `}
+          fill="#AEA7EC"
+        />
         <Text
-          x="60"
-          y="265"
+          x={text1X}
+          y={text1Y}
           fill="white"
-          fontSize={fontSizes.span}
+          fontSize={text1Size}
           fontWeight="800"
           textAnchor="middle"
         >
           2
         </Text>
 
-        {/* Primer Lugar */}
-        {/* Degradado */}
-        <Defs>
-          <LinearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
-            <Stop offset="10%" stopColor="#9087E5" stopOpacity="1" />
-            <Stop offset="100%" stopColor="#CDC9F3" stopOpacity="1" />
-          </LinearGradient>
-        </Defs>
-        {/* Cara principal */}
-        <Rect x="110" y="150" width="110" height="200" fill="url(#grad1)" />
-        {/* Cara superior para efecto 3D */}
-        <Polygon points="110,150 220,150 205,130 125,130" fill="#CDC9F3" />
-        {/* Texto para Primer Lugar */}
-        <Text
-          x="160"
-          y="235"
-          fill="white"
-          fontSize={fontSizes.span}
-          fontWeight="1000"
-          textAnchor="middle"
-        >
-          1
-        </Text>
+          {/* Segundo Lugar - Información */ }
+          < View style={{ position: 'absolute', top: info1ContainerY, left: 0, alignItems: 'center', width: info1ContainerWidth, borderWidth: 1, borderColor: 'transparent' }}>
+            <Image
+              source={{ uri: top3Data[1].profilePicture }}
+              style={{ width: 50, height: 50, borderRadius: 25 }}
+            />
+            <Image
+              source={{ uri: top3Data[1].countriFlag }}
+              style={{
+                width: 20,
+                height: 20,
+                borderRadius: 10,
+                position: 'absolute',
+                top: image1_20Y,
+                right: image1_20X,
+              }}
+            />
+            <CenteredTextWithBackground text={top3Data[1].name} rectWidth={rectWidth} positionX={textNameX} positionY={textNameY} screenHeight={textNameSize} fillColor='transparent' textColor='white' fontWeight='700' fontSize={text1NameFontSize} />
+            <CenteredTextWithBackground text={`${formatNumber(top3Data[1].points)} QP`} rectWidth={textPointSize} positionX={textPointX} positionY={textPointY} screenHeight={textNameSize} fillColor={"#9087E5"} textColor='white' fontWeight='700' fontSize={text1PointsFontSize}  />
+          </View>
 
-        {/* Tercer Lugar */}
-        {/* Cara principal */}
-        <Rect x="220" y="200" width="110" height="160" fill="#9087E5" />
-        {/* Cara superior para efecto 3D */}
-        <Polygon points="220,200 330,200 310,180 220,180" fill="#AEA7EC" />
-        {/* Texto para Tercer Lugar */}
-        <Text
-          x="270"
-          y="285"
-          fill="white"
-          fontSize={fontSizes.span}
-          fontWeight="700"
-          textAnchor="middle"
-        >
-          3
-        </Text>
+         {/* Primer Lugar */ }
+          <Defs>
+            <LinearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
+              <Stop offset="10%" stopColor="#9087E5" stopOpacity="1" />
+              <Stop offset="100%" stopColor="#CDC9F3" stopOpacity="1" />
+            </LinearGradient>
+          </Defs>
 
+          <Rect x={rectWidth} y={rect2Y} width={rectWidth} height={rectHeight} fill="url(#grad1)" />
 
-        {/* Segundo Lugar */}
-        <View style={{ position: 'absolute', top: 30, left: -15, alignItems: 'center' }}>
-          <Image
-            source={{ uri: 'https://via.placeholder.com/50' }}
-            style={{ width: 50, height: 50, borderRadius: 25 }}
+          <Polygon
+            points={`
+            ${rect2X},${polygon2Y1}
+            ${polygon2X3},${polygon2Y1}
+            ${polygon2X2},${polygon2Y2}
+            ${polygon2X1},${polygon2Y2}
+          `}
+            fill="#AEA7EC"
           />
-          <Image
-            source={{ uri: 'https://via.placeholder.com/20' }}
-            style={{
-              width: 20,
-              height: 20,
-              borderRadius: 10,
-              position: 'absolute',
-              top: 35,
-              right: 35,
-            }}
-          />
-          <CenteredTextWithBackground
-            text={top3Data[1].name}
-            rectWidth={110}
-            rectHeight={25}
-            fillColor={"none"}
-            textColor='white'
-            positionY={90} // posición Y del rectángulo
-            positionX={0} // posición X (centro del componente)
-            fontWeight='700'
-          />
-          {/* Rectángulo con bordes redondeados */}
-          <CenteredTextWithBackground text={`${top3Data[1].points} QP`} rectWidth={75} rectHeight={25} fillColor={"#9087E5"} textColor='white' positionY={125} positionX={15} fontWeight='700' />
-        </View>
 
-        {/* Primer Lugar */}
-        <View style={{ position: 'absolute', top: 0, left: 110, alignItems: 'center' }}>
-          <Image
-            source={{ uri: 'https://via.placeholder.com/50' }}
-            style={{ width: 50, height: 50, borderRadius: 25, left: -20 }}
-          />
-          <Image
-            source={{ uri: 'https://via.placeholder.com/20' }}
-            style={{
-              width: 20,
-              height: 20,
-              borderRadius: 10,
-              position: 'absolute',
-              top: 35,
-              left: 55,
-            }}
-          />
-          <CenteredTextWithBackground
-            text={top3Data[0].name}
-            rectWidth={110}
-            rectHeight={25}
-            fillColor={"none"}
-            textColor='white'
-            positionY={60} // posición Y del rectángulo
-            positionX={110} // posición X (centro del componente)
-            fontWeight='700'
-          />
-          {/* Rectángulo con bordes redondeados */}
-          <CenteredTextWithBackground text={`${top3Data[0].points} QP`} rectWidth={75} rectHeight={25} fillColor={"#9087E5"} textColor='white' positionY={90} positionX={125} fontWeight='700' />
-        </View>
+          <Text
+            x={text2X}
+            y={text2Y}
+            fill="white"
+            fontSize={text2Size}
+            fontWeight="800"
+            textAnchor="middle"
+          >
+            1
+          </Text>
+          // {/* Primer Lugar - Información */ }
+ 
+          <View style={{ position: 'absolute', top: info2ContainerY, left: info2ContainerX, alignItems: 'center', width: rectWidth, borderWidth: 1, borderColor: 'transparent' }}>
+            <Image
+              source={{ uri: top3Data[0].profilePicture }}
+              style={{ width: 50, height: 50, borderRadius: 25 }}
+            />
+            <Image
+              source={{ uri: top3Data[1].countriFlag }}
+              style={{
+                width: 20,
+                height: 20,
+                borderRadius: 10,
+                position: 'absolute',
+                top: image2_20Y,
+                right: image2_20X,
+              }}
+            />
+            <CenteredTextWithBackground text={top3Data[0].name} rectWidth={rectWidth} positionY={text2NameY} screenHeight={text2NameSize} fillColor='transparent' textColor='white' fontWeight='700' />
+            <CenteredTextWithBackground text={`${formatNumber(top3Data[0].points)} QP`} rectWidth={text2PointSize} positionY={text2PointY} screenHeight={text2NameSize} fillColor={"#9087E5"} textColor='white' fontWeight='700' />
+          </View>
 
-        {/* Tercer Lugar */}
-        <View style={{ position: 'absolute', top: 45, left: 215, alignItems: 'center'}}>
-          <Image
-            source={{ uri: 'https://via.placeholder.com/50' }}
-            style={{ width: 50, height: 50, borderRadius: 25 }}
-          />
-          <Image
-            source={{ uri: 'https://via.placeholder.com/20' }}
-            style={{
-              width: 20,
-              height: 20,
-              borderRadius: 10,
-              position: 'absolute',
-              top: 35,
-              right: 35,
-            }}
-          />
-          <CenteredTextWithBackground
-            text={top3Data[2].name}
-            rectWidth={110}
-            rectHeight={25}
-            fillColor={"none"}
-            textColor='white'
-            positionY={105} // posición Y del rectángulo
-            positionX={220} // posición X (centro del componente)
-            fontWeight='700'
-          />
-          {/* Rectángulo con bordes redondeados */}
-          <CenteredTextWithBackground text={`${top3Data[2].points} QP`} rectWidth={75} rectHeight={25} fillColor={"#9087E5"} textColor='white' positionY={140} positionX={235} />
-        </View>
+          {/* Tercer Lugar */ }
 
+          <Rect x={rectWidth * 2} y={rect3Y} width={rectWidth} height={rectHeight} fill="#9087E5" />
 
-      </Svg>
-    </View>
+          <Polygon
+            points={`
+            ${rect3X},${polygon3Y1}
+            ${polygon3X3},${polygon3Y1}
+            ${polygon3X2},${polygon3Y2}
+            ${polygon3X1},${polygon3Y2}
+          `}
+            fill="#AEA7EC"
+          />
+
+          <Text
+            x={text3X}
+            y={text3Y}
+            fill="white"
+            fontSize={text3Size}
+            fontWeight="800"
+            textAnchor="middle"
+          >
+            3
+          </Text>
+          {/* Primer Lugar - Información */}
+
+          <View style={{ position: 'absolute', top: info3ContainerY, left: info3ContainerX, alignItems: 'center', width: rectWidth, borderWidth: 1, borderColor: 'transparent' }}>
+            <Image
+              source={{ uri: top3Data[0].profilePicture }}
+              style={{ width: 50, height: 50, borderRadius: 25 }}
+            />
+            <Image
+              source={{ uri: top3Data[1].countriFlag }}
+              style={{
+                width: 20,
+                height: 20,
+                borderRadius: 10,
+                position: 'absolute',
+                top: image3_20Y,
+                right: image3_20X,
+              }}
+            />
+            <CenteredTextWithBackground text={top3Data[0].name} rectWidth={rectWidth} positionY={text3NameY} screenHeight={text3NameSize} fillColor='transparent' textColor='white' fontWeight='700' />
+            <CenteredTextWithBackground text={`${formatNumber(top3Data[0].points)} QP`} rectWidth={text3PointSize} positionY={text3PointY} screenHeight={text3NameSize} fillColor={"#9087E5"} textColor='white' fontWeight='700' />
+          </View>
+      </Svg >
+    </View >
   );
 };
 
 const styles = StyleSheet.create({
   qpContainer: {
-    backgroundColor: '#9087E5', // Fondo del contenedor
-    borderRadius: 10, // Borde redondeado
-    paddingVertical: 5, // Espaciado vertical
-    paddingHorizontal: 10, // Espaciado horizontal
-    marginTop: 5, // Margen superior
+    backgroundColor: '#9087E5',
+    borderRadius: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    marginTop: 5,
   },
   qpText: {
-    color: 'white', // Color del texto
+    color: 'white',
     fontSize: fontSizes.xs,
     fontWeight: '700',
-    textAlign: 'center', // Centrar el texto
+    textAlign: 'center',
   },
 });
 

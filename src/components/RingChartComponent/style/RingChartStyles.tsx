@@ -5,6 +5,7 @@ const RingChartStyle = StyleSheet.create({
   container: {
     justifyContent: 'center',
     alignItems: 'center',
+    alignContent: 'center',
     position: 'relative',
   },
   ring: {
@@ -19,7 +20,6 @@ const RingChartStyle = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
-    height: '100%',
   },
 });
 

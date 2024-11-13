@@ -1,19 +1,18 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faHome, faUser, faChartBar, faGamepad } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faUser, faChartBar, faGamepad, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { colors } from '../../../global-class';
 
 import HomeScreen from '../../screens/HomeScreen/Home';
-import ProfileScreen from '../../screens/ProfileScreen/Profile';
-import StadisticsScreen from '../../screens/ProfileScreen/Stadistics';
+import ProfileStack from '../../screens/ProfileScreen/ProfileStack';
 import LeaderBoard from '../../screens/LeaderBoard/LeaderBoard';
-import GamesScreen from '../../screens/HomeScreen/Games';
 
 import { useAuth } from '../../AuthContext';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import NotchBackground from './NotchBackground';
+import _404Page from '../../screens/404Screen/404';
 
 const Tab = createBottomTabNavigator();
 
@@ -27,16 +26,16 @@ const TabNavigation = () => {
     }
   }, [displayName, uid]);
 
-  const tabBarIconOptions = (route: RouteProp<ParamListBase, string>, {color, size}) => {
+  const tabBarIconOptions = (route: RouteProp<ParamListBase, string>, { color, size }) => {
     let iconName = faHome;
     if (route.name === 'Home') {
       iconName = faHome;
     } else if (route.name === 'Profile') {
       iconName = faUser;
-    } else if (route.name === 'Stadistics') {
+    } else if (route.name === 'Leaderboard') {
       iconName = faChartBar;
-    } else if (route.name === 'Games') {
-      iconName = faGamepad;
+    } else if (route.name === 'Search') {
+      iconName = faMagnifyingGlass;
     }
 
     return <FontAwesomeIcon icon={iconName} size={size} color={color} />;
@@ -51,21 +50,21 @@ const TabNavigation = () => {
         tabBarStyle: styles.tabBar,
         tabBarShowLabel: false,
         headerShown: false,
-        tabBarBackground: () => <NotchBackground />
+        tabBarBackground: () => <NotchBackground />,
       })}
     >
       <Tab.Screen
         name="Home"
         component={HomeScreen}
       />
-      <Tab.Screen name="Profile"
-        component={ProfileScreen}
+      <Tab.Screen name="Search"
+        component={_404Page}
       />
-      <Tab.Screen name="Stadistics"
+      <Tab.Screen name="Leaderboard"
         component={LeaderBoard}
       />
-      <Tab.Screen name="Games"
-        component={GamesScreen}
+      <Tab.Screen name="Profile"
+        component={ProfileStack}
       />
     </Tab.Navigator>
   );

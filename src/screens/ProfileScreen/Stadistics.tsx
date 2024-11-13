@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image } from 'react-native';
+import { View, Text, Image, Dimensions } from 'react-native';
 
 // Styles
 import StadiscticsStyle from './style/StadiscticsStyle';
@@ -32,6 +32,8 @@ type StatCategory = {
     maxValue: number;
   }[];
 };
+
+const { width: windowWidth } = Dimensions.get('window');
 
 const StadisticsScreen: React.FC = () => {
 
@@ -123,8 +125,27 @@ const StadisticsScreen: React.FC = () => {
 
   const listOfColors = ['#FFD6DD', '#C4D0FB', '#A9ADF3'];
 
+  const [orientation, setOrientation] = useState('portrait');
+  const [screenWidth, setScreenWidth] = useState<number>(windowWidth);
+
+  useEffect(() => {
+    const updateOrientation = () => {
+      const { width, height } = Dimensions.get('window');
+      setOrientation(width > height ? 'landscape' : 'portrait');
+      setScreenWidth(width);
+    };
+
+    const subscription = Dimensions.addEventListener('change', updateOrientation);
+
+    updateOrientation();
+
+    return () => {
+      subscription?.remove();
+    };
+  }, []);
+
   return (
-    <View style={StadiscticsStyle.container} >
+    <View style={StadiscticsStyle.container}  >
       <View style={StadiscticsStyle.containerEstadistics}>
         {/**
         <OptionSelect options={options} />
@@ -135,8 +156,6 @@ const StadisticsScreen: React.FC = () => {
 
         <View style={StadiscticsStyle.ringChartContainer} >
           <RingChart
-            size={150}
-            strokeWidth={12}
             progress={progress.progressPercent} // Asegúrate de pasar el porcentaje aquí
             color="#6A5AE0"
           >

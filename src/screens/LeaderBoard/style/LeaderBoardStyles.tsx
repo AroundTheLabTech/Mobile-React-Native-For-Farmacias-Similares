@@ -7,6 +7,14 @@ const LeaderBoardStyles = StyleSheet.create({
         backgroundColor: colors.background2,
         width: '100%',
     },
+    containerFull: {
+        flex: 1,
+        flexDirection: 'row',
+    },
+    userLeaderboard: {
+        flex: 1,
+        height: 700,
+    },
     containerTitle: {
         justifyContent: 'center',
         margin: spacing.md,
@@ -59,7 +67,15 @@ const LeaderBoardStyles = StyleSheet.create({
         flex: 15,
     },
     containerPositions: {
-        
+    },
+    containerPlayersList: {
+        flex: 1,
+        height: 700,
+    },
+    playersList: {
+        backgroundColor: colors.background7,
+        padding: spacing.sm,
+        height: '100%',
     },
 });
 
