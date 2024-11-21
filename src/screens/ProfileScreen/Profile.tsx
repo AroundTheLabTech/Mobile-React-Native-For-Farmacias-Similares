@@ -9,7 +9,6 @@ import { faStar, faGlobe, faCube } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../../AuthContext'; // Importa el hook useAuth
 
 //Services
-import { useTranslation } from 'react-i18next';
 
 
 import StadisticsScreen from './Stadistics';
@@ -25,7 +24,6 @@ const ProfileScreen: React.FC = ({ navigation }) => {
 
   const { displayName, uid } = useAuth();
 
-  const { t } = useTranslation();
   const [selectedTab, setSelectedTab] = useState('badges');
   const [userPoints, setUserPoints] = useState<TUserPoints>();
 
@@ -67,7 +65,7 @@ const ProfileScreen: React.FC = ({ navigation }) => {
         <Image
           resizeMode="contain"
           style={ProfileStyles.imageProfile}
-          source={require('../../../img/profile/victorGonzales.png')}
+          source={require('../../../img/profile/profilePicture.png')}
         />
       </View>
 
@@ -85,7 +83,7 @@ const ProfileScreen: React.FC = ({ navigation }) => {
             </View>
             {/* Title */}
             <Text style={ProfileStyles.titlePuntaje}>
-              {t('points')}
+              Puntos
             </Text>
             {/* Puntos */}
             <Text style={ProfileStyles.puntajeNumber}>
@@ -136,12 +134,12 @@ const ProfileScreen: React.FC = ({ navigation }) => {
               {
                 selectedTab === 'badges' ?
                   (<>
-                    <Text style={ProfileStyles.TabNabTitle} >{t('badges')}</Text>
+                    <Text style={ProfileStyles.TabNabTitle} >Insignias</Text>
                     <Spacer />
                     <EllipseComponent width={10} height={10} color={'#6A5AE0'} />
                   </>) :
                   (<>
-                    <Text style={ProfileStyles.TabNabTitleSelected} >{t('badges')}</Text>
+                    <Text style={ProfileStyles.TabNabTitleSelected} >Insignias</Text>
                   </>)
               }
             </TouchableOpacity>
@@ -149,18 +147,18 @@ const ProfileScreen: React.FC = ({ navigation }) => {
               {
                 selectedTab === 'stadistics' ?
                   (<>
-                    <Text style={ProfileStyles.TabNabTitle} >{t('stadistics')}</Text>
+                    <Text style={ProfileStyles.TabNabTitle} >Estadisticas</Text>
                     <Spacer />
                     <EllipseComponent width={10} height={10} color={'#6A5AE0'} />
                   </>) :
                   (<>
-                    <Text style={ProfileStyles.TabNabTitleSelected} >{t('stadistics')}</Text>
+                    <Text style={ProfileStyles.TabNabTitleSelected} >Estadisticas</Text>
                   </>)
               }
             </TouchableOpacity>
             {/*
             <TouchableOpacity disabled onPress={() => setSelectedView('estadisticas')}>
-              <Text>{t('details')}</Text>
+              <Text>Detalles</Text>
             </TouchableOpacity>
             */}
           </View>

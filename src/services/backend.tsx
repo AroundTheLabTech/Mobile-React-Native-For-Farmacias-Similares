@@ -1,10 +1,46 @@
 import { Alert } from 'react-native';
 import { BACKEND_BASE_URL } from '@env';
-import { TUserCurrentMonthSession, TUserLast3MonthInfo, TUserPoints, TUserInformation, TUserPicture } from 'src/types/user';
+import { TUserCurrentMonthSession, TUserLast3MonthInfo, TUserPoints, TUserInformation, TUserPicture, TBackResponse, TGameCard, TUserLogin } from 'src/types/user';
+
+export const loginUserByEmailAndPassword = async (email: string, password: string): Promise<TUserLogin | null> => {
+  try {
+    if (!email) {
+      throw new Error('Email inválido');
+    }
+
+    if (!password) {
+      throw new Error('Email inválido');
+    }
+
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: email,
+        password: password,
+      }),
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/users/login_with_email_and_password`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result as TUserLogin;
+  } catch (error) {
+    Alert.alert('Error', 'Fallo la autenticacion del usuario');
+    return null;
+  }
+};
 
 export const getUserInformation = async (uid: string): Promise<TUserInformation | null> => {
   try {
-    if(!uid) {
+    if (!uid) {
       throw new Error('UID inválido');
     }
 
@@ -31,7 +67,7 @@ export const getUserInformation = async (uid: string): Promise<TUserInformation 
 
 export const getUserPicture = async (uid: string): Promise<TUserPicture | null> => {
   try {
-    if(!uid) {
+    if (!uid) {
       throw new Error('UID inválido');
     }
 
@@ -44,7 +80,7 @@ export const getUserPicture = async (uid: string): Promise<TUserPicture | null> 
 
     const response = await fetch(`${BACKEND_BASE_URL}/users/user_profile_picture/${uid}`, requestOptions);
 
-    if(!response.ok) {
+    if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
     }
 
@@ -131,6 +167,64 @@ export const getUserLast3MonthsInfo = async (uid: string): Promise<TUserLast3Mon
     const result = await response.json();
     return result as TUserLast3MonthInfo;
   } catch (error) {
-    Alert.alert('Error', 'No se pudo obtener el mes actual');
+    // Alert.alert('Error', 'No se pudo obtener el mes actual');
+    return null;
+  }
+};
+
+export const postReportProblem = async (uid: string, issue: string, description: string): Promise<TBackResponse | null> => {
+  try {
+    if (!uid) {
+      throw new Error('UID inválido');
+    }
+
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        issue: issue,
+        description: description,
+      }),
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/reports/problem_report/${uid}`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result as TBackResponse;
+  } catch (error) {
+    return error.message;
+  }
+};
+
+export const getGameCard = async (uid: string): Promise<TGameCard | null> => {
+  try {
+    if (!uid) {
+      throw new Error('UID inválido');
+    }
+
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/users/user_game_card/${uid}`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result as TGameCard;
+  } catch (error) {
+    return error.message;
   }
 };

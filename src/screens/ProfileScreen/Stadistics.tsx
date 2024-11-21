@@ -142,7 +142,7 @@ const StadisticsScreen: React.FC = () => {
     return () => {
       subscription?.remove();
     };
-  }, []);
+  }, [orientation, screenWidth]);
 
   return (
     <View style={StadiscticsStyle.container}  >

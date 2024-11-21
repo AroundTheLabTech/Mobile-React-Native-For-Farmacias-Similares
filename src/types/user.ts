@@ -1,3 +1,14 @@
+export type TUserLogin = {
+  uid: string,
+  age: number,
+  user_name: string,
+  email: string,
+  gender: string,
+  laast_session: any,
+  score_total: number,
+  location: string,
+}
+
 export type TTokenManager = {
   accessToken: string,
   expirationTime: number,
@@ -61,4 +72,14 @@ export type TUserInformation = {
 
 export type TUserPicture = {
   url: string,
+}
+
+export type TBackResponse = {
+  message: string,
+}
+
+export type TGameCard = {
+  name: string,
+  score: number,
+  card_number: number
 }

@@ -71,7 +71,7 @@ const ProfileStyles = StyleSheet.create({
   },
   titlePuntaje: {
     color: 'rgba(255, 255, 255, 0.4)', // Color blanco con 40% de opacidad
-    fontSize: fontSizes.md,
+    fontSize: fontSizes.sm,
   },
   puntajeNumber: {
     color: colors.primary,

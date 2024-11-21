@@ -1,13 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, Dimensions, Alert } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import ProfilePictureStyles from './style/ProfilePictureStyles';
 import ImagePicker from '../../components/ImagePickerComponent/ImagePicker';
+import { getUserPicture } from '../../services/backend';
+import { useAuth } from '../../AuthContext';
+import RNFS from 'react-native-fs';
+import { saveProfileImage } from '../../services/funtions';
 
 const ProfilePicture = ({ navigation }) => {
 
+  const { uid } = useAuth();
+
   const [orientation, setOrientation] = useState('portrait');
+  const [profileUrl, setProfileUrl] = useState('');
 
   useEffect(() => {
     const updateOrientation = () => {
@@ -22,6 +29,37 @@ const ProfilePicture = ({ navigation }) => {
     return () => {
       subscription?.remove();
     };
+  }, []);
+
+  async function handleUpdatePictureProfile() {
+    try {
+      const response = await getUserPicture(uid);
+      if (response && response.url) {
+
+        const path = saveProfileImage(response.url);
+
+        setProfileUrl(profileUrl);
+
+        if (path) {
+          Alert.alert('Descarga completa', 'Imagen actualizada');
+        } else {
+          Alert.alert('Error', 'No se pudo aplicar la imagen');
+        }
+      } else {
+        Alert.alert('Error', 'Ocurrió un error al enviar el reporte.');
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'No se pudo enviar el reporte. Inténtalo más tarde.');
+    }
+  }
+
+  useEffect(() => {
+    async function fetchData() {
+      setProfileUrl("tets")
+    }
+
+    fetchData();
   }, []);
 
   return (
@@ -40,34 +78,12 @@ const ProfilePicture = ({ navigation }) => {
           </View>
           <View style={ProfilePictureStyles.line} />
           <View style={ProfilePictureStyles.containerLastPictures} >
-            <Image
-              style={ProfilePictureStyles.profilePicture}
-              source={require('../../../img/profile/victorGonzales.png')}
-            />
-            <Image
-              style={ProfilePictureStyles.profilePicture}
-              source={require('../../../img/profile/victorGonzales.png')}
-            />
-            <Image
-              style={ProfilePictureStyles.profilePicture}
-              source={require('../../../img/profile/victorGonzales.png')}
-            />
-            <Image
-              style={ProfilePictureStyles.profilePicture}
-              source={require('../../../img/profile/victorGonzales.png')}
-            />
-            <Image
-              style={ProfilePictureStyles.profilePicture}
-              source={require('../../../img/profile/victorGonzales.png')}
-            />
-            <Image
-              style={ProfilePictureStyles.profilePicture}
-              source={require('../../../img/profile/victorGonzales.png')}
-            />
+            <Text>{profileUrl}</Text>
+
           </View>
         </View>
         <View style={ProfilePictureStyles.containerSave} >
-          <TouchableOpacity style={ProfilePictureStyles.containerButtonSave} onPress={() => navigation.goBack()} >
+          <TouchableOpacity style={ProfilePictureStyles.containerButtonSave} onPress={handleUpdatePictureProfile} >
             <Text style={ProfilePictureStyles.buttonSaveText} >Guardar</Text>
           </TouchableOpacity>
         </View>

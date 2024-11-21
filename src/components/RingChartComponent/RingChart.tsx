@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, useWindowDimensions, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import RingChartStyle from './style/RingChartStyles';
 
@@ -10,37 +10,7 @@ interface RingChartProps {
   children: React.ReactElement;
 }
 
-const validateSizes = (width: number, height: number) => {
-  if (width < 412 && width > 411 && height < 915 && height > 914) {
-    return {
-      size: width * 0.5,
-      x: (width * 0.8) * 0.2,
-      y: 0,
-      stroke: 10,
-    };
-  } else if (width < 541 && width > 539 && height < 937 && height > 935) {
-    return {
-      size: width * 0.3,
-      x: (width * 0.8) * 0.2,
-      y: 0,
-      stroke: 10,
-    };
-  } else if (width < 541 && width > 540 && height < 926 && height > 925) {
-    return {
-      size: width * 0.2,
-      x: (width * 0.8) * 0.13,
-      y: 0,
-      stroke: 8,
-    };
-  } else {
-    return {
-      size: width * 0.15,
-      x: (width * 0.8) * 0.28,
-      y: 0,
-      stroke: 10,
-    };
-  }
-};
+
 
 const RingChart: React.FC<RingChartProps> = ({
   progress = 50,
@@ -48,67 +18,47 @@ const RingChart: React.FC<RingChartProps> = ({
   backgroundColor = '#e0e0e0',
   children,
 }) => {
-  const { width } = Dimensions.get('window');
-  const [screenWidth, setScreenWidth] = useState(width);
-  const [screenHeight, setScreenHeight] = useState(width);
-  const [positionX, setPositionX] = useState(width);
-  const [positionY, setPositionY] = useState(width);
-  const [adjustedSize, setAdjustedSize] = useState(screenWidth);
-  const [strokeWidth, setStrokeWidth] = useState(10);
-  const [radius, setRadius] = useState((adjustedSize - strokeWidth) / 2);
-  const [circumference, setCircumference] = useState(2 * Math.PI * radius);
-  const [strokeDashoffset, setStrokeDashoffset] = useState(circumference - (progress / 100) * circumference);
+  const [ringhDimensions, setRinghDimensions] = useState({ width: 0, height: 0 });
 
-  useEffect(() => {
-    function updateDimension() {
-      const { width: updateWidth, height: updateHeight } = Dimensions.get('window');
-      const { size, x, y, stroke } = validateSizes(updateWidth, updateHeight);
-      setScreenWidth(updateWidth * 0.8);
-      setScreenHeight(updateHeight * 0.23);
-      setPositionX(x);
-      setPositionY(y);
-      setStrokeWidth(stroke);
-      setAdjustedSize(size);
-      setRadius((adjustedSize - strokeWidth) / 2);
-      setCircumference(2 * Math.PI * radius);
-      setStrokeDashoffset(circumference - (progress / 100) * circumference);
-    }
+  const handleLayout = (event) => {
+    const { width, height } = event.nativeEvent.layout; // Obtener el ancho
+    console.log(width, height);
+    setRinghDimensions({ width, height });
+  };
 
-    updateDimension();
-  }, [adjustedSize, circumference, progress, radius, strokeWidth, width]);
 
   return (
-    <View style={[RingChartStyle.container, { width: screenWidth, height: screenHeight}]}>
-      <Svg width={screenWidth} height={screenHeight}>
+    <View style={[RingChartStyle.container, { width: '100%', height: '100%' }]} onLayout={handleLayout}>
+      <Svg width={ringhDimensions.width} height={ringhDimensions.height}>
         {/* Fondo del anillo */}
         <Circle
-          x={positionX}
-          y={positionY}
+          x={0}
+          y={-(ringhDimensions.height * 0.22)}
           stroke={backgroundColor}
           fill="none"
-          cx={adjustedSize / 2}
-          cy={adjustedSize / 2}
-          r={radius}
-          strokeWidth={strokeWidth}
+          cx={ringhDimensions.width / 2}
+          cy={ringhDimensions.width / 2}
+          r={(ringhDimensions.height - 10) / 2.5}
+          strokeWidth={10}
         />
         {/* Progreso del anillo */}
         <Circle
-          x={positionX}
-          y={positionY}
+          x={0}
+          y={-(ringhDimensions.height * 0.22)}
           stroke={color}
           fill="none"
-          cx={adjustedSize / 2}
-          cy={adjustedSize / 2}
-          r={radius}
-          strokeWidth={strokeWidth}
-          strokeDasharray={`${circumference} ${circumference}`}
-          strokeDashoffset={strokeDashoffset}
+          cx={ringhDimensions.width / 2}
+          cy={ringhDimensions.width / 2}
+          r={(ringhDimensions.height - 10) / 2.5}
+          strokeWidth={10}
+          strokeDasharray={`${(2 * Math.PI * ((ringhDimensions.height - 10) / 2))} ${(2 * Math.PI * ((ringhDimensions.height - 10) / 2))}`}
+          strokeDashoffset={(2 * Math.PI * ((ringhDimensions.height - 10) / 2)) - (progress / 100) * (2 * Math.PI * ((ringhDimensions.height - 10) / 2))}
           strokeLinecap="round"
           rotation="-90"
-          origin={`${adjustedSize / 2}, ${adjustedSize / 2}`}
+          origin={`${ringhDimensions.width / 2}, ${ringhDimensions.width / 2}`}
         />
       </Svg>
-      <View style={[RingChartStyle.center, { position: 'absolute', width: screenWidth, height: screenHeight }]}>
+      <View style={[RingChartStyle.center, { position: 'absolute', width: '100%', height: '100%' }]}>
         {children}
       </View>
     </View>

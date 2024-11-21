@@ -45,6 +45,7 @@ const LeaderBoardStyles = StyleSheet.create({
     containerPosition: {
         backgroundColor: colors.background5,
         margin: spacing.md,
+        marginBottom: 0,
         padding: spacing.sm,
         borderRadius: 15,
         flexDirection: 'row',

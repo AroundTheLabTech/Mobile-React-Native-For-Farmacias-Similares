@@ -3,12 +3,23 @@ import { View, Text, TouchableOpacity, ScrollView, Image, Dimensions } from 'rea
 import SettingsStyles from './style/SettingsStyles';
 import { faArrowLeft, faArrowRight, faCameraRetro, faCircleXmark, faUser, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { TGameCard } from '../../types/user';
+import { getGameCard } from '../../services/backend';
+import { useAuth } from '../../AuthContext';
+import { formarGameCardNumber } from '../../utils/helpers';
 
 
 const SettingOpctionCard = ({ option, navigation }) => {
   return (
     <View style={SettingsStyles.containerSettingsOption}  >
-      <TouchableOpacity onPress={() => navigation.navigate(option.path)}>
+      <TouchableOpacity
+        onPress={() => {
+          if (option.fn) {
+            option.fn();
+          }
+          navigation.navigate(option.path);
+        }}
+      >
         <View style={SettingsStyles.containerSettingsOptionTexts} >
           <FontAwesomeIcon style={SettingsStyles.settingOptionsIcon} icon={option.icon} />
           <Text style={SettingsStyles.settingOptionsText} >{option.label}</Text>
@@ -16,34 +27,13 @@ const SettingOpctionCard = ({ option, navigation }) => {
         </View>
       </TouchableOpacity>
     </View>
-  )
+  );
 };
 
-const settingOptionData = [
-  {
-    icon: faCameraRetro,
-    label: 'Foto de perfil',
-    backIcon: faArrowRight,
-    path: 'ProfilePicture',
-  },
-  {
-    icon: faCircleXmark,
-    label: 'Reportar un problema',
-    backIcon: faArrowRight,
-    path: 'ReportProblem',
-  },
-  {
-    icon: faXmark,
-    label: 'Cerrar session',
-    backIcon: faArrowRight,
-    path: 'Login',
-  },
-];
-
 const Settings = ({ navigation }) => {
-
-
+  const { uid, logout } = useAuth();
   const [orientation, setOrientation] = useState('portrait');
+  const [gameCard, setGameCard] = useState<TGameCard>();
 
   useEffect(() => {
     const updateOrientation = () => {
@@ -52,13 +42,49 @@ const Settings = ({ navigation }) => {
     };
 
     const subscription = Dimensions.addEventListener('change', updateOrientation);
-
     updateOrientation();
 
     return () => {
       subscription?.remove();
     };
   }, []);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await getGameCard(uid);
+        setGameCard(response);
+      } catch (error) {
+        console.error('Error fetching game card:', error);
+      }
+    }
+
+    fetchData();
+  }, [uid]);
+
+  const settingOptionData = [
+    {
+      icon: faCameraRetro,
+      label: 'Foto de perfil',
+      backIcon: faArrowRight,
+      path: 'ProfilePicture',
+      fn: null,
+    },
+    {
+      icon: faCircleXmark,
+      label: 'Reportar un problema',
+      backIcon: faArrowRight,
+      path: 'ReportProblem',
+      fn: null,
+    },
+    {
+      icon: faXmark,
+      label: 'Cerrar session',
+      backIcon: faArrowRight,
+      path: 'Login',
+      fn: () => logout(),
+    },
+  ];
 
   return (
     <ScrollView
@@ -73,19 +99,19 @@ const Settings = ({ navigation }) => {
           <View style={SettingsStyles.containerProfilePicture} >
             <Image
               style={SettingsStyles.profilePicture}
-              source={require('../../../img/profile/victorGonzales.png')}
+              source={require('../../../img/profile/profilePicture.png')}
             />
           </View>
           <View style={SettingsStyles.containerAccountInformation} >
             <View style={SettingsStyles.accountInformationLeft} >
               <Text style={SettingsStyles.accountCardText} >GAME-CARD</Text>
-              <Text style={SettingsStyles.accountUsername} >Iván Martínez</Text>
-              <Text style={SettingsStyles.accountUserNumber} >1020-2012-2333-2211</Text>
+              <Text style={SettingsStyles.accountUsername} >{gameCard?.name}</Text>
+              <Text style={SettingsStyles.accountUserNumber} >{formarGameCardNumber(gameCard?.card_number)}</Text>
             </View>
             <View style={SettingsStyles.accountInformationRigth} >
               <Image
                 style={SettingsStyles.simiAccountImage}
-                source={require('../../../img/profile/victorGonzales.png')}
+                source={require('../../../img/profile/profilePicture.png')}
               />
               <Text style={SettingsStyles.userPoints} >
                 <Image source={require('../../../img/iconos/moneda.png')} /> 1,000

@@ -76,7 +76,7 @@ const AccountCenter = ({ navigation }) => {
         </View>
       </View>
     </ScrollView>
-  )
+  );
 };
 
 export default AccountCenter;

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
 
 // Styles
@@ -6,12 +6,30 @@ import HomeStyles from './style/HomeStyle';
 
 import { useAuth } from '../../AuthContext'; // Importa el hook useAuth
 import CompetitionModal from '../../components/CompetitionComponent/CompetitionModal';
+import Loader from '@components/LoaderComponent/Loader';
+import Virus1 from '@img/personajes/virus-1.svg';
+import Game1 from '@img/games/portada/game-1.png';
+import { getUserLast3MonthsInfo } from '@services/backend';
+import { TUserLast3MonthInfo } from '../../types/user';
+import { getMaxScorePerMonth, groupSessionsByMonth } from '../../utils/helpers';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faGamepad } from '@fortawesome/free-solid-svg-icons';
 
+type Last3MonthHomeData = {
+  label: string,
+  value: number,
+}
 
-const HomeScreen = ({navigation}) => {
+const HomeScreen = ({ navigation }) => {
   // Obtener la variable del usuario
   const { uid, displayName } = useAuth();
 
+  const gameInformation = {
+    'imageUrl': Game1,
+    'title': 'Dr. Simi Invide',
+    'description': '¡No dejes caer ninguna Rosca de Reyes! Corta todos los objetos y evita encender la mecha . Acumula puntos por cada Rosca de Reyes que logres cortar.',
+    'gameUrl': 'https://simijuegos-game2.web.app/',
+  };
 
   useEffect(() => {
     if (uid) {
@@ -19,6 +37,42 @@ const HomeScreen = ({navigation}) => {
       console.log('El nombre de usuario es:', displayName);
     }
   }, [displayName, uid]);
+
+  const [scoresLats3Months, setScoresLast3Months] = useState<Last3MonthHomeData[]>();
+
+  useEffect(() => {
+    async function fetchData() {
+      const result: TUserLast3MonthInfo = await getUserLast3MonthsInfo(uid);
+      const resultGroupByMonth = groupSessionsByMonth(result.sessions);
+      const last3MonthsScores = getMaxScorePerMonth(resultGroupByMonth);
+      const keys = Object.keys(last3MonthsScores);
+
+      console.log(last3MonthsScores, keys);
+      const month1 = keys[keys.length - 1];
+      const month2 = keys[keys.length - 2];
+      const month3 = keys[keys.length - 3];
+      setScoresLast3Months([
+        {
+          label: month1,
+          value: last3MonthsScores[month1],
+        },
+        {
+          label: month2,
+          value: last3MonthsScores[month2],
+        },
+        {
+          label: month3,
+          value: last3MonthsScores[month3],
+        },
+      ]);
+    }
+
+    fetchData();
+  }, [uid]);
+
+  if (!displayName) {
+    return <Loader visible={true} />;
+  }
 
   return (
 
@@ -34,7 +88,7 @@ const HomeScreen = ({navigation}) => {
             <Image
               style={HomeStyles.PerfilImage}
               resizeMode="contain"
-              source={require('../../../img/profile/victorGonzales.png')}
+              source={require('../../../img/profile/profilePicture.png')}
 
             />
           </View>
@@ -42,27 +96,31 @@ const HomeScreen = ({navigation}) => {
 
         {/* Juego Reciente */}
 
-        <View style={HomeStyles.recienteContainer}>
-          {/* Left Column */}
-          <View style={HomeStyles.columnLeft}>
-            <Text style={HomeStyles.nuevoJuego}>Nuevo juego disponible</Text>
-            <View style={HomeStyles.containerTitleGameNew}>
+        <TouchableOpacity onPress={() => {
+          navigation.navigate('Games', {
+            screen: 'GameDetails',
+            params: gameInformation,
+          });
+        }} >
+          <View style={HomeStyles.recienteContainer}>
+            {/* Left Column */}
+            <View style={HomeStyles.columnLeft}>
+              <Text style={HomeStyles.nuevoJuego}>Nuevo juego disponible</Text>
+              <View style={HomeStyles.containerTitleGameNew}>
+                <Virus1 />
+                <Text style={HomeStyles.titleJuego}>
+                  {gameInformation.title.toUpperCase()}
+                </Text>
+              </View>
+            </View>
+
+            <View style={HomeStyles.columnRight}>
               <Image
-                style={HomeStyles.imageTitleGameNew}
-                source={require('../../../img/personajes/virus-1.png')}
+                source={require('../../../img/iconos/play.png')}
               />
-              <Text style={HomeStyles.titleJuego}>
-                DR.SIMI DEFENSE
-              </Text>
             </View>
           </View>
-
-          <View style={HomeStyles.columnRight}>
-            <Image
-              source={require('../../../img/iconos/play.png')}
-            />
-          </View>
-        </View>
+        </TouchableOpacity>
 
         {/* Referidos */}
 
@@ -89,84 +147,35 @@ const HomeScreen = ({navigation}) => {
 
       </View>
 
-      {/* Games */}
+      {/* Points and games */}
       <View style={HomeStyles.containerGamesSection}>
         <View style={HomeStyles.containerTitleGames}>
           <Text style={HomeStyles.titleSectionGames}>
-            ¡Nuevos Juegos Disponibles!
+            ¡Esta es tu puntuacion de los ultimos 3 meses!
           </Text>
-
-          <TouchableOpacity onPress={() => navigation.navigate('Games')} >
-            <Text>Ver Todos</Text>
+        </View>
+        {
+          scoresLats3Months && scoresLats3Months.map((score, index) => {
+            if (score.label && score.value) {
+              return (
+                <View key={index} style={HomeStyles.containerScores}>
+                  <View style={HomeStyles.scoresPerMonth}>
+                    <Text style={HomeStyles.monthLabel}>{score.label}:</Text>
+                    <Text style={HomeStyles.monthValue}>{score.value}</Text>
+                  </View>
+                </View>
+              );
+            } else {
+              return null;
+            }
+          })
+        }
+        {/* Boton para los juegos */}
+        <View style={HomeStyles.containerGameButton}>
+          <Text style={HomeStyles.gameButton}>Visita todos los juegos aquí:</Text>
+          <TouchableOpacity style={HomeStyles.playIconContainer} onPress={() => navigation.navigate('Games')} >
+            <FontAwesomeIcon size={50} icon={faGamepad} />
           </TouchableOpacity>
-        </View>
-        {/* Game-1 */}
-        <View style={HomeStyles.containerGame}>
-          <Image
-            source={require('../../../img/games/mini-games/game-1.png')}
-            style={HomeStyles.imageGameImg}
-            resizeMode="contain"
-          />
-
-          <View style={HomeStyles.titleGame}>
-            <Text style={HomeStyles.gameTitle}>SimiInvade</Text>
-            <Text>¡Defiende el Centro a toda costa!</Text>
-          </View>
-
-          <Image
-            source={require('../../../img/iconos/arrow-right.png')}
-          />
-        </View>
-        {/* Game-2 */}
-        <View style={HomeStyles.containerGame}>
-          <Image
-            source={require('../../../img/games/mini-games/game-2.png')}
-            style={HomeStyles.imageGameImg}
-            resizeMode="contain"
-          />
-
-          <View style={HomeStyles.titleGame}>
-            <Text style={HomeStyles.gameTitle}>SimiRun</Text>
-            <Text>¡Ayuda a Simi a recolectar todas las monedas!</Text>
-          </View>
-
-          <Image
-            source={require('../../../img/iconos/arrow-right.png')}
-          />
-        </View>
-        {/* Game-4 */}
-        <View style={HomeStyles.containerGame}>
-          <Image
-            source={require('../../../img/games/mini-games/game-3.png')}
-            style={HomeStyles.imageGameImg}
-            resizeMode="contain"
-          />
-
-          <View style={HomeStyles.titleGame}>
-            <Text style={HomeStyles.gameTitle}>SimiSlash</Text>
-            <Text>¡No dejes caer ninguna Rosca de Reyes!</Text>
-          </View>
-
-          <Image
-            source={require('../../../img/iconos/arrow-right.png')}
-          />
-        </View>
-        {/* Game-5 */}
-        <View style={HomeStyles.containerGame}>
-          <Image
-            source={require('../../../img/games/mini-games/game-4.png')}
-            style={HomeStyles.imageGameImg}
-            resizeMode="contain"
-          />
-
-          <View style={HomeStyles.titleGame}>
-            <Text style={HomeStyles.gameTitle}>SimiFest</Text>
-            <Text>¡Se parte de simiFest! Proximamente</Text>
-          </View>
-
-          <Image
-            source={require('../../../img/iconos/arrow-right.png')}
-          />
         </View>
       </View>
     </ScrollView>

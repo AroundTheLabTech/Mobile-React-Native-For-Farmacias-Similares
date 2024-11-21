@@ -13,7 +13,6 @@ import GamesStack from './src/screens/GamesScreen/GamesStack';
 //Contexto AuthContext
 import { AuthProvider } from './src/AuthContext';
 
-import './src/services/i18n';
 import 'react-native-reanimated';
 
 // Crea los navegadores

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth } from './lib/firebase'; // Importa el archivo Firebase.js
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { getUserData } from './services/UserDatabase'; // Importa el servicio que consulta Firestore
 import { getUserScores } from './services/ScoreCollectionDatabase'; // Importa el servicio que consulta los puntajes
 
@@ -13,6 +13,7 @@ type AuthContextType = {
   lastSession: string | null;
   scoreTotal: number | null;
   ubication: string | null;
+  logout: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -24,6 +25,7 @@ const AuthContext = createContext<AuthContextType>({
   lastSession: null,
   scoreTotal: 0,
   ubication: null,
+  logout: async () => { },
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -38,27 +40,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [scoreTotal, setScoreTotal] = useState<number | null>(0);
   const [ubication, setUbication] = useState<string | null>(null);
 
+  // Función para manejar el logout
+  const logout = async () => {
+    try {
+      await signOut(auth); // Llamar a Firebase signOut para cerrar sesión
+      setUid(null); // Limpiar el estado
+      setAge(null);
+      setDisplayName(null);
+      setEmail(null);
+      setGender(null);
+      setLastSession(null);
+      setScoreTotal(0);
+      setUbication(null);
+      console.log('Usuario deslogueado exitosamente');
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUid(user.uid); // Guardamos el uid del usuario autenticado
 
-        // Obtener los datos del usuario desde Firestore
-        const userData = await getUserData(user.uid);
-        if (userData) {
-          setAge(userData.age);
-          setDisplayName(userData.display_name);
-          setEmail(userData.email);
-          setGender(userData.gender);
-          setLastSession(userData.last_session);
-          setUbication(userData.ubication);
+        try {
+          // Obtener los datos del usuario desde Firestore
+          const userData = await getUserData(user.uid);
+          if (userData) {
+            setAge(userData.age);
+            setDisplayName(userData.display_name);
+            setEmail(userData.email);
+            setGender(userData.gender);
+            setLastSession(userData.last_session);
+            setUbication(userData.ubication);
+          }
+
+          // Obtener los puntajes del usuario desde Firestore
+          const userScoreTotal = await getUserScores(user.uid);
+          setScoreTotal(userScoreTotal);
+
+          console.log('Datos y puntaje del usuario obtenidos y guardados en el contexto');
+        } catch (error) {
+          console.error('Error al obtener datos del usuario:', error);
         }
-
-        // Obtener los puntajes del usuario desde Firestore
-        const userScoreTotal = await getUserScores(user.uid);
-        setScoreTotal(userScoreTotal);
-
-        console.log("Datos y puntaje del usuario obtenidos y guardados en el contexto");
       } else {
         setUid(null); // El usuario no está autenticado
         setAge(null);
@@ -76,7 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider
-      value={{ uid, age, displayName, email, gender, lastSession, scoreTotal, ubication }}
+      value={{ uid, age, displayName, email, gender, lastSession, scoreTotal, ubication, logout }}
     >
       {children}
     </AuthContext.Provider>

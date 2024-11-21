@@ -7,8 +7,7 @@ import GameDetailsStyles from './style/GameDetailsStyles';
 
 const GameDetails = ({ navigation, route }) => {
 
-  const { title, description, imageUrl, gameUrl } = route.params;
-  const iframeUrl = { "gameUrl": gameUrl };
+  const { title, description, imageUrl } = route.params;
 
   const [orientation, setOrientation] = useState('portrait');
 
@@ -30,12 +29,12 @@ const GameDetails = ({ navigation, route }) => {
     };
   }, []);
 
-  const handleGoToGame = (iframeUrl) => {
+  const handleGoToGame = () => {
 
     if (orientation === 'portrait') {
       Alert.alert('Por favor gira la pantalla');
     } else {
-      navigation.navigate('GameIframe', iframeUrl);
+      navigation.navigate('GameIframe', route.params );
     }
   };
 
@@ -61,7 +60,7 @@ const GameDetails = ({ navigation, route }) => {
             </View>
           </View>
           <Text style={GameDetailsStyles.gameDescription} >{description}</Text>
-          <TouchableOpacity style={GameDetailsStyles.playGameButton} onPress={() => handleGoToGame(iframeUrl)} >
+          <TouchableOpacity style={GameDetailsStyles.playGameButton} onPress={() => handleGoToGame()} >
             <Text style={GameDetailsStyles.playGameButtonText} >Jugar solo</Text>
           </TouchableOpacity>
         </View>
