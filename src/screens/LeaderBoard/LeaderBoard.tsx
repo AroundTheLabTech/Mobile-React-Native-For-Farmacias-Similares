@@ -4,177 +4,23 @@ import LeaderBoardStyles from './style/LeaderBoardStyles';
 // import PodiumChart from '../../components/PodiumChartComponent/PodiumChart';
 import LeaderBoardCard from '../../components/LeaderBoardCardComponents/LeaderBoardCard';
 import DraggableMenu from '../../components/DraggableMenuComponent/DraggableMenu';
-import PodiumSvg from '@components/PodiumChartComponent/PodiumSvg';
-
-interface Player {
-  name: string;
-  position: number;
-  points: number;
-  countryFlax: string;
-  pictureProfile: any; // Cambia a string o ImageSourcePropType según sea necesario
-}
+import PodiumSvg from '../../components/PodiumChartComponent/PodiumSvg';
+import { getTopTwenty } from '@services/backend';
+import { TLeaderBoard } from 'src/types/user';
+import { calculatePercent, splitTopTwenty } from '../../utils/helpers';
+import Loader from '@components/LoaderComponent/Loader';
+import { useAuth } from '../../AuthContext';
 
 const LeaderBoard: React.FC = () => {
-  const players: Player[] = [
-    {
-      name: 'Madekyb Días',
-      position: 4,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-    {
-      name: 'Madekyb Días',
-      position: 5,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-    {
-      name: 'Madekyb Días',
-      position: 6,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-    {
-      name: 'Madekyb Días',
-      position: 7,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-    {
-      name: 'Madekyb Días',
-      position: 8,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-    {
-      name: 'Madekyb Días',
-      position: 9,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-    {
-      name: 'Madekyb Días',
-      position: 10,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-    {
-      name: 'Madekyb Días',
-      position: 11,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-    {
-      name: 'Madekyb Días',
-      position: 12,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-    {
-      name: 'Madekyb Días',
-      position: 13,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-    {
-      name: 'Madekyb Días',
-      position: 14,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-    {
-      name: 'Madekyb Días',
-      position: 15,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-    {
-      name: 'Madekyb Días',
-      position: 16,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-    {
-      name: 'Madekyb Días',
-      position: 17,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-    {
-      name: 'Madekyb Días',
-      position: 18,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-    {
-      name: 'Madekyb Días',
-      position: 19,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-    {
-      name: 'Madekyb Días',
-      position: 20,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-    {
-      name: 'Madekyb Días',
-      position: 21,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-    {
-      name: 'Madekyb Días',
-      position: 22,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-    {
-      name: 'Madekyb Días',
-      position: 23,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-    {
-      name: 'Madekyb Días',
-      position: 24,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-    {
-      name: 'Madekyb Días',
-      position: 25,
-      points: 590,
-      countryFlax: 'https://www.worldometers.info/img/flags/ar-flag.gif',
-      pictureProfile: require('../../../img/profile/profilePicture.png'),
-    },
-  ];
+  const { uid } = useAuth();
 
   const [orientation, setOrientation] = useState('portrait');
   // const [width1, setWidth1] = useState(0);
   // const [height1, setHeight1] = useState(0);
+  const [topThree, setTopThree] = useState<TLeaderBoard[]>();
+  const [topTwenty, setTopTwenty] = useState<TLeaderBoard[]>();
+  const [userPosition, setUserPosition] = useState<TLeaderBoard>();
+  const [userPercent, setUserPercent] = useState<number>();
 
   useEffect(() => {
     const updateOrientation = () => {
@@ -193,6 +39,33 @@ const LeaderBoard: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    async function fetchData() {
+      const response = await getTopTwenty();
+
+      const tops = splitTopTwenty(response);
+
+      setTopThree(tops.topThree);
+      setTopTwenty(tops.topRest);
+
+      const filterUserTop = tops.all.filter((player) => player.uid === uid);
+
+      const userTopPercent = calculatePercent(filterUserTop[0].position, 0, 20);
+
+      setUserPercent(userTopPercent);
+
+      setUserPosition(filterUserTop[0]);
+    }
+
+    if (!topTwenty || !topThree) {
+      fetchData();
+    }
+  }, [topThree, topTwenty, uid]);
+
+  if (!topThree || !topTwenty) {
+    return <Loader visible />;
+  }
+
   return (
     <ScrollView style={LeaderBoardStyles.containerScroll}>
       {/* Header */}
@@ -209,10 +82,19 @@ const LeaderBoard: React.FC = () => {
             </View>
           </View>
           <View style={LeaderBoardStyles.containerPosition}>
-            <Text style={LeaderBoardStyles.positionNumber}>#4</Text>
-            <Text style={LeaderBoardStyles.positionDescription}>Tu estas entre los 30% de mejores jugadores</Text>
+            <Text style={LeaderBoardStyles.positionNumber}>#{userPosition?.position}</Text>
+            {
+              userPercent && userPercent > 0 ?
+                <Text style={LeaderBoardStyles.positionDescription}>Tu estas entre el {userPercent}% de mejores jugadores</Text>
+                :
+                <Text style={LeaderBoardStyles.positionDescription}>No estás en el top 20, pero recuerda que puedes mejorar jugando</Text>
+            }
+
           </View>
-          <PodiumSvg />
+          {
+            topThree && topThree.length > 2 &&
+            <PodiumSvg top3Data={topThree} />
+          }
           {/*
           <PodiumChart />
           */}
@@ -226,7 +108,7 @@ const LeaderBoard: React.FC = () => {
                   scrollEnabled={true} // Controla si el scroll está habilitado
                   nestedScrollEnabled={true}
                 >
-                  {players.map((player, index) => (
+                  {topTwenty && topTwenty.length > 15 && topTwenty.map((player: TLeaderBoard, index) => (
                     <LeaderBoardCard key={index} player={player} />
                   ))}
                 </ScrollView>
@@ -234,8 +116,8 @@ const LeaderBoard: React.FC = () => {
             ) :
             (
               <DraggableMenu>
-                <View>
-                  {players.map((player, index) => (
+                <View style={{ paddingBottom: 70 }} >
+                  {topTwenty && topTwenty.length > 15 && topTwenty.map((player: TLeaderBoard, index) => (
                     <LeaderBoardCard key={index} player={player} />
                   ))}
                 </View>

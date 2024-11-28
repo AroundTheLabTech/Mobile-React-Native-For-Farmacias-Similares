@@ -168,6 +168,15 @@ Esto generará el APK sin firma, y puedes firmarlo después con las herramientas
    2.1 **Generar APK de Debug**:
    ```bash
    npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
+
+   npx react-native run-android
+   ```
+
+   2.2 **Generar APK de Debug (Opcion 2)**:
+   ```bash
+   cd android
+   ./gradlew assembleDebug
+   cd ..
    ```
 
 
@@ -397,9 +406,180 @@ npx react-native run-ios --device "NombreDelDispositivo"
    npx react-native run-ios
    ```
 
-## Congratulations! :tada:
+## Subida de la app a play store
+### 1. **Generar la Clave de Subida**
+Primero, necesitas generar una clave de subida para firmar tu aplicación antes de subirla a la Play Store. Puedes hacerlo usando `keytool`:
 
-You've successfully run and modified your React Native App. :partying_face:
+```bash
+keytool -genkeypair -v -keystore simijuegos-upload.keystore -alias simijuegos-mobile-app -keyalg RSA -keysize 2048 -validity 10000
+```
+
+Recuerda guardar la contraseña de la clave y el alias, ya que los necesitarás más adelante.
+
+### 2. **Configurar Gradle**
+Coloca el archivo `simijuegos-upload.keystore` en la carpeta `android/app` y actualiza el archivo `android/gradle.properties` con las siguientes variables:
+
+```properties
+MYAPP_UPLOAD_STORE_FILE=simijuegos-upload.keystore
+MYAPP_UPLOAD_KEY_ALIAS=simijuegos-mobile-app
+MYAPP_UPLOAD_STORE_PASSWORD=${UPLOAD_STORE_PASSWORD}
+MYAPP_UPLOAD_KEY_PASSWORD=${UPLOAD_KEY_PASSWORD}
+```
+
+### 3. **Actualizar `build.gradle`**
+Asegúrate de que el archivo `android/app/build.gradle` esté configurado para usar la clave de subida:
+
+```groovy
+apply plugin: "com.android.application"
+apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: "com.facebook.react"
+
+react {
+    autolinkLibrariesWithApp()
+}
+
+def enableProguardInReleaseBuilds = false
+def jscFlavor = 'org.webkit:android-jsc:+'
+
+import java.util.Properties
+def loadPropertiesFile() {
+    def propertiesFile = rootProject.file("../.env")
+    def properties = new Properties()
+    if (propertiesFile.exists()) {
+        properties.load(new FileInputStream(propertiesFile))
+    } else {
+        throw new GradleException("Properties file '${propertiesFile}' not found")
+    }
+    return properties
+}
+
+def env = loadPropertiesFile()
+
+android {
+    ndkVersion rootProject.ext.ndkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdk rootProject.ext.compileSdkVersion
+
+    namespace "com.simijuegos"
+    defaultConfig {
+        applicationId "com.simijuegos"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+    }
+    flavorDimensions "store"
+    productFlavors {
+        play {
+            dimension "store"
+        }
+        amazon {
+            dimension "store"
+        }
+    }
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+        release {
+            if (!env['MYAPP_UPLOAD_STORE_FILE'] || !env['UPLOAD_STORE_PASSWORD'] || !env['MYAPP_UPLOAD_KEY_ALIAS'] || !env['UPLOAD_KEY_PASSWORD']) {
+                throw new GradleException("One or more environment variables are missing.")
+            }
+            storeFile file(env['MYAPP_UPLOAD_STORE_FILE'])
+            storePassword env['UPLOAD_STORE_PASSWORD']
+            keyAlias env['MYAPP_UPLOAD_KEY_ALIAS']
+            keyPassword env['UPLOAD_KEY_PASSWORD']
+        }
+    }
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+        release {
+            signingConfig signingConfigs.debug
+            minifyEnabled enableProguardInReleaseBuilds
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+    }
+
+    applicationVariants.all { variant -> 
+        variant.outputs.all { output -> 
+            def newApkName = "SimiJuegos-${variant.buildType.name}-${variant.versionName}.apk"
+            output.outputFileName = newApkName
+        }
+    }
+}
+
+dependencies {
+    implementation("com.facebook.react:react-android")
+    implementation 'com.android.billingclient:billing:5.0.0'
+    implementation 'com.google.android.gms:play-services-base:18.0.0'
+
+    if (hermesEnabled.toBoolean()) {
+        implementation("com.facebook.react:hermes-android")
+    } else {
+        implementation jscFlavor
+    }
+
+    implementation(project(path: ":react-native-iap", configuration: "default"))
+    implementation(project(path: ":react-native-reanimated", configuration: "default"))
+}
+
+apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
+```
+
+Si se deséa cambiar el nombre del APK generado podemos modificar el `outputFileName` en el archivo `android/app/build.gradle`.
+
+### Pasos para Cambiar el Nombre del APK
+
+1. Abre el archivo `android/app/build.gradle`.
+2. Añade el siguiente bloque dentro de `android` para configurar el nombre de salida del APK:
+
+```groovy
+android {
+    ...
+    // Configura el nombre del archivo APK de salida
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def newApkName = "SimiJuegos-${variant.buildType.name}-${variant.versionName}.apk"
+            output.outputFileName = newApkName
+        }
+    }
+    ...
+}
+```
+### Generar el APK
+
+El APK generado debería tener el nombre que configuraste, como `SimiJuegos-release-1.0.apk`, en lugar de `app-release.apk`.
+
+### 4. **Generar el APK de Lanzamiento**
+Con la configuración completa, puedes generar el APK de lanzamiento:
+
+```bash
+cd android
+# Puede no ser necesario si está bien configurados los .env
+set UPLOAD_STORE_PASSWORD=your-keystore-password
+set UPLOAD_KEY_PASSWORD=your-key-password
+./gradlew assembleRelease
+```
+
+Esto generará un archivo `SimiJuegos-release.apk` en la carpeta `android/app/build/outputs/apk/release`.
+
+### 5. **Subir a la Play Store**
+1. **Accede a tu cuenta de Google Play Console** y selecciona tu proyecto.
+2. **Sube el archivo APK** generado (`app-release.apk`) a través de la sección de lanzamientos.
+3. Completa los detalles necesarios como descripción, capturas de pantalla, etc.
+4. **Revisa y publica** tu aplicación.
+
+### 6. **Automatización con CI/CD**
+Para automatizar este proceso, puedes usar herramientas como Buddy o GitHub Actions para configurar un flujo de trabajo de Integración y Despliegue Continuo (CI/CD).
+
+### Recursos Adicionales
+- [Guía oficial de React Native para publicar en Google Play Store](https://reactnative.dev/docs/signed-apk-android)
+- [Blog de LogRocket sobre despliegue en Google Play Store](https://blog.logrocket.com/how-to-deploy-a-react-native-app-to-the-google-play-store/)
 
 ### Now what?
 

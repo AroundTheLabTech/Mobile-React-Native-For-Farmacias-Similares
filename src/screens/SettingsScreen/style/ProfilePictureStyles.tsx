@@ -64,17 +64,23 @@ const ProfilePictureStyles = StyleSheet.create({
     marginLeft: spacing.sm,
     marginRight: spacing.sm,
     marginTop: spacing.sm,
+    paddingBottom: spacing.xxxl,
+    gap: spacing.sm,
   },
   profilePicture: {
     margin: spacing.sm,
   },
+  profilePicturesAvalibleContainer: {
+    marginBottom: spacing.md,
+  },
   containerSave: {
-    flex: 1,
     width: '100%',
     paddingRight: spacing.md,
     paddingLeft: spacing.md,
     alignItems: 'flex-end',
     marginVertical: spacing.lg,
+    position: 'absolute',
+    bottom: 0,
   },
   containerButtonSave: {
     width: '40%',

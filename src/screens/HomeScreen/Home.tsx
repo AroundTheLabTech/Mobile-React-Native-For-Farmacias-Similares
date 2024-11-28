@@ -9,7 +9,7 @@ import CompetitionModal from '../../components/CompetitionComponent/CompetitionM
 import Loader from '@components/LoaderComponent/Loader';
 import Virus1 from '@img/personajes/virus-1.svg';
 import Game1 from '@img/games/portada/game-1.png';
-import { getUserLast3MonthsInfo } from '@services/backend';
+import { getScorePerGames, getUserLast3MonthsInfo } from '@services/backend';
 import { TUserLast3MonthInfo } from '../../types/user';
 import { getMaxScorePerMonth, groupSessionsByMonth } from '../../utils/helpers';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -24,12 +24,31 @@ const HomeScreen = ({ navigation }) => {
   // Obtener la variable del usuario
   const { uid, displayName } = useAuth();
 
-  const gameInformation = {
-    'imageUrl': Game1,
-    'title': 'Dr. Simi Invide',
-    'description': '¡No dejes caer ninguna Rosca de Reyes! Corta todos los objetos y evita encender la mecha . Acumula puntos por cada Rosca de Reyes que logres cortar.',
-    'gameUrl': 'https://simijuegos-game2.web.app/',
-  };
+  const [gameInformation, setGameInformation] = useState(
+    {
+      'imageUrl': Game1,
+      'id': 'juego1',
+      'score': 0,
+      'title': 'Dr. Simi Invide',
+      'description': '¡No dejes caer ninguna Rosca de Reyes! Corta todos los objetos y evita encender la mecha . Acumula puntos por cada Rosca de Reyes que logres cortar.',
+      'gameUrl': 'https://simijuegos-game2.web.app/',
+    }
+  );
+
+  useEffect(() => {
+    async function fetchData() {
+      const response = await getScorePerGames(uid);
+
+      const score = response.score_per_game[gameInformation.id];
+      gameInformation.score = score;
+
+      setGameInformation(gameInformation);
+    }
+
+    if (!gameInformation.score || gameInformation.score <= 0) {
+      fetchData();
+    }
+  }, [gameInformation, uid]);
 
   useEffect(() => {
     if (uid) {
@@ -70,7 +89,7 @@ const HomeScreen = ({ navigation }) => {
     fetchData();
   }, [uid]);
 
-  if (!displayName) {
+  if (!displayName || (scoresLats3Months && scoresLats3Months.length < 3)) {
     return <Loader visible={true} />;
   }
 

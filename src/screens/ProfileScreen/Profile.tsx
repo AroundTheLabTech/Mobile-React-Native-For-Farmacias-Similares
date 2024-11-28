@@ -18,6 +18,7 @@ import EllipseComponent from '../../components/ElipseComponent/ElipseComponent';
 import Spacer from '../../components/SpacerComponent/Spacer';
 import { getUserPoints } from '../../services/backend';
 import { TUserPoints } from 'src/types/user';
+import Loader from '@components/LoaderComponent/Loader';
 
 
 const ProfileScreen: React.FC = ({ navigation }) => {
@@ -46,6 +47,10 @@ const ProfileScreen: React.FC = ({ navigation }) => {
         return <_404Page />;
     }
   };
+
+  if (!displayName || !userPoints) {
+    return <Loader visible={true} />;
+  }
 
   return (
     <ScrollView style={ProfileStyles.containerMax} contentContainerStyle={ProfileStyles.container}>

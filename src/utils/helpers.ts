@@ -1,4 +1,4 @@
-import { TUserSession, TGroupedSessions, TMaxScores } from '../types/user';
+import { TUserSession, TGroupedSessions, TMaxScores, TTopTwenty, TLeaderBoard } from '../types/user';
 
 export function calculatePercentage(total: number, progress: number): number {
   if (total === 0 || progress === 0) {
@@ -115,3 +115,31 @@ export function formarGameCardNumber(number: number): string {
 
   return formattedString;
 }
+
+export function splitTopTwenty(topTwenty: TTopTwenty[]): { topThree: TLeaderBoard[], topRest: TLeaderBoard[], all: TLeaderBoard[] } {
+  // Dividir el array en el top 3 y el resto (top 4-20)
+  const topThree = topTwenty.slice(0, 3).map((item, index) => ({
+    ...item,
+    position: index + 1,
+  }));
+
+  const topRest = topTwenty.slice(3).map((item, index) => ({
+    ...item,
+    position: index + 4,
+  }));
+
+  const all = topTwenty.map((item, index) => ({
+    ...item,
+    position: index + 1,
+  }));
+
+  return {
+    topThree,
+    topRest,
+    all,
+  };
+}
+
+export function calculatePercent(valor: number, min: number, max: number): number {
+  return ((valor - min) / (max - min)) * 100;
+};

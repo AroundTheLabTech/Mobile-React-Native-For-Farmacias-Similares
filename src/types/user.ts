@@ -74,6 +74,17 @@ export type TUserPicture = {
   url: string,
 }
 
+export type TUserProfilePicture = {
+  title: string,
+  image_url: string
+}
+
+export type TUserProfilePictures = {
+  current_profile_picture_url: string,
+  list_profile_pictures_avalible: TUserProfilePicture[]
+}
+
+
 export type TBackResponse = {
   message: string,
 }
@@ -82,4 +93,21 @@ export type TGameCard = {
   name: string,
   score: number,
   card_number: number
+}
+
+export type TScorePerGame = {
+  uid: string,
+  score_per_game: Record<string, number>
+}
+
+export type TTopTwenty = {
+  username: string
+  uid: string
+  total_score: number
+  profile_mini_pictures_url: string
+  flag_url: string
+}
+
+export type TLeaderBoard = TTopTwenty & {
+  position: number
 }

@@ -2,30 +2,13 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import Svg, { Rect, Polygon, Text, Image as SvgImage } from 'react-native-svg';
+import { TLeaderBoard } from '../../types/user';
 
-const PodiumSvg = () => {
+interface PodiumSvgProps {
+  top3Data: TLeaderBoard[]
+}
 
-  const top3Data = [
-    {
-      name: 'vicglezh',
-      profilePicture: 'https://via.placeholder.com/50',
-      countriFlag: 'https://via.placeholder.com/20',
-      points: 2569,
-    },
-    {
-      name: 'Alena Donin',
-      profilePicture: 'https://via.placeholder.com/50',
-      countriFlag: 'https://via.placeholder.com/20',
-      points: 1469,
-    },
-    {
-      name: 'Craig Gouse',
-      profilePicture: 'https://via.placeholder.com/50',
-      countriFlag: 'https://via.placeholder.com/20',
-      points: 591,
-    },
-  ];
-
+const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
   // Definir las dimensiones fijas del SVG
   const svgHeight = 400; // Alto fijo en píxeles
 
@@ -93,18 +76,18 @@ const PodiumSvg = () => {
         <View style={{ borderWidth: 0, borderColor: '#000', width: podiumDimensions.width, flex: 1.2 }} onLayout={handleLayoutInformation2} >
           <Svg width={podium2DimensionsInformation.width} height={podium2DimensionsInformation.height * 0.5} >
             <SvgImage
-              href={{ uri: 'https://via.placeholder.com/50' }}
-              x={'38%'}
-              y={'50%'}
-              width={30}
-              height={30}
+              href={{ uri: top3Data[1].profile_mini_pictures_url }}
+              x={'32%'}
+              y={'48%'}
+              width={40}
+              height={40}
             />
             <SvgImage
-              href={{ uri: 'https://via.placeholder.com/20' }}
+              href={{ uri: top3Data[1].flag_url }}
               x={'52%'}
-              y={'75%'}
-              width={10}
-              height={10}
+              y={'80%'}
+              width={20}
+              height={20}
             />
           </Svg>
           <Svg width={podium2DimensionsInformation.width} height={podium2DimensionsInformation.height * 0.25} >
@@ -116,7 +99,7 @@ const PodiumSvg = () => {
               fontWeight="800"
               textAnchor="middle"
               alignmentBaseline="middle">
-              {top3Data[1].name}
+              {top3Data[1].username}
             </Text>
           </Svg>
 
@@ -127,7 +110,7 @@ const PodiumSvg = () => {
               width={podium1DimensionsInformation.width * 0.5}
               height={(podium1DimensionsInformation.height * 0.25) * 0.6}
               rx={podium1DimensionsInformation.height * 0.05}
-              fill={"#9087E5"}
+              fill={'#9087E5'}
             />
             <Text
               x="40%"
@@ -137,7 +120,7 @@ const PodiumSvg = () => {
               fontWeight="800"
               textAnchor="middle"
               alignmentBaseline="middle">
-              {top3Data[1].points} QP
+              {top3Data[1].total_score} QP
             </Text>
           </Svg>
         </View>
@@ -174,20 +157,29 @@ const PodiumSvg = () => {
       >
         <View style={{ borderWidth: 0, borderColor: '#000', width: podiumDimensions.width, flex: 1 }} onLayout={handleLayoutInformation1} >
           <Svg width={podium2DimensionsInformation.width} height={podium2DimensionsInformation.height * 0.3} >
-            <SvgImage
-              href={{ uri: 'https://via.placeholder.com/50' }}
-              x={'38%'}
-              y={'30%'}
-              width={30}
-              height={30}
-            />
-            <SvgImage
-              href={{ uri: 'https://via.placeholder.com/20' }}
-              x={'52%'}
-              y={'55%'}
-              width={10}
-              height={10}
-            />
+            <View style={{ borderRadius: 40, width: 40, height: 40, top: '12%', left: '32%', overflow: 'hidden' }} >
+              <Svg>
+                <SvgImage
+                  href={{ uri: top3Data[0].profile_mini_pictures_url }}
+                  x={'0%'}
+                  y={'0%'}
+                  width={40}
+                  height={40}
+                  preserveAspectRatio="xMidYMid slice"
+                />
+              </Svg>
+            </View>
+            <View style={{ width: 20, height: 20, top: '80%', left: '52%', overflow: 'visible', display: 'flex', position: 'absolute', zIndex: 10 }} >
+              <Svg>
+                <SvgImage
+                  href={{ uri: top3Data[0].flag_url }}
+                  x={'0%'}
+                  y={'0%'}
+                  width={20}
+                  height={20}
+                />
+              </Svg>
+            </View>
           </Svg>
           <Svg width={podium2DimensionsInformation.width} height={podium2DimensionsInformation.height * 0.35} >
             <Text
@@ -198,7 +190,7 @@ const PodiumSvg = () => {
               fontWeight="800"
               textAnchor="middle"
               alignmentBaseline="middle">
-              {top3Data[0].name}
+              {top3Data[0].username}
             </Text>
           </Svg>
 
@@ -209,7 +201,7 @@ const PodiumSvg = () => {
               width={podium1DimensionsInformation.width * 0.5}
               height={(podium1DimensionsInformation.height * 0.25) * 0.6}
               rx={podium1DimensionsInformation.height * 0.05}
-              fill={"#9087E5"}
+              fill={'#9087E5'}
             />
             <Text
               x="40%"
@@ -219,7 +211,7 @@ const PodiumSvg = () => {
               fontWeight="800"
               textAnchor="middle"
               alignmentBaseline="middle">
-              {top3Data[0].points} QP
+              {top3Data[0].total_score} QP
             </Text>
           </Svg>
         </View>
@@ -255,21 +247,29 @@ const PodiumSvg = () => {
         onLayout={handleLayout}
       >
         <View style={{ borderWidth: 0, borderColor: '#000', width: podiumDimensions.width, flex: 1.4 }} onLayout={handleLayoutInformation3} >
-        <Svg width={podium2DimensionsInformation.width} height={podium2DimensionsInformation.height * 0.7} >
-            <SvgImage
-              href={{ uri: 'https://via.placeholder.com/50' }}
-              x={'38%'}
-              y={'60%'}
-              width={30}
-              height={30}
-            />
-            <SvgImage
-              href={{ uri: 'https://via.placeholder.com/20' }}
-              x={'52%'}
-              y={'75%'}
-              width={10}
-              height={10}
-            />
+          <Svg width={podium2DimensionsInformation.width} height={podium2DimensionsInformation.height * 0.7} >
+            <View style={{ borderRadius: 40, width: 40, height: 40, top: '148%', left: '32%', overflow: 'hidden' }} >
+              <Svg>
+                <SvgImage
+                  href={{ uri: top3Data[2].profile_mini_pictures_url }}
+                  x={'0%'}
+                  y={'0%'}
+                  width={40}
+                  height={40}
+                />
+              </Svg>
+            </View>
+            <View style={{ width: 20, height: 20, top: '218%', left: '52%', overflow: 'visible', display: 'flex', position: 'absolute', zIndex: 10 }} >
+              <Svg>
+                <SvgImage
+                  href={{ uri: top3Data[1].flag_url }}
+                  x={'0%'}
+                  y={'0%'}
+                  width={20}
+                  height={20}
+                />
+              </Svg>
+            </View>
           </Svg>
           <Svg width={podium2DimensionsInformation.width} height={podium2DimensionsInformation.height * 0.2} >
             <Text
@@ -280,7 +280,7 @@ const PodiumSvg = () => {
               fontWeight="800"
               textAnchor="middle"
               alignmentBaseline="middle">
-              {top3Data[2].name}
+              {top3Data[2].username}
             </Text>
           </Svg>
 
@@ -291,7 +291,7 @@ const PodiumSvg = () => {
               width={podium1DimensionsInformation.width * 0.5}
               height={(podium1DimensionsInformation.height * 0.25) * 0.6}
               rx={podium1DimensionsInformation.height * 0.05}
-              fill={"#9087E5"}
+              fill={'#9087E5'}
             />
             <Text
               x="40%"
@@ -301,7 +301,7 @@ const PodiumSvg = () => {
               fontWeight="800"
               textAnchor="middle"
               alignmentBaseline="middle">
-              {top3Data[2].points} QP
+              {top3Data[2].total_score} QP
             </Text>
           </Svg>
         </View>

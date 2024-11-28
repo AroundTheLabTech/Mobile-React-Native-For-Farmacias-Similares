@@ -42,7 +42,7 @@ const MountainGripSVG = () => {
 const { height: screenHeight } = Dimensions.get('window');
 const INITIAL_POSITION = screenHeight * 0.65;
 const MAX_DRAG_POSITION = screenHeight * 0.15;
-const MIN_DRAG_POSITION  = screenHeight * 0.68;
+const MIN_DRAG_POSITION = screenHeight * 0.68;
 const GRIP_HEIGHT = 40; // Altura de la sección superior para activar el arrastre
 
 interface DraggableMenuProps {
@@ -107,7 +107,7 @@ const DraggableMenu: React.FC<DraggableMenuProps> = ({ children }) => {
     >
       <MountainGripSVG />
       <ScrollView
-        style={{ width: '90%', height: '100%'}}
+        style={{ width: '90%', height: '100%' }}
         scrollEnabled={scrollEnabled} // Controla si el scroll está habilitado
         nestedScrollEnabled={true}
         ref={scrollViewRef}
