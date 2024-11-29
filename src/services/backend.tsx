@@ -2,6 +2,7 @@ import { Alert } from 'react-native';
 import { BACKEND_BASE_URL } from '@env';
 import { TUserCurrentMonthSession, TUserLast3MonthInfo, TUserPoints, TUserInformation, TUserPicture, TBackResponse, TGameCard, TUserLogin, TUserProfilePictures, TScorePerGame, TTopTwenty, TUserTokenValidate, TUserBadges } from 'src/types/user';
 
+
 export const loginUserByEmailAndPassword = async (email: string, password: string): Promise<TUserLogin | null> => {
   try {
     if (!email) {

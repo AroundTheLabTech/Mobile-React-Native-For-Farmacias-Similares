@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, TextInput } from 'react-native';
 import loginStyles from './style/registerStyle'; // Importamos los estilos de login
 import { ScrollView } from 'react-native-gesture-handler';
 import { RootStackParamList } from '../../NavigationTypes';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { TUserRegister } from 'src/types/user';
 
 
 
@@ -18,6 +19,46 @@ type RegisterScreenProps = {
 };
 
 const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
+
+  const [email, setEmail] = useState<string>();
+  const [name, setName] = useState<string>();
+  const [password, setPassword] = useState<string>();
+  const [location, setLocation] = useState<string>();
+  const [age, setAge] = useState<string>();
+
+  async function handleRegister() {
+    if (!email) {
+      console.log('completar el email');
+      return;
+    }
+    if (!name) {
+      console.log('completar el name');
+      return;
+    }
+    if (!password) {
+      console.log('completar el password');
+      return;
+    }
+    if (!location) {
+      console.log('completar el location');
+      return;
+    }
+    if (!age) {
+      console.log('completar el age');
+      return;
+    }
+
+    const newUser: TUserRegister = {
+      email,
+      name,
+      password,
+      location,
+      age,
+    };
+
+    console.log(newUser);
+  }
+
   return (
     <ScrollView>
       <View style={loginStyles.headerContainer}>
@@ -56,6 +97,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
               placeholder="Correo electrónico"
               keyboardType="email-address"
               autoCapitalize="none"
+              onChangeText={setEmail}
             />
 
 
@@ -71,9 +113,10 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 
             <TextInput
               style={loginStyles.input}
-              placeholder="Correo electrónico"
-              keyboardType="email-address"
+              placeholder="Nombre"
+              keyboardType="default"
               autoCapitalize="none"
+              onChangeText={setName}
             />
 
 
@@ -88,9 +131,10 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 
             <TextInput
               style={loginStyles.input}
-              placeholder="Correo electrónico"
-              keyboardType="email-address"
+              placeholder="Contraseña"
+              keyboardType="default"
               autoCapitalize="none"
+              onChangeText={setPassword}
             />
 
             {/* Ubicación */}
@@ -104,9 +148,10 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 
             <TextInput
               style={loginStyles.input}
-              placeholder="Correo electrónico"
-              keyboardType="email-address"
+              placeholder="Ubicacion"
+              keyboardType="default"
               autoCapitalize="none"
+              onChangeText={setLocation}
             />
 
             {/* Edad */}
@@ -115,14 +160,15 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
               <Text
                 style={loginStyles.placeHolder}
               >
-                Eda                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             d</Text>
+                Edad</Text>
             </View>
 
             <TextInput
               style={loginStyles.input}
-              placeholder="Correo electrónico"
-              keyboardType="email-address"
+              placeholder="Edad"
+              keyboardType="default"
               autoCapitalize="none"
+              onChangeText={setAge}
             />
 
 
@@ -144,7 +190,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
             </TouchableOpacity>
 
             {/* Boton Register */}
-            <TouchableOpacity
+            <TouchableOpacity onPress={handleRegister}
               style={loginStyles.botonLogin}
             >
               <Text style={loginStyles.textoButtons}>

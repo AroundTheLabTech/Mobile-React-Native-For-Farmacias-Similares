@@ -1,3 +1,11 @@
+export type TUserRegister = {
+  email: string,
+  name: string,
+  password: string,
+  location: string,
+  age: string
+}
+
 export type TUserLogin = {
   uid: string,
   email: string,
