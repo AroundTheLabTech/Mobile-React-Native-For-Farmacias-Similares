@@ -45,7 +45,7 @@ const GameDetails = ({ navigation, route }) => {
     >
       <View style={GameDetailsStyles.containerGameDetails} >
         <TouchableOpacity style={GameDetailsStyles.containerGoBack} onPress={() => navigation.goBack()} >
-          <FontAwesomeIcon icon={faArrowLeft} color='white' />
+          <FontAwesomeIcon icon={faArrowLeft} color="white" />
         </TouchableOpacity>
         <View style={GameDetailsStyles.containerCoverImage} >
           <Image style={GameDetailsStyles.coverImage} source={imageUrl} />

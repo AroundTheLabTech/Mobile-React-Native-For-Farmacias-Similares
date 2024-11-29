@@ -82,7 +82,7 @@ const ReportProblem = ({ navigation }) => {
         </View>
       </View>
     </ScrollView>
-  )
+  );
 };
 
 export default ReportProblem;

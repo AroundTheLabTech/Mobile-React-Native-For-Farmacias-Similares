@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, TouchableOpacity, ScrollView, StyleSheet, Dimensions, Text, Image, ImageBackground, Alert } from 'react-native';
+import { View, TouchableOpacity, ScrollView, StyleSheet, Text, Image, Alert } from 'react-native';
 import Orientation from 'react-native-orientation-locker';
 import { WebView } from 'react-native-webview';
-import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { colors, fonts, fontSizes, spacing } from '../../../global-class';
 import { updateScoreGame } from '@services/backend';
 import { useAuth } from '../../AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const GameIframe = ({ navigation, route }) => {
 
@@ -43,8 +42,6 @@ const GameIframe = ({ navigation, route }) => {
         seCurrentScore(newCurrentScore);
         setUpdate(false);
       }
-    } else {
-      console.log(message)
     }
   };
 
@@ -82,6 +79,8 @@ const GameIframe = ({ navigation, route }) => {
 
   async function handleUpdateScore() {
     const response = await updateScoreGame(uid, id, currentScore);
+
+    await AsyncStorage.setItem('updateScore', 'true');
 
     if (response && response.message) {
       Alert.prompt('Succes', response.message);

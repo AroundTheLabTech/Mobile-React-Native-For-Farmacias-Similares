@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image, Dimensions, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import ProfilePictureStyles from './style/ProfilePictureStyles';
@@ -8,36 +8,24 @@ import { useAuth } from '../../AuthContext';
 import { SvgUri } from 'react-native-svg';
 import { TUserProfilePictures } from 'src/types/user';
 import Loader from '@components/LoaderComponent/Loader';
+import { useUser } from '@services/UserContext';
 
 const ProfilePicture = ({ navigation }) => {
 
   const { uid } = useAuth();
-
-  const [orientation, setOrientation] = useState('portrait');
   const [profileUrl, setProfileUrl] = useState('');
   const [profilePicturesUrls, setProfilePicturesUrls] = useState<TUserProfilePictures>();
 
-  useEffect(() => {
-    const updateOrientation = () => {
-      const { width, height } = Dimensions.get('window');
-      setOrientation(width > height ? 'landscape' : 'portrait');
-    };
-
-    const subscription = Dimensions.addEventListener('change', updateOrientation);
-
-    updateOrientation();
-
-    return () => {
-      subscription?.remove();
-    };
-  }, []);
+  const { setUpdateProfilePicture } = useUser();
 
   async function handleUpdatePictureProfile() {
     try {
       const response = await updateUserProfilePicture(uid, profileUrl);
-      console.log(response.message)
+
+      setUpdateProfilePicture(true);
+
       if (response && response.message) {
-        Alert.prompt('succes', response.message);
+        navigation.goBack();
       }
     } catch (error) {
       console.error(error);
@@ -67,7 +55,7 @@ const ProfilePicture = ({ navigation }) => {
   }, [profilePicturesUrls, profileUrl, uid]);
 
   return (
-    <View style={{ flex: 1 }} >
+    <View style={ProfilePictureStyles.profileMainContainer} >
       <ScrollView
         style={ProfilePictureStyles.container}
         contentContainerStyle={ProfilePictureStyles.containerMax}
@@ -80,12 +68,7 @@ const ProfilePicture = ({ navigation }) => {
           <Text style={ProfilePictureStyles.profilePictureTite} >Foto de perfil</Text>
           <View style={ProfilePictureStyles.containerPictures}>
             <View style={ProfilePictureStyles.containerMainPicture} >
-              <View style={{ borderRadius: 150, width: 150, borderWidth: 1, overflow: 'hidden' }} >
-                {
-                  /**
-                  <ImagePicker customStyles={ProfilePictureStyles.mainPicture} imagePickerStyle={ProfilePictureStyles.mainPicture} />
-                  */
-                }
+              <View style={ProfilePictureStyles.subContainerMainPicture} >
                 {
                   profileUrl &&
                   (

@@ -28,6 +28,11 @@ const HomeStyles = StyleSheet.create({
         width: '20%',
         alignItems: 'flex-end',
     },
+    containerSvgImage: {
+        width: '20%',
+        alignItems: 'flex-end',
+        overflow: 'hidden',
+    },
     containerInfo: {
         width: '50%',
     },
@@ -72,9 +77,7 @@ const HomeStyles = StyleSheet.create({
         width: '100%',
         marginTop: spacing.sm,
     },
-    imageTitleGameNew: {
-        
-    },
+    imageTitleGameNew: {},
     columnLeft: {
         width: '85%',
     },

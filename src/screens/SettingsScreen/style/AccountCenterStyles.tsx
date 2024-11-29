@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { colors, fontSizes, spacing, fonts } from '../../../../global-class'; // Importa las variables globales
+import { colors, fontSizes, spacing } from '../../../../global-class'; // Importa las variables globales
 
 const AccountCenterStyles = StyleSheet.create({
   container: {

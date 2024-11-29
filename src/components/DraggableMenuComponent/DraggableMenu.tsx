@@ -93,7 +93,7 @@ const DraggableMenu: React.FC<DraggableMenuProps> = ({ children }) => {
 
   useEffect(() => {
     if (!scrollEnabled) {
-      scrollViewRef.current?.scrollTo({ y: 0, animated: true })
+      scrollViewRef.current?.scrollTo({ y: 0, animated: true });
     }
   }, [scrollEnabled]);
 
@@ -107,7 +107,7 @@ const DraggableMenu: React.FC<DraggableMenuProps> = ({ children }) => {
     >
       <MountainGripSVG />
       <ScrollView
-        style={{ width: '90%', height: '100%' }}
+        style={styles.scrollViewStyle}
         scrollEnabled={scrollEnabled} // Controla si el scroll está habilitado
         nestedScrollEnabled={true}
         ref={scrollViewRef}
@@ -121,6 +121,10 @@ const DraggableMenu: React.FC<DraggableMenuProps> = ({ children }) => {
 };
 
 const styles = StyleSheet.create({
+  scrollViewStyle: {
+    width: '90%',
+    height: '100%',
+  },
   container: {
     alignItems: 'center',
     justifyContent: 'center',

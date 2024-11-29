@@ -16,6 +16,10 @@ import NotchBackground from './NotchBackground';
 
 const Tab = createBottomTabNavigator();
 
+const TabBarBackground = () => {
+  return <NotchBackground />;
+};
+
 const TabNavigation = () => {
   const { uid, displayName } = useAuth();
 
@@ -50,7 +54,7 @@ const TabNavigation = () => {
         tabBarStyle: styles.tabBar,
         tabBarShowLabel: false,
         headerShown: false,
-        tabBarBackground: () => <NotchBackground />,
+        tabBarBackground: TabBarBackground,
       })}
     >
       <Tab.Screen

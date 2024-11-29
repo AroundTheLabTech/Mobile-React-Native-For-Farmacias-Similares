@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet, Image, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, Image, TouchableOpacity, TextInput } from 'react-native';
 import loginStyles from './style/registerStyle'; // Importamos los estilos de login
 import { ScrollView } from 'react-native-gesture-handler';
-import { RootStackParamList } from '../../NavigationTypes'; 
+import { RootStackParamList } from '../../NavigationTypes';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 
@@ -14,39 +14,39 @@ type RegisterScreenNavigationProp = StackNavigationProp<
 >;
 
 type RegisterScreenProps = {
-    navigation: RegisterScreenNavigationProp;
-  };
+  navigation: RegisterScreenNavigationProp;
+};
 
-  const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
-    return (
+const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
+  return (
     <ScrollView>
-         <View style={loginStyles.headerContainer}>
-              <Image
-                source={require('../../../img/medallas/medal1.png')}
-                style={loginStyles.headerMedal}
-            />
+      <View style={loginStyles.headerContainer}>
+        <Image
+          source={require('../../../img/medallas/medal1.png')}
+          style={loginStyles.headerMedal}
+        />
 
-            <Image
-                source={require('../../../img/medallas/medal1.png')}
-                style={loginStyles.headerMedal}
-            />
-        </View>
-        <View style={loginStyles.containerLogin}>
-  
+        <Image
+          source={require('../../../img/medallas/medal1.png')}
+          style={loginStyles.headerMedal}
+        />
+      </View>
+      <View style={loginStyles.containerLogin}>
+
         <View style={loginStyles.containerTitle}>
           {/* Title */}
           <Text style={loginStyles.titleLogin}>
-            ¡Registro! 
-          </Text>  
+            ¡Registro!
+          </Text>
           {/* Container Forms */}
-          <View 
-          style={loginStyles.containerForms}>
+          <View
+            style={loginStyles.containerForms}>
 
             {/* Correo Electronico */}
-            <View style ={loginStyles.containerPlaceHolder}
+            <View style={loginStyles.containerPlaceHolder}
             >
               <Text
-              style ={loginStyles.placeHolder}
+                style={loginStyles.placeHolder}
               >
                 Correo Electrónico</Text>
             </View>
@@ -59,49 +59,49 @@ type RegisterScreenProps = {
             />
 
 
-             {/* Nombre */}
-            <View style ={loginStyles.containerPlaceHolder}
+            {/* Nombre */}
+            <View style={loginStyles.containerPlaceHolder}
             >
               <Text
-              style ={loginStyles.placeHolder}
+                style={loginStyles.placeHolder}
               >
                 Nombre</Text>
             </View>
 
-       
-             <TextInput
-              style={loginStyles.input}
-              placeholder="Correo electrónico"
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
 
-            
-            {/* Contraseña */}
-            <View style ={loginStyles.containerPlaceHolder}
-            >
-              <Text
-              style ={loginStyles.placeHolder}
-              >
-                Contraseña</Text>
-            </View>
-  
             <TextInput
               style={loginStyles.input}
               placeholder="Correo electrónico"
               keyboardType="email-address"
               autoCapitalize="none"
             />
-               
-            {/* Ubicación */}
-            <View style ={loginStyles.containerPlaceHolder}
+
+
+            {/* Contraseña */}
+            <View style={loginStyles.containerPlaceHolder}
             >
               <Text
-              style ={loginStyles.placeHolder}
+                style={loginStyles.placeHolder}
+              >
+                Contraseña</Text>
+            </View>
+
+            <TextInput
+              style={loginStyles.input}
+              placeholder="Correo electrónico"
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+
+            {/* Ubicación */}
+            <View style={loginStyles.containerPlaceHolder}
+            >
+              <Text
+                style={loginStyles.placeHolder}
               >
                 Ubicación</Text>
             </View>
-  
+
             <TextInput
               style={loginStyles.input}
               placeholder="Correo electrónico"
@@ -110,31 +110,31 @@ type RegisterScreenProps = {
             />
 
             {/* Edad */}
-            <View style ={loginStyles.containerPlaceHolder}
+            <View style={loginStyles.containerPlaceHolder}
             >
               <Text
-              style ={loginStyles.placeHolder}
+                style={loginStyles.placeHolder}
               >
                 Eda                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             d</Text>
             </View>
-  
+
             <TextInput
               style={loginStyles.input}
               placeholder="Correo electrónico"
               keyboardType="email-address"
               autoCapitalize="none"
             />
-          
-          
+
+
           </View>
 
 
           {/* Container Button */}
           <View style={loginStyles.containerButtons}>
-  
-               {/* Boton Login */}
+
+            {/* Boton Login */}
             <TouchableOpacity
-              style= {loginStyles.botonLogin}
+              style={loginStyles.botonLogin}
               onPress={() => navigation.navigate('Login')} // Asegúrate de que onPress esté dentro de TouchableOpacity
 
             >
@@ -142,43 +142,28 @@ type RegisterScreenProps = {
                 Login
               </Text>
             </TouchableOpacity>
-  
+
             {/* Boton Register */}
-            <TouchableOpacity 
-                style={loginStyles.botonLogin}
-              >
-                <Text style={loginStyles.textoButtons}>
-                  Register
-                </Text>
-              </TouchableOpacity>
-  
-         
-  
+            <TouchableOpacity
+              style={loginStyles.botonLogin}
+            >
+              <Text style={loginStyles.textoButtons}>
+                Register
+              </Text>
+            </TouchableOpacity>
+
+
+
           </View>
-  
-        </View> 
-  
-        <View style={loginStyles.headerContainer}>
-         
-          
-        </View> 
-  
+
         </View>
-      
+
+        <View style={loginStyles.headerContainer} />
+
+      </View>
+
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#000',
-  },
-  text: {
-    fontSize: 24,
-  },
-});
 
 export default RegisterScreen;

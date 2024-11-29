@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { colors, fontSizes, spacing, fonts } from '../../../../global-class'; // Importa las variables globales
+import { colors, fontSizes, spacing } from '../../../../global-class'; // Importa las variables globales
 
 const LeaderBoardStyles = StyleSheet.create({
     containerScroll: {
@@ -40,7 +40,7 @@ const LeaderBoardStyles = StyleSheet.create({
         borderRadius: 10,
         fontSize: fontSizes.sm,
         fontWeight: '400',
-        color: colors.primary
+        color: colors.primary,
     },
     containerPosition: {
         backgroundColor: colors.background5,
@@ -77,6 +77,9 @@ const LeaderBoardStyles = StyleSheet.create({
         backgroundColor: colors.background7,
         padding: spacing.sm,
         height: '100%',
+    },
+    leaderBoardContainer: {
+        paddingBottom: 70,
     },
 });
 

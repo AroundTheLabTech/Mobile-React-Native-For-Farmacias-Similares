@@ -5,15 +5,17 @@ import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
 import HomeStyles from './style/HomeStyle';
 
 import { useAuth } from '../../AuthContext'; // Importa el hook useAuth
+import { useUser } from '../../services/UserContext';
 import CompetitionModal from '../../components/CompetitionComponent/CompetitionModal';
 import Loader from '@components/LoaderComponent/Loader';
 import Virus1 from '@img/personajes/virus-1.svg';
 import Game1 from '@img/games/portada/game-1.png';
-import { getScorePerGames, getUserLast3MonthsInfo } from '@services/backend';
-import { TUserLast3MonthInfo } from '../../types/user';
+import { getScorePerGames } from '@services/backend';
 import { getMaxScorePerMonth, groupSessionsByMonth } from '../../utils/helpers';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faGamepad } from '@fortawesome/free-solid-svg-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SvgUri } from 'react-native-svg';
 
 type Last3MonthHomeData = {
   label: string,
@@ -23,6 +25,8 @@ type Last3MonthHomeData = {
 const HomeScreen = ({ navigation }) => {
   // Obtener la variable del usuario
   const { uid, displayName } = useAuth();
+  const { profilePicture, setUpdateProfilePicture, last3MonthsScores, setUpdateLast3MonthsScores } = useUser();
+  // const [profilePicture, setProfilePicture] = useState<string>();
 
   const [gameInformation, setGameInformation] = useState(
     {
@@ -48,6 +52,16 @@ const HomeScreen = ({ navigation }) => {
     if (!gameInformation.score || gameInformation.score <= 0) {
       fetchData();
     }
+
+    async function getUpdateScore() {
+      const updateScore = await AsyncStorage.getItem('updateScore');
+      await AsyncStorage.setItem('updateScore', 'false');
+      return Boolean(updateScore);
+    }
+
+    if (getUpdateScore) {
+      fetchData();
+    }
   }, [gameInformation, uid]);
 
   useEffect(() => {
@@ -60,34 +74,52 @@ const HomeScreen = ({ navigation }) => {
   const [scoresLats3Months, setScoresLast3Months] = useState<Last3MonthHomeData[]>();
 
   useEffect(() => {
-    async function fetchData() {
-      const result: TUserLast3MonthInfo = await getUserLast3MonthsInfo(uid);
-      const resultGroupByMonth = groupSessionsByMonth(result.sessions);
-      const last3MonthsScores = getMaxScorePerMonth(resultGroupByMonth);
-      const keys = Object.keys(last3MonthsScores);
+    function fetchData() {
+      console.log("obteniendo data")
+      const resultGroupByMonth = groupSessionsByMonth(last3MonthsScores.sessions);
+      const lastThreeMonthsScores = getMaxScorePerMonth(resultGroupByMonth);
+      const keys = Object.keys(lastThreeMonthsScores);
 
-      console.log(last3MonthsScores, keys);
       const month1 = keys[keys.length - 1];
       const month2 = keys[keys.length - 2];
       const month3 = keys[keys.length - 3];
       setScoresLast3Months([
         {
           label: month1,
-          value: last3MonthsScores[month1],
+          value: lastThreeMonthsScores[month1],
         },
         {
           label: month2,
-          value: last3MonthsScores[month2],
+          value: lastThreeMonthsScores[month2],
         },
         {
           label: month3,
-          value: last3MonthsScores[month3],
+          value: lastThreeMonthsScores[month3],
         },
       ]);
     }
 
+    if (!last3MonthsScores || !scoresLats3Months) {
+      setUpdateLast3MonthsScores(true);
+      fetchData();
+    } else {
+      setUpdateLast3MonthsScores(false);
+    }
+
+    //fetchData();
+  }, [last3MonthsScores, scoresLats3Months, setUpdateLast3MonthsScores, uid]);
+
+  useEffect(() => {
+    function fetchData() {
+      if (!profilePicture) {
+        setUpdateProfilePicture(true);
+      } else {
+        setUpdateProfilePicture(false);
+      }
+    }
+
     fetchData();
-  }, [uid]);
+  }, [profilePicture, setUpdateProfilePicture, uid]);
 
   if (!displayName || (scoresLats3Months && scoresLats3Months.length < 3)) {
     return <Loader visible={true} />;
@@ -104,12 +136,22 @@ const HomeScreen = ({ navigation }) => {
             <Text style={HomeStyles.textUsuario}>{displayName || 'Usuario'}</Text>
           </View>
           <View style={HomeStyles.containerImage}>
-            <Image
-              style={HomeStyles.PerfilImage}
-              resizeMode="contain"
-              source={require('../../../img/profile/profilePicture.png')}
-
-            />
+            {
+              profilePicture &&
+              (
+                profilePicture.includes('.png') ?
+                  <Image
+                    style={HomeStyles.PerfilImage}
+                    resizeMode="contain"
+                    source={{ uri: profilePicture }}
+                    width={70}
+                  />
+                  :
+                  <View style={HomeStyles.containerImage} >
+                    <SvgUri uri={profilePicture} width={70} height={70} />
+                  </View>
+              )
+            }
           </View>
         </View>
 

@@ -7,7 +7,7 @@ import { TGameCard } from '../../types/user';
 import { getGameCard } from '../../services/backend';
 import { useAuth } from '../../AuthContext';
 import { formarGameCardNumber } from '../../utils/helpers';
-
+import { useUser } from '@services/UserContext';
 
 const SettingOpctionCard = ({ option, navigation }) => {
   return (
@@ -35,6 +35,8 @@ const Settings = ({ navigation }) => {
   const [orientation, setOrientation] = useState('portrait');
   const [gameCard, setGameCard] = useState<TGameCard>();
 
+  const { profilePicture, setUpdateProfilePicture } = useUser();
+
   useEffect(() => {
     const updateOrientation = () => {
       const { width, height } = Dimensions.get('window');
@@ -61,6 +63,18 @@ const Settings = ({ navigation }) => {
 
     fetchData();
   }, [uid]);
+
+  useEffect(() => {
+    function fetchData() {
+      if (!profilePicture) {
+        setUpdateProfilePicture(true);
+      } else {
+        setUpdateProfilePicture(false);
+      }
+    }
+
+    fetchData();
+  }, [profilePicture, setUpdateProfilePicture, uid]);
 
   const settingOptionData = [
     {
@@ -99,7 +113,9 @@ const Settings = ({ navigation }) => {
           <View style={SettingsStyles.containerProfilePicture} >
             <Image
               style={SettingsStyles.profilePicture}
-              source={require('../../../img/profile/profilePicture.png')}
+              source={{uri: profilePicture}}
+              width={100}
+              height={100}
             />
           </View>
           <View style={SettingsStyles.containerAccountInformation} >
@@ -111,7 +127,7 @@ const Settings = ({ navigation }) => {
             <View style={SettingsStyles.accountInformationRigth} >
               <Image
                 style={SettingsStyles.simiAccountImage}
-                source={require('../../../img/profile/profilePicture.png')}
+                source={{uri: profilePicture}}
               />
               <Text style={SettingsStyles.userPoints} >
                 <Image source={require('../../../img/iconos/moneda.png')} /> 1,000

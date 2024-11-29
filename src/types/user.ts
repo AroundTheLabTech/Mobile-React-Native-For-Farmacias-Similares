@@ -1,12 +1,22 @@
 export type TUserLogin = {
   uid: string,
-  age: number,
-  user_name: string,
   email: string,
   gender: string,
-  laast_session: any,
-  score_total: number,
-  location: string,
+  age: number,
+  last_session: string,
+  ubication: string,
+  display_name: string,
+  id_token: string,
+  registered: string,
+  refresh_token: any,
+  expires_in: number,
+}
+
+export type TUserTokenValidate = {
+  message: string,
+  uid: string,
+  email: string,
+  valid: boolean,
 }
 
 export type TTokenManager = {
@@ -67,7 +77,9 @@ export type TUserInformation = {
   name: string,
   email: string,
   state: string,
-  age: number
+  age: number,
+  last_session: string,
+  gender: string,
 }
 
 export type TUserPicture = {
@@ -110,4 +122,9 @@ export type TTopTwenty = {
 
 export type TLeaderBoard = TTopTwenty & {
   position: number
+}
+
+export type TUserBadges = {
+  badges: string[]
+  scoring_streak: number
 }

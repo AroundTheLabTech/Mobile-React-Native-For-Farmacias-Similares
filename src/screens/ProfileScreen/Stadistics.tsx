@@ -8,7 +8,7 @@ import StadiscticsStyle from './style/StadiscticsStyle';
 import RingChart from '../../components/RingChartComponent/RingChart';
 
 import { calculatePercentage, getMaxScore, getMaxScorePerMonth, getMonthWithHighestScore, groupSessionsByMonth } from '../../utils/helpers';
-// import OptionSelect from '../../components/OptionSelectComponent/OptionSelect';
+
 
 import MedalIcon from '../../../img/iconos/medal.svg';
 import StadisticsIcon from '../../../img/iconos/stadistics.svg';
@@ -145,7 +145,7 @@ const StadisticsScreen: React.FC = () => {
     };
   }, [orientation, screenWidth]);
 
-  if (!bestGame || (!last3MonthsInfo && last3MonthsInfo.length < 3)) {
+  if (!bestGame || (!last3MonthsInfo && last3MonthsInfo?.length < 3)) {
     return <Loader visible={true} />;
   }
 

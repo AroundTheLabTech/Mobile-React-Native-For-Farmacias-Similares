@@ -20,7 +20,6 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
 
   const handleLayout = (event) => {
     const { width, height } = event.nativeEvent.layout; // Obtener el ancho
-    console.log(width)
     setPodiumDimensions({ width, height });
   };
 
@@ -28,7 +27,6 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
 
   const handleLayoutInformation2 = (event) => {
     const { width, height } = event.nativeEvent.layout; // Obtener el ancho
-    console.log(width)
     setPodium2DimensionsInformation({ width, height });
   };
 

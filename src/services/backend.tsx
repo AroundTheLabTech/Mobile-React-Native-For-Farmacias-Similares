@@ -1,6 +1,6 @@
 import { Alert } from 'react-native';
 import { BACKEND_BASE_URL } from '@env';
-import { TUserCurrentMonthSession, TUserLast3MonthInfo, TUserPoints, TUserInformation, TUserPicture, TBackResponse, TGameCard, TUserLogin, TUserProfilePictures, TScorePerGame, TTopTwenty } from 'src/types/user';
+import { TUserCurrentMonthSession, TUserLast3MonthInfo, TUserPoints, TUserInformation, TUserPicture, TBackResponse, TGameCard, TUserLogin, TUserProfilePictures, TScorePerGame, TTopTwenty, TUserTokenValidate, TUserBadges } from 'src/types/user';
 
 export const loginUserByEmailAndPassword = async (email: string, password: string): Promise<TUserLogin | null> => {
   try {
@@ -9,7 +9,7 @@ export const loginUserByEmailAndPassword = async (email: string, password: strin
     }
 
     if (!password) {
-      throw new Error('Email inválido');
+      throw new Error('Password inválido');
     }
 
     const requestOptions = {
@@ -34,6 +34,63 @@ export const loginUserByEmailAndPassword = async (email: string, password: strin
     return result as TUserLogin;
   } catch (error) {
     Alert.alert('Error', 'Fallo la autenticacion del usuario');
+    return null;
+  }
+};
+
+export const validateToken = async (idToken: string): Promise<TUserTokenValidate | null> => {
+  try {
+    if (!idToken) {
+      throw new Error('Email inválido');
+    }
+
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/users/validate_token?id_token=${idToken}`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result as TUserTokenValidate;
+  } catch (error) {
+    Alert.alert('Error', 'Fallo la autenticacion del usuario');
+    return null;
+  }
+};
+
+export const postLogout = async (idToken: string): Promise<Record<string, string> | null> => {
+  try {
+    if (!idToken) {
+      throw new Error('Email inválido');
+    }
+
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/users/logout?id_token${idToken}`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
     return null;
   }
 };
@@ -353,6 +410,28 @@ export const getTopTwenty = async (): Promise<TTopTwenty[] | null> => {
 
     const result = await response.json();
     return result as TTopTwenty[];
+  } catch (error) {
+    return null;
+  }
+};
+
+export const getUserBadges = async (uid: string): Promise<TUserBadges | null> => {
+  try {
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/users/user_badges/${uid}`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result as TUserBadges;
   } catch (error) {
     return null;
   }

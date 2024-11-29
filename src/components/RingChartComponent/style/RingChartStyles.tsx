@@ -1,5 +1,4 @@
 import { StyleSheet } from 'react-native';
-import { colors, fontSizes, spacing, fonts } from '../../../../global-class'; // Importa las variables globales
 
 const RingChartStyle = StyleSheet.create({
   container: {
@@ -7,6 +6,8 @@ const RingChartStyle = StyleSheet.create({
     alignItems: 'center',
     alignContent: 'center',
     position: 'relative',
+    width: '100%',
+    height: '100%',
   },
   ring: {
     borderRadius: 75, // Cambia esto según tu tamaño
@@ -20,6 +21,7 @@ const RingChartStyle = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
+    height: '100%',
   },
 });
 

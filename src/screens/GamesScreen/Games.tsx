@@ -26,14 +26,6 @@ const Games = ({ navigation, route }) => {
     }
   }, [params]);
 
-  console.log(route);
-
-  // const { redirectToGame, gameInformation } = route.params;
-
-  //if (redirectToGame) {
-  //  navigation.navigate('GameDetails', gameInformation);
-  //}
-
   useEffect(() => {
     async function fetchData() {
       const response = await getScorePerGames(uid);
@@ -84,7 +76,7 @@ const Games = ({ navigation, route }) => {
   return (
     <ScrollView style={GamesStyles.container} contentContainerStyle={GamesStyles.containerMax} >
       <TouchableOpacity style={GamesStyles.containerGoBack} onPress={() => navigation.goBack()} >
-        <FontAwesomeIcon icon={faArrowLeft} color='white' />
+        <FontAwesomeIcon icon={faArrowLeft} color="white" />
       </TouchableOpacity>
       <View style={GamesStyles.containerGames} >
         {listGames && listGames.map((game, index) => {

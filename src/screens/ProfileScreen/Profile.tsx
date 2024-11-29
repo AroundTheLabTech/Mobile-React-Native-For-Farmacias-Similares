@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import ProfileStyles from './style/ProfileStyle';
 
@@ -19,14 +19,17 @@ import Spacer from '../../components/SpacerComponent/Spacer';
 import { getUserPoints } from '../../services/backend';
 import { TUserPoints } from 'src/types/user';
 import Loader from '@components/LoaderComponent/Loader';
+import { useUser } from '@services/UserContext';
 
 
-const ProfileScreen: React.FC = ({ navigation }) => {
+const ProfileScreen = ({ navigation }) => {
 
   const { displayName, uid } = useAuth();
 
   const [selectedTab, setSelectedTab] = useState('badges');
   const [userPoints, setUserPoints] = useState<TUserPoints>();
+
+  const { profilePicture, setUpdateProfilePicture } = useUser();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,6 +50,18 @@ const ProfileScreen: React.FC = ({ navigation }) => {
         return <_404Page />;
     }
   };
+
+  useEffect(() => {
+    function fetchData() {
+      if (!profilePicture) {
+        setUpdateProfilePicture(true);
+      } else {
+        setUpdateProfilePicture(false);
+      }
+    }
+
+    fetchData();
+  }, [profilePicture, setUpdateProfilePicture, uid]);
 
   if (!displayName || !userPoints) {
     return <Loader visible={true} />;
@@ -70,7 +85,7 @@ const ProfileScreen: React.FC = ({ navigation }) => {
         <Image
           resizeMode="contain"
           style={ProfileStyles.imageProfile}
-          source={require('../../../img/profile/profilePicture.png')}
+          source={{ uri: profilePicture }}
         />
       </View>
 

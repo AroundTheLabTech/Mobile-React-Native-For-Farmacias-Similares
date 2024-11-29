@@ -72,19 +72,11 @@ def enableProguardInReleaseBuilds = false
  */
 def jscFlavor = 'org.webkit:android-jsc:+'
 
-import java.util.Properties
-def loadPropertiesFile() {
-    def propertiesFile = rootProject.file("../.env")
-    def properties = new Properties()
-    if (propertiesFile.exists()) {
-        properties.load(new FileInputStream(propertiesFile))
-    } else {
-        throw new GradleException("Properties file '${propertiesFile}' not found")
-    }
-    return properties
+def keystorePropertiesFile = rootProject.file("local.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
-
-def env = loadPropertiesFile()
 
 android {
     ndkVersion rootProject.ext.ndkVersion
@@ -116,13 +108,10 @@ android {
             keyPassword 'android'
         }
         release {
-            if (!env['MYAPP_UPLOAD_STORE_FILE'] || !env['UPLOAD_STORE_PASSWORD'] || !env['MYAPP_UPLOAD_KEY_ALIAS'] || !env['UPLOAD_KEY_PASSWORD']) {
-                throw new GradleException("One or more environment variables are missing.")
-            }
-            storeFile file(env['MYAPP_UPLOAD_STORE_FILE'])
-            storePassword env['UPLOAD_STORE_PASSWORD']
-            keyAlias env['MYAPP_UPLOAD_KEY_ALIAS']
-            keyPassword env['UPLOAD_KEY_PASSWORD']
+            storeFile file(keystoreProperties['MYAPP_UPLOAD_STORE_FILE'])
+            storePassword keystoreProperties['MYAPP_UPLOAD_STORE_PASSWORD']
+            keyAlias keystoreProperties['MYAPP_UPLOAD_KEY_ALIAS']
+            keyPassword keystoreProperties['MYAPP_UPLOAD_KEY_PASSWORD']
         }
     }
     buildTypes {
@@ -159,7 +148,6 @@ dependencies {
     }
 
     implementation(project(path: ":react-native-iap", configuration: "default"))
-    implementation(project(path: ":react-native-reanimated", configuration: "default"))
 }
 
 // Importa el script de fuentes de react-native-vector-icons 

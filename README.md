@@ -417,13 +417,13 @@ keytool -genkeypair -v -keystore simijuegos-upload.keystore -alias simijuegos-mo
 Recuerda guardar la contraseña de la clave y el alias, ya que los necesitarás más adelante.
 
 ### 2. **Configurar Gradle**
-Coloca el archivo `simijuegos-upload.keystore` en la carpeta `android/app` y actualiza el archivo `android/gradle.properties` con las siguientes variables:
+Coloca el archivo `simijuegos-upload.keystore` en la carpeta `android/app` y actualiza el archivo `android/gradle.properties` y el archivo `android/local.properties` (si no existe debes crearlo) con las siguientes variables:
 
 ```properties
 MYAPP_UPLOAD_STORE_FILE=simijuegos-upload.keystore
 MYAPP_UPLOAD_KEY_ALIAS=simijuegos-mobile-app
-MYAPP_UPLOAD_STORE_PASSWORD=${UPLOAD_STORE_PASSWORD}
-MYAPP_UPLOAD_KEY_PASSWORD=${UPLOAD_KEY_PASSWORD}
+UPLOAD_STORE_PASSWORD=UPLOAD_STORE_PASSWORD
+UPLOAD_KEY_PASSWORD=UPLOAD_KEY_PASSWORD
 ```
 
 ### 3. **Actualizar `build.gradle`**
@@ -525,7 +525,6 @@ dependencies {
     }
 
     implementation(project(path: ":react-native-iap", configuration: "default"))
-    implementation(project(path: ":react-native-reanimated", configuration: "default"))
 }
 
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"

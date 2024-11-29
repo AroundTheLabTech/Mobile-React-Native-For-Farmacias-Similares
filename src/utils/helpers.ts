@@ -142,4 +142,4 @@ export function splitTopTwenty(topTwenty: TTopTwenty[]): { topThree: TLeaderBoar
 
 export function calculatePercent(valor: number, min: number, max: number): number {
   return ((valor - min) / (max - min)) * 100;
-};
+}

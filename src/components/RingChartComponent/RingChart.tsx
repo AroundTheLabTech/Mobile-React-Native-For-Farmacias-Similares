@@ -10,8 +10,6 @@ interface RingChartProps {
   children: React.ReactElement;
 }
 
-
-
 const RingChart: React.FC<RingChartProps> = ({
   progress = 50,
   color = '#3498db',
@@ -22,13 +20,12 @@ const RingChart: React.FC<RingChartProps> = ({
 
   const handleLayout = (event) => {
     const { width, height } = event.nativeEvent.layout; // Obtener el ancho
-    console.log(width, height);
     setRinghDimensions({ width, height });
   };
 
 
   return (
-    <View style={[RingChartStyle.container, { width: '100%', height: '100%' }]} onLayout={handleLayout}>
+    <View style={RingChartStyle.container} onLayout={handleLayout}>
       <Svg width={ringhDimensions.width} height={ringhDimensions.height}>
         {/* Fondo del anillo */}
         <Circle
@@ -58,7 +55,7 @@ const RingChart: React.FC<RingChartProps> = ({
           origin={`${ringhDimensions.width / 2}, ${ringhDimensions.width / 2}`}
         />
       </Svg>
-      <View style={[RingChartStyle.center, { position: 'absolute', width: '100%', height: '100%' }]}>
+      <View style={RingChartStyle.center}>
         {children}
       </View>
     </View>

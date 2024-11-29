@@ -43,6 +43,21 @@ const LeaderBoardCardStyles = StyleSheet.create({
         fontSize: fontSizes.xs,
         color: colors.secondary,
     },
+    profilePicture : {
+        width: 40,
+        height: 40,
+        borderRadius: 40,
+        top: 10,
+        borderWidth: 1,
+        borderColor: 'black',
+    },
+    flagPicture: {
+        width: 20,
+        height: 20,
+        borderRadius: 20,
+        top: -7,
+        right: -22,
+    },
 });
 
 export default LeaderBoardCardStyles;

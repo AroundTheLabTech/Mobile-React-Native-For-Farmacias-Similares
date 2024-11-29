@@ -17,13 +17,13 @@ const LeaderBoardCard: React.FC<LeaderBoardCardProps> = ({ player }) => {
         <View style={LeaderBoardCardStyles.containerProfileImages} >
           <Image
             source={{ uri: player.profile_mini_pictures_url }}
-            style={{ width: 40, height: 40, borderRadius: 40, top: 10, borderWidth: 1, borderColor: 'black' }}
+            style={LeaderBoardCardStyles.profilePicture}
           />
           <Image
             src={player.flag_url}
             width={20}
             height={20}
-            style={{ width: 20, height: 20, borderRadius: 20, top: -7, right: -22 }}
+            style={LeaderBoardCardStyles.flagPicture}
           />
         </View>
         <View style={LeaderBoardCardStyles.containerSubInformation} >

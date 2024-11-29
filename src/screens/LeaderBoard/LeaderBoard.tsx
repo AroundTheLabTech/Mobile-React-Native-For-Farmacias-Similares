@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Text, Dimensions } from 'react-native';
 import LeaderBoardStyles from './style/LeaderBoardStyles';
-// import PodiumChart from '../../components/PodiumChartComponent/PodiumChart';
-import LeaderBoardCard from '../../components/LeaderBoardCardComponents/LeaderBoardCard';
-import DraggableMenu from '../../components/DraggableMenuComponent/DraggableMenu';
-import PodiumSvg from '../../components/PodiumChartComponent/PodiumSvg';
+import LeaderBoardCard from '@components/LeaderBoardCardComponents/LeaderBoardCard';
+import DraggableMenu from '@components/DraggableMenuComponent/DraggableMenu';
+import PodiumSvg from '@components/PodiumChartComponent/PodiumSvg';
 import { getTopTwenty } from '@services/backend';
 import { TLeaderBoard } from 'src/types/user';
 import { calculatePercent, splitTopTwenty } from '../../utils/helpers';
@@ -116,7 +115,7 @@ const LeaderBoard: React.FC = () => {
             ) :
             (
               <DraggableMenu>
-                <View style={{ paddingBottom: 70 }} >
+                <View style={LeaderBoardStyles.leaderBoardContainer} >
                   {topTwenty && topTwenty.length > 15 && topTwenty.map((player: TLeaderBoard, index) => (
                     <LeaderBoardCard key={index} player={player} />
                   ))}
