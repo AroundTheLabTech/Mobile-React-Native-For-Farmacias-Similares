@@ -4,8 +4,8 @@ import AccountCenterStyles from './style/AccountCenterStyles';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { TUserInformation } from '../../types/user';
-import { getUserInformation } from '../../services/backend';
 import { useAuth } from '../../AuthContext';
+import { useUser } from '@services/UserContext';
 
 type TUpdateInput = {
   key: string
@@ -15,8 +15,8 @@ type TUpdateInput = {
 
 const AccountCenter = ({ navigation }) => {
 
+  const {userInformation, setUpdateUserInformation} = useUser();
   const [orientation, setOrientation] = useState('portrait');
-  const [userInformation, setUserInformation] = useState<TUserInformation>();
 
   const [name, setName] = useState<TUpdateInput>({
     key: 'name',
@@ -52,13 +52,12 @@ const AccountCenter = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    async function fetchData() {
-      const response = await getUserInformation(uid);
-      setUserInformation(response);
+    if(!userInformation) {
+      setUpdateUserInformation(true);
+    } else {
+      setUpdateUserInformation(false);
     }
-
-    fetchData();
-  }, [uid]);
+  }, [setUpdateUserInformation, uid, userInformation]);
 
   function handleUpdate() {
 

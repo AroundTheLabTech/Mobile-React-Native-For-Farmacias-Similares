@@ -5,11 +5,12 @@ import { WebView } from 'react-native-webview';
 import { colors, fonts, fontSizes, spacing } from '../../../global-class';
 import { updateScoreGame } from '@services/backend';
 import { useAuth } from '../../AuthContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useUser } from '@services/UserContext';
 
 const GameIframe = ({ navigation, route }) => {
 
   const { uid } = useAuth();
+  const { setUpdateScorePerGame, setUpdateLast3MonthsScores } = useUser();
 
   const { gameUrl, id, score, title } = route.params;
 
@@ -27,8 +28,6 @@ const GameIframe = ({ navigation, route }) => {
       Orientation.unlockAllOrientations();
     };
   }, []);
-
-  console.log(id, score);
 
   const handleMessage = (event) => {
     console.log('Mensaje recibido del iframe:', event.nativeEvent.data);
@@ -73,14 +72,14 @@ const GameIframe = ({ navigation, route }) => {
 
   function handleLayout(event) {
     const { width, height } = event.nativeEvent.layout;
-    console.log(width, height);
     setDimensions({ width, height });
   }
 
   async function handleUpdateScore() {
     const response = await updateScoreGame(uid, id, currentScore);
 
-    await AsyncStorage.setItem('updateScore', 'true');
+    setUpdateScorePerGame(true);
+    setUpdateLast3MonthsScores(true);
 
     if (response && response.message) {
       Alert.prompt('Succes', response.message);

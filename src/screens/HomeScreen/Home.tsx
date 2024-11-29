@@ -10,11 +10,9 @@ import CompetitionModal from '../../components/CompetitionComponent/CompetitionM
 import Loader from '@components/LoaderComponent/Loader';
 import Virus1 from '@img/personajes/virus-1.svg';
 import Game1 from '@img/games/portada/game-1.png';
-import { getScorePerGames } from '@services/backend';
 import { getMaxScorePerMonth, groupSessionsByMonth } from '../../utils/helpers';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faGamepad } from '@fortawesome/free-solid-svg-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SvgUri } from 'react-native-svg';
 
 type Last3MonthHomeData = {
@@ -25,7 +23,7 @@ type Last3MonthHomeData = {
 const HomeScreen = ({ navigation }) => {
   // Obtener la variable del usuario
   const { uid, displayName } = useAuth();
-  const { profilePicture, setUpdateProfilePicture, last3MonthsScores, setUpdateLast3MonthsScores } = useUser();
+  const { profilePicture, setUpdateProfilePicture, last3MonthsScores, setUpdateLast3MonthsScores, scorePerGame, setUpdateScorePerGame } = useUser();
   // const [profilePicture, setProfilePicture] = useState<string>();
 
   const [gameInformation, setGameInformation] = useState(
@@ -33,6 +31,7 @@ const HomeScreen = ({ navigation }) => {
       'imageUrl': Game1,
       'id': 'juego1',
       'score': 0,
+      'score_given_per_game': 20,
       'title': 'Dr. Simi Invide',
       'description': '¡No dejes caer ninguna Rosca de Reyes! Corta todos los objetos y evita encender la mecha . Acumula puntos por cada Rosca de Reyes que logres cortar.',
       'gameUrl': 'https://simijuegos-game2.web.app/',
@@ -41,9 +40,7 @@ const HomeScreen = ({ navigation }) => {
 
   useEffect(() => {
     async function fetchData() {
-      const response = await getScorePerGames(uid);
-
-      const score = response.score_per_game[gameInformation.id];
+      const score = scorePerGame.score_per_game[gameInformation.id];
       gameInformation.score = score;
 
       setGameInformation(gameInformation);
@@ -53,16 +50,16 @@ const HomeScreen = ({ navigation }) => {
       fetchData();
     }
 
-    async function getUpdateScore() {
-      const updateScore = await AsyncStorage.getItem('updateScore');
-      await AsyncStorage.setItem('updateScore', 'false');
-      return Boolean(updateScore);
+    if (!scorePerGame) {
+      fetchData();
+      setUpdateScorePerGame(true);
+    } else {
+      setUpdateScorePerGame(false);
     }
 
-    if (getUpdateScore) {
-      fetchData();
-    }
-  }, [gameInformation, uid]);
+    fetchData();
+
+  }, [gameInformation, scorePerGame, setUpdateScorePerGame, uid]);
 
   useEffect(() => {
     if (uid) {
@@ -75,28 +72,29 @@ const HomeScreen = ({ navigation }) => {
 
   useEffect(() => {
     function fetchData() {
-      console.log("obteniendo data")
-      const resultGroupByMonth = groupSessionsByMonth(last3MonthsScores.sessions);
-      const lastThreeMonthsScores = getMaxScorePerMonth(resultGroupByMonth);
-      const keys = Object.keys(lastThreeMonthsScores);
+      if (last3MonthsScores && last3MonthsScores?.sessions) {
+        const resultGroupByMonth = groupSessionsByMonth(last3MonthsScores.sessions);
+        const lastThreeMonthsScores = getMaxScorePerMonth(resultGroupByMonth);
+        const keys = Object.keys(lastThreeMonthsScores);
 
-      const month1 = keys[keys.length - 1];
-      const month2 = keys[keys.length - 2];
-      const month3 = keys[keys.length - 3];
-      setScoresLast3Months([
-        {
-          label: month1,
-          value: lastThreeMonthsScores[month1],
-        },
-        {
-          label: month2,
-          value: lastThreeMonthsScores[month2],
-        },
-        {
-          label: month3,
-          value: lastThreeMonthsScores[month3],
-        },
-      ]);
+        const month1 = keys[keys.length - 1];
+        const month2 = keys[keys.length - 2];
+        const month3 = keys[keys.length - 3];
+        setScoresLast3Months([
+          {
+            label: month1,
+            value: lastThreeMonthsScores[month1],
+          },
+          {
+            label: month2,
+            value: lastThreeMonthsScores[month2],
+          },
+          {
+            label: month3,
+            value: lastThreeMonthsScores[month3],
+          },
+        ]);
+      }
     }
 
     if (!last3MonthsScores || !scoresLats3Months) {

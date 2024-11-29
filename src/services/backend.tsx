@@ -268,8 +268,6 @@ export const getUserLast3MonthsInfo = async (uid: string): Promise<TUserLast3Mon
 
     const response = await fetch(`${BACKEND_BASE_URL}/scores/last_3_months_info/${uid}`, requestOptions);
 
-    console.log(response);
-
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
     }

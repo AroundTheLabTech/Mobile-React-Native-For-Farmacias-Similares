@@ -16,8 +16,6 @@ import _404Page from '../404Screen/404';
 import Badges from './Badges';
 import EllipseComponent from '../../components/ElipseComponent/ElipseComponent';
 import Spacer from '../../components/SpacerComponent/Spacer';
-import { getUserPoints } from '../../services/backend';
-import { TUserPoints } from 'src/types/user';
 import Loader from '@components/LoaderComponent/Loader';
 import { useUser } from '@services/UserContext';
 
@@ -27,18 +25,16 @@ const ProfileScreen = ({ navigation }) => {
   const { displayName, uid } = useAuth();
 
   const [selectedTab, setSelectedTab] = useState('badges');
-  const [userPoints, setUserPoints] = useState<TUserPoints>();
 
-  const { profilePicture, setUpdateProfilePicture } = useUser();
+  const { profilePicture, setUpdateProfilePicture, userPoints, setUpdateUserPoints } = useUser();
 
   useEffect(() => {
-    const fetchData = async () => {
-      const result: TUserPoints = await getUserPoints(uid);
-      setUserPoints(result);
-    };
-
-    fetchData();
-  }, [uid]);
+    if(!userPoints) {
+      setUpdateUserPoints(true);
+    } else {
+      setUpdateUserPoints(false);
+    }
+  }, [setUpdateUserPoints, userPoints]);
 
   const renderContent = () => {
     switch (selectedTab) {

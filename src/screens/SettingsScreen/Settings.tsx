@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { TGameCard } from '../../types/user';
 import { getGameCard } from '../../services/backend';
 import { useAuth } from '../../AuthContext';
-import { formarGameCardNumber } from '../../utils/helpers';
+import { formarGameCardNumber, formatNumber } from '../../utils/helpers';
 import { useUser } from '@services/UserContext';
 
 const SettingOpctionCard = ({ option, navigation }) => {
@@ -35,7 +35,7 @@ const Settings = ({ navigation }) => {
   const [orientation, setOrientation] = useState('portrait');
   const [gameCard, setGameCard] = useState<TGameCard>();
 
-  const { profilePicture, setUpdateProfilePicture } = useUser();
+  const { profilePicture, setUpdateProfilePicture, userPoints, setUpdateUserPoints } = useUser();
 
   useEffect(() => {
     const updateOrientation = () => {
@@ -75,6 +75,14 @@ const Settings = ({ navigation }) => {
 
     fetchData();
   }, [profilePicture, setUpdateProfilePicture, uid]);
+
+  useEffect(() => {
+    if(!userPoints) {
+      setUpdateUserPoints(true);
+    } else {
+      setUpdateUserPoints(false);
+    }
+  }, [setUpdateUserPoints, userPoints]);
 
   const settingOptionData = [
     {
@@ -130,7 +138,7 @@ const Settings = ({ navigation }) => {
                 source={{uri: profilePicture}}
               />
               <Text style={SettingsStyles.userPoints} >
-                <Image source={require('../../../img/iconos/moneda.png')} /> 1,000
+                <Image source={require('../../../img/iconos/moneda.png')} /> {userPoints?.score_total ? formatNumber(userPoints.score_total) : formatNumber(1000)}
               </Text>
             </View>
           </View>
