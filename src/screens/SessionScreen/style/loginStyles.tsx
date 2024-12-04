@@ -98,8 +98,7 @@ const loginStyles = StyleSheet.create({
     },
     containerPlaceHolder: {
         width: '80%',
-    }
-
+    },
 });
 
 export default loginStyles;

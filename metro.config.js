@@ -1,8 +1,4 @@
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
-const {
-  wrapWithReanimatedMetroConfig,
-} = require('react-native-reanimated/metro-config');
-
 
 /**
  * Metro configuration
@@ -11,8 +7,10 @@ const {
  * @type {import('metro-config').MetroConfig}
  */
 
+// Obtén la configuración predeterminada de Metro
 const defaultConfig = getDefaultConfig(__dirname);
 
+// Configuración personalizada para el transformador de SVG
 const config = {
   transformer: {
     babelTransformerPath: require.resolve('react-native-svg-transformer'), // Agrega el transformador de SVG
@@ -23,4 +21,5 @@ const config = {
   },
 };
 
-module.exports = wrapWithReanimatedMetroConfig(mergeConfig(defaultConfig, config));
+// Exporta la configuración fusionada
+module.exports = mergeConfig(defaultConfig, config);

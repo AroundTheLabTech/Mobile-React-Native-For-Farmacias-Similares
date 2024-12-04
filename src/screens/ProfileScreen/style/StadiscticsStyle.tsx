@@ -139,6 +139,7 @@ const StadiscticsStyle = StyleSheet.create({
     fontWeight: '700',
     padding: spacing.md,
     fontSize: fontSizes.xxl,
+    flex: 1,
   },
 
   // Estadisticas
@@ -181,11 +182,13 @@ const StadiscticsStyle = StyleSheet.create({
   rowStadistics: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    flex: 1,
   },
 
   ringChartContainer: {
     alignItems: 'center',
     height: 200,
+    flex: 2,
   },
   ringChartView: {
     alignItems: 'center',

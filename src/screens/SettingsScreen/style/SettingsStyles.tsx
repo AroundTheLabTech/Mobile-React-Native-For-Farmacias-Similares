@@ -32,6 +32,7 @@ const ProfileStyles = StyleSheet.create({
   },
   profilePicture: {
     top: '-150%',
+    width: 100,
   },
   containerAccountInformation: {
     backgroundColor: colors.background2,

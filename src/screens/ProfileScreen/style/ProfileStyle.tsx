@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 import { colors, fontSizes, spacing, fonts } from '../../../../global-class'; // Importa las variables globales
 
 const ProfileStyles = StyleSheet.create({
-  //Profile Image 
+  //Profile Image
   containerMax: {
     flex: 1,
     backgroundColor: colors.background2,
@@ -71,7 +71,7 @@ const ProfileStyles = StyleSheet.create({
   },
   titlePuntaje: {
     color: 'rgba(255, 255, 255, 0.4)', // Color blanco con 40% de opacidad
-    fontSize: fontSizes.md,
+    fontSize: fontSizes.sm,
   },
   puntajeNumber: {
     color: colors.primary,
