@@ -1,84 +1,80 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { auth } from './lib/firebase'; // Importa el archivo Firebase.js
-import { onAuthStateChanged } from 'firebase/auth';
-import { getUserData } from './services/UserDatabase'; // Importa el servicio que consulta Firestore
-import { getUserScores } from './services/ScoreCollectionDatabase'; // Importa el servicio que consulta los puntajes
+import React, { createContext, useContext, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { TUserLogin } from 'src/types/user';
 
 type AuthContextType = {
   uid: string | null;
-  age: string | null;
+  age: number | null;
   displayName: string | null;
   email: string | null;
   gender: string | null;
   lastSession: string | null;
   scoreTotal: number | null;
   ubication: string | null;
+  logout: () => void;
+  updateUserInformation: (user: TUserLogin) => void;
 };
 
-const AuthContext = createContext<AuthContextType>({
-  uid: null,
-  age: null,
-  displayName: null,
-  email: null,
-  gender: null,
-  lastSession: null,
-  scoreTotal: 0,
-  ubication: null,
-});
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = () => useContext(AuthContext);
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children })  => {
   const [uid, setUid] = useState<string | null>(null);
-  const [age, setAge] = useState<string | null>(null);
+  const [age, setAge] = useState<number | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [gender, setGender] = useState<string | null>(null);
   const [lastSession, setLastSession] = useState<string | null>(null);
-  const [scoreTotal, setScoreTotal] = useState<number | null>(0);
   const [ubication, setUbication] = useState<string | null>(null);
+  const [scoreTotal, setScoreTotal] = useState<number | null>(null); // Placeholder si planeas usarlo más tarde.
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setUid(user.uid); // Guardamos el uid del usuario autenticado
+  const updateUserInformation = (user: TUserLogin) => {
+    setUid(user.uid);
+    setAge(user.age);
+    setDisplayName(user.display_name);
+    setEmail(user.email);
+    setGender(user.gender);
+    setLastSession(user.last_session);
+    setUbication(user.ubication);
+    setScoreTotal(0); // Ejemplo, ajusta esto según tu lógica.
+  };
 
-        // Obtener los datos del usuario desde Firestore
-        const userData = await getUserData(user.uid);
-        if (userData) {
-          setAge(userData.age);
-          setDisplayName(userData.display_name);
-          setEmail(userData.email);
-          setGender(userData.gender);
-          setLastSession(userData.last_session);
-          setUbication(userData.ubication);
-        }
-
-        // Obtener los puntajes del usuario desde Firestore
-        const userScoreTotal = await getUserScores(user.uid);
-        setScoreTotal(userScoreTotal);
-
-        console.log("Datos y puntaje del usuario obtenidos y guardados en el contexto");
-      } else {
-        setUid(null); // El usuario no está autenticado
-        setAge(null);
-        setDisplayName(null);
-        setEmail(null);
-        setGender(null);
-        setLastSession(null);
-        setScoreTotal(0);
-        setUbication(null);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
+  const logout = async () => {
+    setUid(null);
+    setAge(null);
+    setDisplayName(null);
+    setEmail(null);
+    setGender(null);
+    setLastSession(null);
+    setUbication(null);
+    setScoreTotal(null);
+    await AsyncStorage.removeItem('userAccessToken');
+    await AsyncStorage.removeItem('tokenExpirationTime');
+  };
 
   return (
     <AuthContext.Provider
-      value={{ uid, age, displayName, email, gender, lastSession, scoreTotal, ubication }}
+      value={{
+        uid,
+        age,
+        displayName,
+        email,
+        gender,
+        lastSession,
+        ubication,
+        scoreTotal,
+        logout,
+        updateUserInformation,
+      }}
     >
       {children}
     </AuthContext.Provider>
   );
+};
+
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };

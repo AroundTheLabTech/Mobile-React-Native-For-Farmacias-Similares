@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { colors, fontSizes, spacing, fonts } from '../../../../global-class'; // Importa las variables globales
+import { colors, fontSizes, spacing } from '../../../../global-class'; // Importa las variables globales
 
 const LeaderBoardCardStyles = StyleSheet.create({
     container: {
@@ -21,6 +21,7 @@ const LeaderBoardCardStyles = StyleSheet.create({
         height: 20,
         width: 20,
         margin: spacing.sm,
+        color: colors.secondary,
     },
     containerInformation: {
         flex: 20,
@@ -40,6 +41,22 @@ const LeaderBoardCardStyles = StyleSheet.create({
     },
     points: {
         fontSize: fontSizes.xs,
+        color: colors.secondary,
+    },
+    profilePicture : {
+        width: 40,
+        height: 40,
+        borderRadius: 40,
+        top: 10,
+        borderWidth: 1,
+        borderColor: 'black',
+    },
+    flagPicture: {
+        width: 20,
+        height: 20,
+        borderRadius: 20,
+        top: -7,
+        right: -22,
     },
 });
 

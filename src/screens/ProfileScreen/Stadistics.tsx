@@ -8,7 +8,7 @@ import StadiscticsStyle from './style/StadiscticsStyle';
 import RingChart from '../../components/RingChartComponent/RingChart';
 
 import { calculatePercentage, getMaxScore, getMaxScorePerMonth, getMonthWithHighestScore, groupSessionsByMonth } from '../../utils/helpers';
-// import OptionSelect from '../../components/OptionSelectComponent/OptionSelect';
+
 
 import MedalIcon from '../../../img/iconos/medal.svg';
 import StadisticsIcon from '../../../img/iconos/stadistics.svg';
@@ -16,6 +16,7 @@ import BarChart from '../../components/BarChartComponent/BarChart';
 import { TUserCurrentMonthSession, TUserLast3MonthInfo } from 'src/types/user';
 import { getUserCurrentMonthSession, getUserLast3MonthsInfo } from '../../services/backend';
 import { useAuth } from '../../AuthContext';
+import Loader from '@components/LoaderComponent/Loader';
 
 
 interface IProgress {
@@ -142,7 +143,11 @@ const StadisticsScreen: React.FC = () => {
     return () => {
       subscription?.remove();
     };
-  }, []);
+  }, [orientation, screenWidth]);
+
+  if (!bestGame || (!last3MonthsInfo && last3MonthsInfo?.length < 3)) {
+    return <Loader visible={true} />;
+  }
 
   return (
     <View style={StadiscticsStyle.container}  >

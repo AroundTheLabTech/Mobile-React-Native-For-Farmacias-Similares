@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, Image } from 'react-native';
-import { getUserTrophies } from '../../services/StadisticsCollectionDatabase';
 import { trophyImages } from '../HomeScreen/imageMapping';
 
 // Styles
 import BadgesStyle from './style/BadgesStyle';
 
 import { useAuth } from '../../AuthContext'; // Importa el hook useAuth
+import { getUserBadges } from '@services/backend';
 
 
 const Badges = () => {
@@ -19,14 +19,14 @@ const Badges = () => {
 
   // Efecto para cargar los trofeos del usuario al montar el componente
   useEffect(() => {
-    const fetchTrophies = async () => {
+    const fetchData = async () => {
       if (uid) {
-        const userTrophies = await getUserTrophies(uid);
-        setTrophies(userTrophies); // Guardar los trofeos en el estado
+        const userBadges = await getUserBadges(uid);
+        setTrophies(userBadges.badges); // Guardar los trofeos en el estado
       }
     };
 
-    fetchTrophies();
+    fetchData();
   }, [uid]);
 
   const getRowsOfTrophies = () => {

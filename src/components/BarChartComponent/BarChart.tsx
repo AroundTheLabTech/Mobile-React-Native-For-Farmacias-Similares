@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {  } from 'react';
 import { Dimensions, View } from 'react-native';
 import { Svg, Rect, G, Text as SVGText, Line, Ellipse } from 'react-native-svg';
 import { colors, fontSizes, fontWeight } from '../../../global-class';
@@ -65,7 +65,7 @@ const BarChart: React.FC<GroupedBarChartProps> = ({ data, listOfColors }) => {
               {/* Línea horizontal interrumpida */}
               <Line
                 x1="25"
-                x2="100%"
+                x2={screenWidth}
                 y1={y}
                 y2={y}
                 stroke={colors.primaryDegrad50}

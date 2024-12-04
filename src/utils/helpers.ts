@@ -1,8 +1,8 @@
-import { TUserSession, TGroupedSessions, TMaxScores } from '../types/user';
+import { TUserSession, TGroupedSessions, TMaxScores, TTopTwenty, TLeaderBoard } from '../types/user';
 
 export function calculatePercentage(total: number, progress: number): number {
   if (total === 0 || progress === 0) {
-      return 0;
+    return 0;
   }
   return (progress / total) * 100;
 }
@@ -14,7 +14,7 @@ export function formatNumber(num: number | string, decimal: boolean = false) {
     return 'Número inválido';
   }
 
-  if(decimal) {
+  if (decimal) {
     return new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
@@ -96,4 +96,50 @@ export function getMonthWithHighestScore(maxScores: TMaxScores): string {
   }
 
   return highestMonth;
+}
+
+export function formarGameCardNumber(number: number): string {
+
+  if (!number) {
+    return null;
+  }
+
+  let numberString = number.toString();
+  let formattedString = '';
+
+  for (let i = numberString.length; i > 0; i -= 4) {
+    const start = Math.max(0, i - 4);
+    const segment = numberString.slice(start, i);
+    formattedString = segment + (formattedString ? '-' : '') + formattedString;
+  }
+
+  return formattedString;
+}
+
+export function splitTopTwenty(topTwenty: TTopTwenty[]): { topThree: TLeaderBoard[], topRest: TLeaderBoard[], all: TLeaderBoard[] } {
+  // Dividir el array en el top 3 y el resto (top 4-20)
+  const topThree = topTwenty.slice(0, 3).map((item, index) => ({
+    ...item,
+    position: index + 1,
+  }));
+
+  const topRest = topTwenty.slice(3).map((item, index) => ({
+    ...item,
+    position: index + 4,
+  }));
+
+  const all = topTwenty.map((item, index) => ({
+    ...item,
+    position: index + 1,
+  }));
+
+  return {
+    topThree,
+    topRest,
+    all,
+  };
+}
+
+export function calculatePercent(valor: number, min: number, max: number): number {
+  return ((valor - min) / (max - min)) * 100;
 }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, Image, TextInput, GestureResponderEvent } from 'react-native';
-import { colors, fontSizes, spacing } from '../../../global-class';
+import { colors, fonts, fontSizes, spacing } from '../../../global-class';
 
 const CompetitionModal = () => {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -59,7 +59,7 @@ const CompetitionModal = () => {
               <View style={styles.bellContainer} >
                 {/* Botón para cerrar el modal */}
                 <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
-                  <Text style={styles.buttonText}>Cerrar</Text>
+                  <Text style={styles.buttonText}>X</Text>
                 </TouchableOpacity>
                 <Image source={require('../../../img/iconos/bell.png')} />
               </View>
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: colors.secondary,
-    fontSize: fontSizes.sm,
+    fontSize: fontSizes.md,
     fontWeight: '700',
   },
   modalOverlay: {
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   closeButton: {
-    backgroundColor: '#FF6347',
+    backgroundColor: 'transparent',
     padding: 10,
     borderRadius: 10,
   },
@@ -142,11 +142,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   modalText: {
-    fontSize: fontSizes.md,
-    fontWeight: '800',
+    fontSize: fontSizes.xxl,
     color: colors.secondary,
     marginBottom: 20,
     textAlign: 'center',
+    fontFamily: fonts.rubik,
+    fontWeight: 'bold',
   },
   formContainer: {
     justifyContent: 'center',
@@ -154,10 +155,10 @@ const styles = StyleSheet.create({
   },
   label: {
     textAlign: 'left',
-    fontSize: fontSizes.sm,
-    fontWeight: '700',
+    fontSize: fontSizes.xxs,
     color: colors.secondary,
     marginBottom: spacing.sm,
+    fontFamily: fonts.press,
   },
   input: {
     borderWidth: 1,
@@ -195,6 +196,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     textAlignVertical: 'center',
     paddingHorizontal: spacing.sm,
+    fontFamily: fonts.inter,
+    fontWeight: 'bold',
+    color: colors.secondary,
   },
   competitionButton: {
     backgroundColor: colors.background1,
@@ -206,8 +210,11 @@ const styles = StyleSheet.create({
   competitionText: {
     color: colors.primary,
     fontSize: fontSizes.xs,
-    fontWeight: '700',
+    fontWeight: 'regular',
     textAlign: 'center',
+    fontFamily: fonts.press,
+    textAlignVertical: 'center',
+    paddingTop: spacing.sm,
   },
 });
 

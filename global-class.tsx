@@ -77,8 +77,8 @@ export const fontWeight = {
 
 // Font Families, incluyendo la fuente PressStart2P-Regular
 export const fonts = {
-  press: 'PressStart2P-Regular', // Fuente personalizada PressStart2P
   bold: 'Inter-Bold',
-  rubik: 'Rubik-VariableFont_wght',
-
+  inter: 'Inter-VariableFont_opsz,wght',
+  press: 'PressStart2P-Regular',
+  rubik: 'Rubik-Light',
 };
