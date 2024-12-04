@@ -10,8 +10,12 @@ import loginStyles from './style/loginStyles';
 
 //Services
 
-import { checkLoginStatus, loginWithEmailAndPassword, getCurrentUser, getUserInformation, refreshAccessToken } from '../../services/authService';
+// import { checkLoginStatus, getCurrentUser, getUserInformation, refreshAccessToken } from '../../services/authService';
+import { getUserInformation, loginUserByEmailAndPassword, validateToken } from '../../services/backend';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../../AuthContext';
+import { TUserLogin } from 'src/types/user';
+// import { checkLoginStatus, getUserInformation } from '@services/authService';
 
 
 type LoginScreenNavigationProp = StackNavigationProp<
@@ -28,24 +32,76 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const { updateUserInformation } = useAuth();
+
 
   const handleLogin = async () => {
     if (!email || !password) {
-      // setErrorMessage('Por favor, completa todos los campos.');
+      console.error('Por favor, completa todos los campos.');
       return;
     }
 
     try {
-      const { accessToken, expirationTime } = await loginWithEmailAndPassword(email, password);
-      await AsyncStorage.setItem('userAccessToken', accessToken);
-      await AsyncStorage.setItem('tokenExpirationTime', expirationTime.toString());
-      navigation.navigate('MainTab', { screen: 'Home' });
+      const user = await loginUserByEmailAndPassword(email, password); // TUserLogin
+      await AsyncStorage.setItem('userAccessToken', user.id_token);
+      await AsyncStorage.setItem('tokenExpirationTime', user.expires_in.toString());
+
+      await AsyncStorage.setItem('updateScore', 'false');
+      await AsyncStorage.setItem('updateProfilePicture', 'false');
+      await AsyncStorage.setItem('updateProfileInformation', 'false');
+
+      updateUserInformation(user);
+
+      if (user.id_token) {
+        navigation.navigate('MainTab', { screen: 'Home' });
+      }
     } catch (error) {
-      // setErrorMessage('Error de login: ' + error.message);
       console.error('Error de login:', error);
     }
   };
 
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const storedAccessToken = await AsyncStorage.getItem('userAccessToken');
+        const storedExpirationTime = await AsyncStorage.getItem('tokenExpirationTime');
+
+        if (!storedAccessToken || !storedExpirationTime) {
+          navigation.navigate('Login');
+          return;
+        }
+
+        const validateAccessToken = await validateToken(storedAccessToken);
+        const response = await getUserInformation(validateAccessToken.uid);
+
+        const user: TUserLogin = {
+          uid: validateAccessToken.uid,
+          email: response.email,
+          gender: response.gender,
+          age: response.age,
+          last_session: response.last_session,
+          ubication: response.state,
+          display_name: response.name,
+          id_token: storedAccessToken,
+          registered: 'true',
+          refresh_token: null,
+          expires_in: Number(storedExpirationTime),
+        };
+
+        updateUserInformation(user);
+        navigation.navigate('MainTab', { screen: 'Home' });
+      } catch (error) {
+        console.error('Error al validar la sesión:', error);
+        navigation.navigate('Login');
+      }
+    };
+
+    fetchData();
+  }, [navigation, updateUserInformation]);
+
+
+  /*
   useEffect(() => {
     async function sessionStatus() {
       const storedAccessToken = await AsyncStorage.getItem('userAccessToken');
@@ -73,6 +129,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
     sessionStatus();
   }, [navigation]);
+  */
 
   const [orientation, setOrientation] = useState('portrait');
 

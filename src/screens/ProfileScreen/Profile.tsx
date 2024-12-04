@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import ProfileStyles from './style/ProfileStyle';
 
@@ -9,7 +9,6 @@ import { faStar, faGlobe, faCube } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../../AuthContext'; // Importa el hook useAuth
 
 //Services
-import { useTranslation } from 'react-i18next';
 
 
 import StadisticsScreen from './Stadistics';
@@ -17,26 +16,25 @@ import _404Page from '../404Screen/404';
 import Badges from './Badges';
 import EllipseComponent from '../../components/ElipseComponent/ElipseComponent';
 import Spacer from '../../components/SpacerComponent/Spacer';
-import { getUserPoints } from '../../services/backend';
-import { TUserPoints } from 'src/types/user';
+import Loader from '@components/LoaderComponent/Loader';
+import { useUser } from '@services/UserContext';
 
 
-const ProfileScreen: React.FC = ({ navigation }) => {
+const ProfileScreen = ({ navigation }) => {
 
   const { displayName, uid } = useAuth();
 
-  const { t } = useTranslation();
   const [selectedTab, setSelectedTab] = useState('badges');
-  const [userPoints, setUserPoints] = useState<TUserPoints>();
+
+  const { profilePicture, setUpdateProfilePicture, userPoints, setUpdateUserPoints } = useUser();
 
   useEffect(() => {
-    const fetchData = async () => {
-      const result: TUserPoints = await getUserPoints(uid);
-      setUserPoints(result);
-    };
-
-    fetchData();
-  }, [uid]);
+    if(!userPoints) {
+      setUpdateUserPoints(true);
+    } else {
+      setUpdateUserPoints(false);
+    }
+  }, [setUpdateUserPoints, userPoints]);
 
   const renderContent = () => {
     switch (selectedTab) {
@@ -48,6 +46,22 @@ const ProfileScreen: React.FC = ({ navigation }) => {
         return <_404Page />;
     }
   };
+
+  useEffect(() => {
+    function fetchData() {
+      if (!profilePicture) {
+        setUpdateProfilePicture(true);
+      } else {
+        setUpdateProfilePicture(false);
+      }
+    }
+
+    fetchData();
+  }, [profilePicture, setUpdateProfilePicture, uid]);
+
+  if (!displayName || !userPoints) {
+    return <Loader visible={true} />;
+  }
 
   return (
     <ScrollView style={ProfileStyles.containerMax} contentContainerStyle={ProfileStyles.container}>
@@ -67,7 +81,7 @@ const ProfileScreen: React.FC = ({ navigation }) => {
         <Image
           resizeMode="contain"
           style={ProfileStyles.imageProfile}
-          source={require('../../../img/profile/victorGonzales.png')}
+          source={{ uri: profilePicture }}
         />
       </View>
 
@@ -85,7 +99,7 @@ const ProfileScreen: React.FC = ({ navigation }) => {
             </View>
             {/* Title */}
             <Text style={ProfileStyles.titlePuntaje}>
-              {t('points')}
+              Puntos
             </Text>
             {/* Puntos */}
             <Text style={ProfileStyles.puntajeNumber}>
@@ -136,12 +150,12 @@ const ProfileScreen: React.FC = ({ navigation }) => {
               {
                 selectedTab === 'badges' ?
                   (<>
-                    <Text style={ProfileStyles.TabNabTitle} >{t('badges')}</Text>
+                    <Text style={ProfileStyles.TabNabTitle} >Insignias</Text>
                     <Spacer />
                     <EllipseComponent width={10} height={10} color={'#6A5AE0'} />
                   </>) :
                   (<>
-                    <Text style={ProfileStyles.TabNabTitleSelected} >{t('badges')}</Text>
+                    <Text style={ProfileStyles.TabNabTitleSelected} >Insignias</Text>
                   </>)
               }
             </TouchableOpacity>
@@ -149,18 +163,18 @@ const ProfileScreen: React.FC = ({ navigation }) => {
               {
                 selectedTab === 'stadistics' ?
                   (<>
-                    <Text style={ProfileStyles.TabNabTitle} >{t('stadistics')}</Text>
+                    <Text style={ProfileStyles.TabNabTitle} >Estadisticas</Text>
                     <Spacer />
                     <EllipseComponent width={10} height={10} color={'#6A5AE0'} />
                   </>) :
                   (<>
-                    <Text style={ProfileStyles.TabNabTitleSelected} >{t('stadistics')}</Text>
+                    <Text style={ProfileStyles.TabNabTitleSelected} >Estadisticas</Text>
                   </>)
               }
             </TouchableOpacity>
             {/*
             <TouchableOpacity disabled onPress={() => setSelectedView('estadisticas')}>
-              <Text>{t('details')}</Text>
+              <Text>Detalles</Text>
             </TouchableOpacity>
             */}
           </View>

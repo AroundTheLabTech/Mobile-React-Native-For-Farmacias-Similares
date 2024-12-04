@@ -1,10 +1,104 @@
 import { Alert } from 'react-native';
 import { BACKEND_BASE_URL } from '@env';
-import { TUserCurrentMonthSession, TUserLast3MonthInfo, TUserPoints, TUserInformation, TUserPicture } from 'src/types/user';
+import { TUserCurrentMonthSession, TUserLast3MonthInfo, TUserPoints, TUserInformation, TUserPicture, TBackResponse, TGameCard, TUserLogin, TUserProfilePictures, TScorePerGame, TTopTwenty, TUserTokenValidate, TUserBadges } from 'src/types/user';
+
+
+export const loginUserByEmailAndPassword = async (email: string, password: string): Promise<TUserLogin | null> => {
+  try {
+    if (!email) {
+      throw new Error('Email inválido');
+    }
+
+    if (!password) {
+      throw new Error('Password inválido');
+    }
+
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: email,
+        password: password,
+      }),
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/users/login_with_email_and_password`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result as TUserLogin;
+  } catch (error) {
+    Alert.alert('Error', 'Fallo la autenticacion del usuario');
+    return null;
+  }
+};
+
+export const validateToken = async (idToken: string): Promise<TUserTokenValidate | null> => {
+  try {
+    if (!idToken) {
+      throw new Error('Email inválido');
+    }
+
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/users/validate_token?id_token=${idToken}`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result as TUserTokenValidate;
+  } catch (error) {
+    Alert.alert('Error', 'Fallo la autenticacion del usuario');
+    return null;
+  }
+};
+
+export const postLogout = async (idToken: string): Promise<Record<string, string> | null> => {
+  try {
+    if (!idToken) {
+      throw new Error('Email inválido');
+    }
+
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/users/logout?id_token${idToken}`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    return null;
+  }
+};
 
 export const getUserInformation = async (uid: string): Promise<TUserInformation | null> => {
   try {
-    if(!uid) {
+    if (!uid) {
       throw new Error('UID inválido');
     }
 
@@ -31,7 +125,7 @@ export const getUserInformation = async (uid: string): Promise<TUserInformation 
 
 export const getUserPicture = async (uid: string): Promise<TUserPicture | null> => {
   try {
-    if(!uid) {
+    if (!uid) {
       throw new Error('UID inválido');
     }
 
@@ -44,7 +138,7 @@ export const getUserPicture = async (uid: string): Promise<TUserPicture | null> 
 
     const response = await fetch(`${BACKEND_BASE_URL}/users/user_profile_picture/${uid}`, requestOptions);
 
-    if(!response.ok) {
+    if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
     }
 
@@ -53,6 +147,57 @@ export const getUserPicture = async (uid: string): Promise<TUserPicture | null> 
   } catch (err) {
     Alert.alert('Error', 'No se pudo encontrar la foto de perfil del usuario');
     return null;
+  }
+};
+
+export const getUserProfilePictures = async (uid: string): Promise<TUserProfilePictures | null> => {
+  try {
+    if (!uid) {
+      throw new Error('UID inválido');
+    }
+
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/users/profile_pictures/${uid}`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result as TUserProfilePictures;
+  } catch (err) {
+    Alert.alert('Error', 'No se pudo encontrar las fotos de perfil del usuario');
+    return null;
+  }
+};
+
+export const updateUserProfilePicture = async (uid: string, url: string): Promise<TBackResponse | null> => {
+  try {
+    const response = await fetch(`${BACKEND_BASE_URL}/users/update_profile_picture/${uid}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        profile_picture_url: url,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al actualizar la foto de perfil');
+    }
+
+    const data = await response.json();
+    return data as TBackResponse;
+  } catch (error) {
+    console.error('Error:', error);
   }
 };
 
@@ -131,6 +276,162 @@ export const getUserLast3MonthsInfo = async (uid: string): Promise<TUserLast3Mon
     const result = await response.json();
     return result as TUserLast3MonthInfo;
   } catch (error) {
-    Alert.alert('Error', 'No se pudo obtener el mes actual');
+    // Alert.alert('Error', 'No se pudo obtener el mes actual');
+    return null;
+  }
+};
+
+export const postReportProblem = async (uid: string, issue: string, description: string): Promise<TBackResponse | null> => {
+  try {
+    if (!uid) {
+      throw new Error('UID inválido');
+    }
+
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        issue: issue,
+        description: description,
+      }),
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/reports/problem_report/${uid}`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result as TBackResponse;
+  } catch (error) {
+    return error.message;
+  }
+};
+
+export const getGameCard = async (uid: string): Promise<TGameCard | null> => {
+  try {
+    if (!uid) {
+      throw new Error('UID inválido');
+    }
+
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/users/user_game_card/${uid}`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result as TGameCard;
+  } catch (error) {
+    return error.message;
+  }
+};
+
+export const getScorePerGames = async (uid: string): Promise<TScorePerGame | null> => {
+  try {
+    if (!uid) {
+      throw new Error('UID inválido');
+    }
+
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/scores/score_per_game/${uid}`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result as TScorePerGame;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const updateScoreGame = async (uid: string, game_id: string, score: number): Promise<TBackResponse | null> => {
+  try {
+    if (!uid) {
+      throw new Error('UID inválido');
+    }
+    const response = await fetch(`${BACKEND_BASE_URL}/scores/update_user_score_game/${uid}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        game_id: game_id,
+        score: score,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al actualizar la el score del juego de perfil');
+    }
+
+    const data = await response.json();
+    return data as TBackResponse;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const getTopTwenty = async (): Promise<TTopTwenty[] | null> => {
+  try {
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/scores/top_twenty`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result as TTopTwenty[];
+  } catch (error) {
+    return null;
+  }
+};
+
+export const getUserBadges = async (uid: string): Promise<TUserBadges | null> => {
+  try {
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/users/user_badges/${uid}`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result as TUserBadges;
+  } catch (error) {
+    return null;
   }
 };

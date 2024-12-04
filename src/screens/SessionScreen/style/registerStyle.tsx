@@ -87,14 +87,13 @@ const loginStyles = StyleSheet.create({
 
     placeHolder:{
         color: colors.primary,
-        textAlign: 'left',   
+        textAlign: 'left',
         fontFamily: fonts.press,
         fontSize: fontSizes.xs,
     },
     containerPlaceHolder:{
         width: '80%',
-    }
-
+    },
 });
 
 export default loginStyles;

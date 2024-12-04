@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { colors, fontSizes, spacing, fonts } from '../../../../global-class'; // Importa las variables globales
+import { colors, spacing } from '../../../../global-class'; // Importa las variables globales
 
 const GamesStyles = StyleSheet.create({
   container: {

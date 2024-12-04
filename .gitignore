@@ -1,6 +1,7 @@
 # OSX
 #
 .DS_Store
+android/app/src/main/assets/index.android.bundle
 
 # Xcode
 #
@@ -27,6 +28,7 @@ DerivedData
 build/
 .idea
 .gradle
+gradle.properties
 local.properties
 *.iml
 *.hprof

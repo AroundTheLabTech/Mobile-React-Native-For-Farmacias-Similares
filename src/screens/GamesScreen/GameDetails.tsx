@@ -3,14 +3,17 @@ import { View, TouchableOpacity, ScrollView, Text, Image, Dimensions, Alert } fr
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import GameDetailsStyles from './style/GameDetailsStyles';
+import { useUser } from '@services/UserContext';
 
 
 const GameDetails = ({ navigation, route }) => {
 
-  const { title, description, imageUrl, gameUrl } = route.params;
-  const iframeUrl = { "gameUrl": gameUrl };
+  const { title, description, imageUrl, score, score_given_per_game, id } = route.params;
+
+  const { scorePerGame } = useUser();
 
   const [orientation, setOrientation] = useState('portrait');
+  const [gameScore, setGameScore] = useState(score);
 
   useEffect(() => {
     const updateOrientation = () => {
@@ -30,12 +33,25 @@ const GameDetails = ({ navigation, route }) => {
     };
   }, []);
 
-  const handleGoToGame = (iframeUrl) => {
+  useEffect(() => {
+    async function fetchData() {
+      const newScore = scorePerGame.score_per_game[id];
+
+      setGameScore(newScore);
+    }
+
+    fetchData();
+
+  }, [id, scorePerGame]);
+
+
+  const handleGoToGame = () => {
 
     if (orientation === 'portrait') {
       Alert.alert('Por favor gira la pantalla');
     } else {
-      navigation.navigate('GameIframe', iframeUrl);
+      route.params.score = gameScore;
+      navigation.navigate('GameIframe', route.params );
     }
   };
 
@@ -46,7 +62,7 @@ const GameDetails = ({ navigation, route }) => {
     >
       <View style={GameDetailsStyles.containerGameDetails} >
         <TouchableOpacity style={GameDetailsStyles.containerGoBack} onPress={() => navigation.goBack()} >
-          <FontAwesomeIcon icon={faArrowLeft} color='white' />
+          <FontAwesomeIcon icon={faArrowLeft} color="white" />
         </TouchableOpacity>
         <View style={GameDetailsStyles.containerCoverImage} >
           <Image style={GameDetailsStyles.coverImage} source={imageUrl} />
@@ -55,13 +71,13 @@ const GameDetails = ({ navigation, route }) => {
           <Text style={GameDetailsStyles.gameTile} >{title}</Text>
           <View style={GameDetailsStyles.containerCurrentGameDetails} >
             <View style={GameDetailsStyles.currentGameDetails} >
-              <Text style={GameDetailsStyles.currentGameText} >.</Text>
+              <Text style={GameDetailsStyles.currentGameText} >{gameScore}</Text>
               <View style={GameDetailsStyles.line} />
-              <Text style={GameDetailsStyles.currentGameText} >+100 puntos</Text>
+              <Text style={GameDetailsStyles.currentGameText} >+{score_given_per_game} puntos</Text>
             </View>
           </View>
           <Text style={GameDetailsStyles.gameDescription} >{description}</Text>
-          <TouchableOpacity style={GameDetailsStyles.playGameButton} onPress={() => handleGoToGame(iframeUrl)} >
+          <TouchableOpacity style={GameDetailsStyles.playGameButton} onPress={() => handleGoToGame()} >
             <Text style={GameDetailsStyles.playGameButtonText} >Jugar solo</Text>
           </TouchableOpacity>
         </View>
