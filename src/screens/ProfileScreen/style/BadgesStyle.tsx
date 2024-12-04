@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 import { colors, fontSizes, spacing, fonts } from '../../../../global-class'; // Importa las variables globales
 
 const BadgesStyle = StyleSheet.create({
-  //Profile Image 
+  //Profile Image
   containerMax: {
     flex: 1,
     backgroundColor: colors.background2,
@@ -16,7 +16,7 @@ const BadgesStyle = StyleSheet.create({
     width: '100%',
     alignItems: 'flex-end',
   },
-  
+
   profileImageContainer: {
     width: '100%',
     justifyContent: 'center',
@@ -30,7 +30,7 @@ const BadgesStyle = StyleSheet.create({
     zIndex: 1000,
   },
 
-  //Dashboard 
+  //Dashboard
   containerDashboard: {
     width: '97%',
     backgroundColor: colors.background3,
@@ -81,7 +81,7 @@ const BadgesStyle = StyleSheet.create({
   containerIcono: {
   },
 
-  //Insignias, Estadisticas, Detalles 
+  //Insignias, Estadisticas, Detalles
   containerPuntaje: {
     marginTop: spacing.lg,
     width: '100%',

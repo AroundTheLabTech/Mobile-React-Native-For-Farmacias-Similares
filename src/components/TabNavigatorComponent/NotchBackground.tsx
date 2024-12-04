@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
-import BackGround from '../../../img/iconos/notch-background.svg';
+// import BackGround from '../../../img/iconos/notch-background.svg';
 import BackGroundLandscape from '../../../img/iconos/notch-background-landscape.svg';
 
 
@@ -39,12 +39,15 @@ const NotchBackground = () => {
         <Rect x="0" y="0" width={screenWidth} height="80" fill="url(#grad)" />
       </Svg>
       {/* SVG que representa el notch */}
-      {
+      { /*
         orientation === 'landscape' ?
           <BackGroundLandscape style={styles.backgroundLandscape} width={'500%'} />
           :
           <BackGround style={styles.backgroundSvg} height={'240%'} width={'110%'} />
+      */
       }
+      {/** Usamos el SVG para mantener fuera el notch */}
+      <BackGroundLandscape style={styles.backgroundLandscape} width={'500%'} />
     </View>
   );
 };

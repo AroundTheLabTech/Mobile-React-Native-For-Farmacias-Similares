@@ -1,16 +1,38 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Dimensions, TextInput } from 'react-native';
 import AccountCenterStyles from './style/AccountCenterStyles';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { TUserInformation } from '../../types/user';
-import { getUserInformation } from '../../services/backend';
 import { useAuth } from '../../AuthContext';
+import { useUser } from '@services/UserContext';
+
+type TUpdateInput = {
+  key: string
+  value: string
+  visible: boolean
+}
 
 const AccountCenter = ({ navigation }) => {
 
+  const {userInformation, setUpdateUserInformation} = useUser();
   const [orientation, setOrientation] = useState('portrait');
-  const [userInformation, setUserInformation] = useState<TUserInformation>();
+
+  const [name, setName] = useState<TUpdateInput>({
+    key: 'name',
+    value: userInformation?.name,
+    visible: false,
+  });
+  const [location, setLocation] = useState<TUpdateInput>({
+    key: 'location',
+    value: userInformation?.state,
+    visible: false,
+  });
+  const [age, setAge] = useState<TUpdateInput>({
+    key: 'age',
+    value: userInformation?.age.toString(),
+    visible: false,
+  });
 
   const { uid } = useAuth();
 
@@ -30,13 +52,24 @@ const AccountCenter = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    async function fetchData() {
-      const response = await getUserInformation(uid);
-      setUserInformation(response);
+    if(!userInformation) {
+      setUpdateUserInformation(true);
+    } else {
+      setUpdateUserInformation(false);
     }
+  }, [setUpdateUserInformation, uid, userInformation]);
 
-    fetchData();
-  }, [uid]);
+  function handleUpdate() {
+
+    let newInformation: TUserInformation = {
+      ...userInformation,
+      name: name.value,
+      state: location.value,
+      age: Number(age.value),
+    };
+
+    console.log(newInformation);
+  }
 
   return (
     <ScrollView
@@ -51,7 +84,16 @@ const AccountCenter = ({ navigation }) => {
         <View style={AccountCenterStyles.containerTableInformation} >
           <View style={AccountCenterStyles.containerRowTable} >
             <Text style={AccountCenterStyles.tableLabel} >Nombre:</Text>
-            <Text style={AccountCenterStyles.tableValue} >{userInformation?.name}</Text>
+            {
+              name?.value && name?.visible ?
+                <TextInput
+                  placeholder={name?.value}
+                  style={AccountCenterStyles.tableValue}
+                  value={name?.value}
+                  onChangeText={(value) => setName({ ...name, value: value?.trim() === '' ? userInformation?.name : value })}
+                /> :
+                <Text onPress={() => setName({ ...name, key: 'name', value: userInformation?.name, visible: true })} style={AccountCenterStyles.tableValue} >{userInformation?.name}</Text>
+            }
           </View>
           <View style={AccountCenterStyles.line} />
           <View style={AccountCenterStyles.containerRowTable} >
@@ -61,22 +103,40 @@ const AccountCenter = ({ navigation }) => {
           <View style={AccountCenterStyles.line} />
           <View style={AccountCenterStyles.containerRowTable} >
             <Text style={AccountCenterStyles.tableLabel} >Estado:</Text>
-            <Text style={AccountCenterStyles.tableValue} >{userInformation?.state}</Text>
+            {
+              location?.value && location?.visible ?
+                <TextInput
+                  placeholder={location?.value}
+                  style={AccountCenterStyles.tableValue}
+                  value={location?.value}
+                  onChangeText={(value) => setLocation({ ...location, value: value?.trim() === '' ? userInformation?.state : value })}
+                /> :
+                <Text onPress={() => setLocation({ ...location, key: 'location', value: userInformation?.state, visible: true })} style={AccountCenterStyles.tableValue} >{userInformation?.state}</Text>
+            }
           </View>
           <View style={AccountCenterStyles.line} />
           <View style={AccountCenterStyles.containerRowTable} >
             <Text style={AccountCenterStyles.tableLabel} >Edad:</Text>
-            <Text style={AccountCenterStyles.tableValue} >{userInformation?.age} {userInformation?.age > 1 ? 'Años' : 'Año'}</Text>
+            {
+              age?.value && age?.visible ?
+                <TextInput
+                  placeholder={age?.value}
+                  style={AccountCenterStyles.tableValue}
+                  value={age?.value}
+                  onChangeText={(value) => setAge({ ...age, value: value?.trim() === '' ? userInformation?.age.toString() : value })}
+                /> :
+                <Text onPress={() => setAge({ ...age, key: 'age', value: userInformation?.age.toString(), visible: true })} style={AccountCenterStyles.tableValue} >{userInformation?.age} {userInformation?.age > 1 ? 'Años' : 'Año'}</Text>
+            }
           </View>
         </View>
         <View style={AccountCenterStyles.containerSave} >
-          <TouchableOpacity style={AccountCenterStyles.containerButtonSave} onPress={() => navigation.goBack()} >
+          <TouchableOpacity style={AccountCenterStyles.containerButtonSave} onPress={() => handleUpdate()} >
             <Text style={AccountCenterStyles.buttonSaveText} >Guardar</Text>
           </TouchableOpacity>
         </View>
       </View>
     </ScrollView>
-  )
+  );
 };
 
 export default AccountCenter;
