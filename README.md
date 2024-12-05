@@ -1,5 +1,218 @@
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
+La arquitectura hexagonal es un patrón de diseño que se centra en separar las capas de una aplicación para lograr un desacoplamiento efectivo entre la lógica del negocio y las dependencias externas (como bases de datos, APIs, frameworks, etc.). Esto se logra definiendo **puertos** (interfaces) y **adaptadores** (implementaciones de esas interfaces).
+
+Aquí tienes una guía para implementar una arquitectura hexagonal en una aplicación **React Native**:
+
+---
+
+### **1. Estructura del Proyecto**
+Organiza tu proyecto en directorios que representen las capas principales de la arquitectura hexagonal:
+
+```
+src/
+├── app/                                       # Capa de inicio y configuración de la app (React Native)
+│   ├── providers/                             # Proveedores globales de Context
+│   │   ├── AuthContext.tsx
+│   │   └── ...
+│   ├── navigation/                            # Configuración de rutas o navegación
+│   ├── config/                                # Configuración de la aplicación (constantes, env, etc.)
+│   └── index.tsx                              # Punto de entrada principal
+│
+├── application/                               # Casos de uso y lógica de aplicación
+│   ├── useCases/                              # Lógica de acciones específicas
+│   │   ├── GetUsersUseCase.ts
+│   │   ├── LoginUserUseCase.ts
+│   │   └── ...
+│   └── services/                              # Servicios que orquestan varios casos de uso
+│
+├── domain/                                    # Lógica de negocio
+│   ├── models/                                # Entidades del dominio
+│   ├── ports/                                 # Interfaces que define el dominio
+│   │   ├── UserRepository.ts
+│   │   └── ...
+│   ├── exceptions/                            # Manejo de errores específicos del dominio
+│   ├── context/                               # Contextos relacionados con el dominio
+│   │   ├── UserContext.tsx
+│   │   └── ...
+│
+├── infrastructure/                            # Adaptadores
+│   ├── api/                                   # Implementaciones de las consultas
+│   │   ├── UserApi.ts
+│   │   └── ...
+│   ├── http/                                  # Configuración HTTP (axios, fetch, etc.)
+│   │   └── httpClient.ts
+│   ├── database/                              # Persistencia de datos
+│   └── mappers/                               # Conversión de datos (DTOs)
+│
+├── shared/                                    # Recursos compartidos
+│   ├── utils/                                 # Funciones auxiliares
+│   ├── constants/                             # Constantes globales
+│   └── types/                                 # Tipos reutilizables
+│
+├── ui/                                        # Interfaz de usuario
+│   ├── components/
+│   │   ├── Button.tsx
+│   │   └── ...
+│   ├── screens/
+│   │   ├── UserScreen/
+│   │   │   ├── UserScreenContext.tsx
+│   │   │   └── ...
+│   └── navigation/
+```
+
+---
+
+### **2. Lógica de Negocio (Dominio)**
+
+#### **Modelos**
+Define tus entidades principales en el dominio, enfocándote en representar las reglas del negocio.
+
+```typescript
+// src/domain/models/User.ts
+export class User {
+  constructor(public id: string, public name: string, public email: string) {}
+
+  isValidEmail(): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(this.email);
+  }
+}
+```
+
+#### **Interfaces (Puertos)**
+Define interfaces para comunicarte con adaptadores.
+
+```typescript
+// src/domain/ports/UserRepository.ts
+import { User } from "../models/User";
+
+export interface UserRepository {
+  getUserById(id: string): Promise<User>;
+  createUser(user: User): Promise<void>;
+}
+```
+
+#### **Casos de Uso**
+Los casos de uso son los servicios que orquestan la lógica del negocio.
+
+```typescript
+// src/domain/services/GetUserUseCase.ts
+import { UserRepository } from "../ports/UserRepository";
+import { User } from "../models/User";
+
+export class GetUserUseCase {
+  constructor(private userRepository: UserRepository) {}
+
+  async execute(id: string): Promise<User> {
+    const user = await this.userRepository.getUserById(id);
+    if (!user) throw new Error("User not found");
+    return user;
+  }
+}
+```
+
+---
+
+### **3. Infraestructura (Adaptadores)**
+
+Implementa los adaptadores basados en las interfaces definidas en la capa de dominio.
+
+```typescript
+// src/infrastructure/api/UserApiRepository.ts
+import { UserRepository } from "../../domain/ports/UserRepository";
+import { User } from "../../domain/models/User";
+
+export class UserApiRepository implements UserRepository {
+  async getUserById(id: string): Promise<User> {
+    const response = await fetch(`https://api.example.com/users/${id}`);
+    const data = await response.json();
+    return new User(data.id, data.name, data.email);
+  }
+
+  async createUser(user: User): Promise<void> {
+    await fetch("https://api.example.com/users", {
+      method: "POST",
+      body: JSON.stringify(user),
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+}
+```
+
+---
+
+### **4. Interfaz de Usuario (UI)**
+
+La UI interactúa con los casos de uso en lugar de interactuar directamente con los adaptadores.
+
+```typescript
+// src/ui/screens/UserScreen.tsx
+import React, { useEffect, useState } from "react";
+import { Text, View } from "react-native";
+import { GetUserUseCase } from "../../domain/services/GetUserUseCase";
+import { UserApiRepository } from "../../infrastructure/api/UserApiRepository";
+
+const userRepository = new UserApiRepository();
+const getUserUseCase = new GetUserUseCase(userRepository);
+
+export const UserScreen = () => {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const user = await getUserUseCase.execute("123");
+        setUser(user);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  return (
+    <View>
+      {user ? (
+        <Text>{`Hello, ${user.name}`}</Text>
+      ) : (
+        <Text>Loading...</Text>
+      )}
+    </View>
+  );
+};
+```
+
+---
+
+### **5. Configuración de la App**
+
+Inicia la aplicación y configura dependencias globales si es necesario.
+
+```typescript
+// src/app/index.tsx
+import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { UserScreen } from "../ui/screens/UserScreen";
+
+const Stack = createStackNavigator();
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="User" component={UserScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+```
+
+---
+
+
 # Getting Started
 
 >**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.

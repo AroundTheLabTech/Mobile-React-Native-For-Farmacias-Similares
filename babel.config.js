@@ -18,9 +18,12 @@ module.exports = {
       {
         root: ['./'],
         alias: {
-          '@components': './src/components',
-          '@screens': './src/screens',
-          '@services': './src/services',
+          '@app': './src/app',
+          '@application': './src/application',
+          '@domain': './src/domain',
+          '@infrastructure': './src/infrastructure',
+          '@shared': './src/shared',
+          '@ui': './src/ui',
           '@assets': './assets',
           '@img': './img',
         },
