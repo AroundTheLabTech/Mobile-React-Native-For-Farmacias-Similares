@@ -1,6 +1,9 @@
 import { Alert } from 'react-native';
 import { BACKEND_BASE_URL } from '@env';
-import { TUserCurrentMonthSession, TUserLast3MonthInfo, TUserPoints, TUserInformation, TUserPicture, TBackResponse, TGameCard, TUserLogin, TUserProfilePictures, TScorePerGame, TTopTwenty, TUserTokenValidate, TUserBadges } from 'src/types/user';
+import { TUserCurrentMonthSession, TUserLast3MonthInfo, TUserPoints, TUserInformation, TUserPicture, TBackResponse, TGameCard, TUserLogin, TUserProfilePictures, TScorePerGame, TTopTwenty, TUserTokenValidate, TUserBadges, TUpdateUserInformation, TUserRegister } from '../types/user';
+import { TCompetition, TCreateCompetition } from '../types/competition';
+import { TGameSession } from '../types/game';
+import { validateObjectValues } from '../utils/helpers';
 
 
 export const loginUserByEmailAndPassword = async (email: string, password: string): Promise<TUserLogin | null> => {
@@ -96,6 +99,41 @@ export const postLogout = async (idToken: string): Promise<Record<string, string
   }
 };
 
+export const postUserRegister = async (userRegister: TUserRegister): Promise<TBackResponse | null> => {
+  try {
+
+    if(!userRegister) {
+      throw new Error('Objeto no valido');
+    }
+
+    const isValid = validateObjectValues(userRegister);
+
+    if (!isValid) {
+      throw new Error('Valores no validos');
+    }
+
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userRegister),
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/users/register`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result as TBackResponse;
+  } catch (error) {
+    return error.message;
+  }
+};
+
 export const getUserInformation = async (uid: string): Promise<TUserInformation | null> => {
   try {
     if (!uid) {
@@ -119,6 +157,31 @@ export const getUserInformation = async (uid: string): Promise<TUserInformation 
     return result as TUserInformation;
   } catch (err) {
     Alert.alert('Error', 'No se pudo encontrar la informacion del usuario');
+    return null;
+  }
+};
+
+export const putUserInformation = async (uid: string, userInformation: TUpdateUserInformation): Promise<Record<string, string> | null> => {
+  try {
+    if (!uid) {
+      throw new Error('UID inválido');
+    }
+    const response = await fetch(`${BACKEND_BASE_URL}/users/user_information/${uid}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(userInformation),
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al rechazar la competicion');
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
     return null;
   }
 };
@@ -431,6 +494,160 @@ export const getUserBadges = async (uid: string): Promise<TUserBadges | null> =>
 
     const result = await response.json();
     return result as TUserBadges;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const postSessionGame = async (gameSession: TGameSession): Promise<Record<string, string> | null> => {
+  try {
+    if (!gameSession?.uid) {
+      throw new Error('UID inválido');
+    }
+
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(gameSession),
+    };
+
+    console.log(requestOptions);
+
+    const response = await fetch(`${BACKEND_BASE_URL}/games/`, requestOptions);
+
+    console.log(response);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    return error.message;
+  }
+};
+
+export const getListAvalibleCompetition = async (uid: string): Promise<TCompetition[] | null> => {
+  try {
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/competition/active_competitions/${uid}`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result as TCompetition[];
+  } catch (error) {
+    return null;
+  }
+};
+
+export const getListCompetitionNotification = async (uid: string): Promise<TCompetition[] | null> => {
+  try {
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/competition/competitions/${uid}`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result as TCompetition[];
+  } catch (error) {
+    return null;
+  }
+};
+
+export const postCreateCompetition = async (newCompetition: TCreateCompetition): Promise<Record<string, string> | null> => {
+  try {
+    if (!newCompetition?.sender_email) {
+      throw new Error('Email inválido');
+    }
+
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newCompetition),
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/competition/create`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    return error.message;
+  }
+};
+
+export const putRejectCompetition = async (uid: string, competitionUid: string, id: string): Promise<Record<string, string> | null> => {
+  try {
+    if (!uid) {
+      throw new Error('UID inválido');
+    }
+    const response = await fetch(`${BACKEND_BASE_URL}/competition/reject/${uid}/${competitionUid}/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({}),
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al rechazar la competicion');
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const putAcceptCompetition = async (uid: string, competitionUid: string, id: string): Promise<Record<string, string> | null> => {
+  try {
+    if (!uid) {
+      throw new Error('UID inválido');
+    }
+    const response = await fetch(`${BACKEND_BASE_URL}/competition/accept/${uid}/${competitionUid}/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({}),
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al aceptar la competicion');
+    }
+
+    const result = await response.json();
+    return result;
   } catch (error) {
     return null;
   }

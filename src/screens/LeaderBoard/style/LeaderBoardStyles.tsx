@@ -57,15 +57,16 @@ const LeaderBoardStyles = StyleSheet.create({
         fontSize: fontSizes.sm,
         color: colors.primary,
         fontWeight: '700',
-        flex: 1,
+        flex: 2,
         marginRight: spacing.sm,
+        textAlign: 'center',
     },
     positionDescription: {
         fontSize: fontSizes.md,
         marginLeft: spacing.sm,
         fontWeight: '700',
         color: colors.primary,
-        flex: 15,
+        flex: 13,
     },
     containerPositions: {
     },

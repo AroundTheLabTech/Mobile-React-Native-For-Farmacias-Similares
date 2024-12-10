@@ -5,6 +5,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { RootStackParamList } from '../../NavigationTypes';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { TUserRegister } from 'src/types/user';
+import { postUserRegister } from '@services/backend';
 
 
 
@@ -27,36 +28,42 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
   const [age, setAge] = useState<string>();
 
   async function handleRegister() {
-    if (!email) {
+    if (!email || email.trim() === '') {
       console.log('completar el email');
       return;
     }
-    if (!name) {
+    if (!name || email.trim() === '') {
       console.log('completar el name');
       return;
     }
-    if (!password) {
+    if (!password || email.trim() === '') {
       console.log('completar el password');
       return;
     }
-    if (!location) {
+    if (!location || email.trim() === '') {
       console.log('completar el location');
       return;
     }
-    if (!age) {
+    if (!age || Number(age) <= 0) {
       console.log('completar el age');
       return;
     }
 
     const newUser: TUserRegister = {
       email,
-      name,
+      display_name: name,
       password,
-      location,
-      age,
+      ubication: location,
+      age: Number(age),
     };
 
-    console.log(newUser);
+    const response = await postUserRegister(newUser);
+
+    if (response.message) {
+      navigation.navigate('Login');
+    } else {
+      navigation.navigate('Login');
+    }
   }
 
   return (

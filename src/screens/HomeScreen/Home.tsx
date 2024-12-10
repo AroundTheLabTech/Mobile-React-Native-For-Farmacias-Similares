@@ -22,8 +22,17 @@ type Last3MonthHomeData = {
 
 const HomeScreen = ({ navigation }) => {
   // Obtener la variable del usuario
-  const { uid, displayName } = useAuth();
-  const { profilePicture, setUpdateProfilePicture, last3MonthsScores, setUpdateLast3MonthsScores, scorePerGame, setUpdateScorePerGame } = useUser();
+  const { uid } = useAuth();
+  const {
+    profilePicture,
+    setUpdateProfilePicture,
+    last3MonthsScores,
+    setUpdateLast3MonthsScores,
+    scorePerGame,
+    setUpdateScorePerGame,
+    userInformation,
+    setUpdateUserInformation,
+  } = useUser();
   // const [profilePicture, setProfilePicture] = useState<string>();
 
   const [gameInformation, setGameInformation] = useState(
@@ -64,9 +73,8 @@ const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     if (uid) {
       console.log('El UID del usuario es:', uid);
-      console.log('El nombre de usuario es:', displayName);
     }
-  }, [displayName, uid]);
+  }, [uid]);
 
   const [scoresLats3Months, setScoresLast3Months] = useState<Last3MonthHomeData[]>();
 
@@ -119,7 +127,19 @@ const HomeScreen = ({ navigation }) => {
     fetchData();
   }, [profilePicture, setUpdateProfilePicture, uid]);
 
-  if (!displayName || (scoresLats3Months && scoresLats3Months.length < 3)) {
+  useEffect(() => {
+    function fetchData() {
+      if (!userInformation) {
+        setUpdateUserInformation(true);
+      } else {
+        setUpdateUserInformation(false);
+      }
+    }
+
+    fetchData();
+  }, [userInformation, setUpdateUserInformation, uid]);
+
+  if (!userInformation.name || (scoresLats3Months && scoresLats3Months.length < 3)) {
     return <Loader visible={true} />;
   }
 
@@ -131,7 +151,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={HomeStyles.containerHeaderProfile}>
           <View style={HomeStyles.containerInfo}>
             <Text style={HomeStyles.textSaludo}>¡Hola!</Text>
-            <Text style={HomeStyles.textUsuario}>{displayName || 'Usuario'}</Text>
+            <Text style={HomeStyles.textUsuario}>{userInformation.name || 'Usuario'}</Text>
           </View>
           <View style={HomeStyles.containerImage}>
             {

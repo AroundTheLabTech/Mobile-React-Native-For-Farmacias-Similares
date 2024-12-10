@@ -22,11 +22,11 @@ import { useUser } from '@services/UserContext';
 
 const ProfileScreen = ({ navigation }) => {
 
-  const { displayName, uid } = useAuth();
+  const { uid } = useAuth();
 
   const [selectedTab, setSelectedTab] = useState('badges');
 
-  const { profilePicture, setUpdateProfilePicture, userPoints, setUpdateUserPoints } = useUser();
+  const { profilePicture, setUpdateProfilePicture, userPoints, setUpdateUserPoints, userInformation } = useUser();
 
   useEffect(() => {
     if(!userPoints) {
@@ -59,7 +59,7 @@ const ProfileScreen = ({ navigation }) => {
     fetchData();
   }, [profilePicture, setUpdateProfilePicture, uid]);
 
-  if (!displayName || !userPoints) {
+  if (!userInformation.name || !userPoints) {
     return <Loader visible={true} />;
   }
 
@@ -87,7 +87,7 @@ const ProfileScreen = ({ navigation }) => {
 
       {/* View Dashboard */}
       <View style={ProfileStyles.containerDashboard}>
-        <Text style={ProfileStyles.TextProfile}>{displayName || 'Usuario'}</Text>
+        <Text style={ProfileStyles.TextProfile}>{userInformation?.name || 'Usuario'}</Text>
 
         {/* Puntuacion Global */}
         <View style={ProfileStyles.ContainerPuntaje}>

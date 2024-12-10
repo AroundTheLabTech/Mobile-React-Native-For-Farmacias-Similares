@@ -51,7 +51,7 @@ const LeaderBoard: React.FC = () => {
 
       const userTopPercent = calculatePercent(filterUserTop[0].position, 0, 20);
 
-      setUserPercent(userTopPercent);
+      setUserPercent(Math.ceil(userTopPercent));
 
       setUserPosition(filterUserTop[0]);
     }

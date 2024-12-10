@@ -138,7 +138,7 @@ const Settings = ({ navigation }) => {
                 source={{uri: profilePicture}}
               />
               <Text style={SettingsStyles.userPoints} >
-                <Image source={require('../../../img/iconos/moneda.png')} /> {userPoints?.score_total ? formatNumber(userPoints.score_total) : formatNumber(1000)}
+                <Image source={require('../../../img/iconos/moneda.png')} /> {userPoints?.score_total ? formatNumber(userPoints.score_total) : 0}
               </Text>
             </View>
           </View>
