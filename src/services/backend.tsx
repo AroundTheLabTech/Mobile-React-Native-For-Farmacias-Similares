@@ -1,7 +1,7 @@
 import { Alert } from 'react-native';
 import { BACKEND_BASE_URL } from '@env';
 import { TUserCurrentMonthSession, TUserLast3MonthInfo, TUserPoints, TUserInformation, TUserPicture, TBackResponse, TGameCard, TUserLogin, TUserProfilePictures, TScorePerGame, TTopTwenty, TUserTokenValidate, TUserBadges, TUpdateUserInformation, TUserRegister } from '../types/user';
-import { TCompetition, TCreateCompetition } from '../types/competition';
+import { TCompetition, TCompetitionSession, TCreateCompetition } from '../types/competition';
 import { TGameSession } from '../types/game';
 import { validateObjectValues } from '../utils/helpers';
 
@@ -102,7 +102,7 @@ export const postLogout = async (idToken: string): Promise<Record<string, string
 export const postUserRegister = async (userRegister: TUserRegister): Promise<TBackResponse | null> => {
   try {
 
-    if(!userRegister) {
+    if (!userRegister) {
       throw new Error('Objeto no valido');
     }
 
@@ -640,6 +640,35 @@ export const putAcceptCompetition = async (uid: string, competitionUid: string, 
         'Accept': 'application/json',
       },
       body: JSON.stringify({}),
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al aceptar la competicion');
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const putCompetitionSession = async (competitionSession: TCompetitionSession): Promise<Record<string, string> | null> => {
+  try {
+
+    const isValidObject = validateObjectValues(competitionSession);
+
+    if (!isValidObject) {
+      throw new Error('Objecto no valido');
+    }
+
+    const response = await fetch(`${BACKEND_BASE_URL}/competition/competition_session`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(competitionSession),
     });
 
     if (!response.ok) {

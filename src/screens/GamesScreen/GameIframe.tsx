@@ -3,10 +3,11 @@ import { View, TouchableOpacity, ScrollView, StyleSheet, Text, Image } from 'rea
 import Orientation from 'react-native-orientation-locker';
 import { WebView } from 'react-native-webview';
 import { colors, fonts, fontSizes, spacing } from '../../../global-class';
-import { postSessionGame } from '@services/backend';
+import { getListAvalibleCompetition, postSessionGame, putCompetitionSession } from '@services/backend';
 import { useAuth } from '../../AuthContext';
 import { useUser } from '@services/UserContext';
 import { TGameSession } from 'src/types/game';
+import { TCompetitionSession } from 'src/types/competition';
 
 const GameIframe = ({ navigation, route }) => {
 
@@ -32,6 +33,29 @@ const GameIframe = ({ navigation, route }) => {
     };
   }, []);
 
+  async function addCompetitionSession(sessionId: string) {
+    console.log(uid, sessionId);
+    const activeCompetitions = await getListAvalibleCompetition(uid);
+
+    if (activeCompetitions && activeCompetitions.length > 0) {
+      activeCompetitions.map(async (competition) => {
+
+        const newCompetitionSession: TCompetitionSession = {
+          user_uid: uid,
+          opponent_uid: competition.UID,
+          unique_id: competition.id,
+          session_id: sessionId,
+        };
+
+        const competitionSession = await putCompetitionSession(newCompetitionSession);
+
+        if(competitionSession.message) {
+          console.log(competitionSession.message);
+        }
+      });
+    }
+  }
+
   const handleMessage = async (event) => {
     console.log('Mensaje recibido del iframe:', event.nativeEvent.data);
     const message = JSON.parse(event.nativeEvent.data);
@@ -53,8 +77,9 @@ const GameIframe = ({ navigation, route }) => {
 
         const response = await postSessionGame(newGameSession);
 
-        if (response.message) {
+        if (response.message && response.session_id) {
           console.log('session creada', session);
+          addCompetitionSession(response.session_id);
           setSession(newGameSession);
         }
       }

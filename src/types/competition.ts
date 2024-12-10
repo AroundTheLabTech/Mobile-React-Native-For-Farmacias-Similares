@@ -18,3 +18,10 @@ export type TCompetition = {
   resultado: string | null
   reto_status: string
 }
+
+export type TCompetitionSession = {
+  user_uid: string
+  opponent_uid: string
+  unique_id: string
+  session_id: string
+}
