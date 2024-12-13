@@ -1,7 +1,7 @@
 import { Alert } from 'react-native';
 import { BACKEND_BASE_URL } from '@env';
 import { TUserCurrentMonthSession, TUserLast3MonthInfo, TUserPoints, TUserInformation, TUserPicture, TBackResponse, TGameCard, TUserLogin, TUserProfilePictures, TScorePerGame, TTopTwenty, TUserTokenValidate, TUserBadges, TUpdateUserInformation, TUserRegister } from '../types/user';
-import { TCompetition, TCompetitionSession, TCreateCompetition } from '../types/competition';
+import { TCompetition, TCompetitionSession, TCompetitiveStatus, TCreateCompetition, TScoreSessions } from '../types/competition';
 import { TGameSession } from '../types/game';
 import { validateObjectValues } from '../utils/helpers';
 
@@ -208,7 +208,7 @@ export const getUserPicture = async (uid: string): Promise<TUserPicture | null> 
     const result = await response.json();
     return result as TUserPicture;
   } catch (err) {
-    Alert.alert('Error', 'No se pudo encontrar la foto de perfil del usuario');
+    // Alert.alert('Error', 'No se pudo encontrar la foto de perfil del usuario');
     return null;
   }
 };
@@ -286,7 +286,7 @@ export const getUserPoints = async (uid: string): Promise<TUserPoints | null> =>
     const result = await response.json();
     return result as TUserPoints;
   } catch (err) {
-    Alert.alert('Error', 'No se pudo obtener el puntaje del usuario');
+    // Alert.alert('Error', 'No se pudo obtener el puntaje del usuario');
     return null;
   }
 };
@@ -677,6 +677,72 @@ export const putCompetitionSession = async (competitionSession: TCompetitionSess
 
     const result = await response.json();
     return result;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const getCompetitionSessions = async (userUid: string, opponentUid: string, competitionId: string): Promise<TScoreSessions | null> => {
+  try {
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/competition/competition_plays/${userUid}/${opponentUid}/${competitionId}`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result as TScoreSessions;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const getAllCompetition = async (userUid: string): Promise<TCompetition[] | null> => {
+  try {
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/competition/all_competition/${userUid}`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result as TCompetition[];
+  } catch (error) {
+    return null;
+  }
+};
+
+export const getCompetitiveStatus = async (userUid: string, opponentUid: string, uniqueId: string): Promise<TCompetitiveStatus | null> => {
+  try {
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/competition/competitive_status/${userUid}/${opponentUid}/${uniqueId}`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result as TCompetitiveStatus;
   } catch (error) {
     return null;
   }

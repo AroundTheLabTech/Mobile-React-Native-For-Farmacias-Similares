@@ -13,7 +13,7 @@ export type TCompetition = {
   inicio_final: string
   name: string
   profile_picture: string
-  partidas_competicion: string[]
+  partidas_competicion: TScoreSession[]
   puntaje_apuestas: number
   resultado: string | null
   reto_status: string
@@ -25,3 +25,20 @@ export type TCompetitionSession = {
   unique_id: string
   session_id: string
 }
+
+export type TScoreSession = {
+  game: number
+  score: number
+  timestamp: string
+}
+
+export type TScoreSessions = {
+  user_plays_competition: TScoreSession[]
+  opponent_plays_competition: TScoreSession[]
+}
+
+export type TCompetitiveStatus = {
+  user_competition: TCompetition[]
+  opponent_competition: TCompetition[]
+}
+

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { SafeAreaView, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -23,39 +23,41 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={styles.containe}>
-      <NavigationContainer>
-        <AuthProvider>
-          <UserProvider>
-            <Stack.Navigator initialRouteName="Login">
-              <Stack.Screen
-                name="Login"
-                component={LoginScreen}
-                options={{ headerShown: false }} // Sin Tab Bar
-              />
-              <Stack.Screen
-                name="Register"
-                component={RegisterScreen}
-                options={{ headerShown: false }} // Sin Tab Bar
-              />
-              <Stack.Screen
-                name="MainTab" // Cambiamos el nombre de "Home" a "MainTab"
-                component={TabNavigator} // Muestra la vista con el Tab Navigator
-                options={{ headerShown: false }} // Sin header
-              />
-              <Stack.Screen
-                name="Settings"
-                component={SettingsStack}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="Games"
-                component={GamesStack}
-                options={{ headerShown: false }}
-              />
-            </Stack.Navigator>
-          </UserProvider>
-        </AuthProvider>
-      </NavigationContainer>
+      <SafeAreaView style={styles.safeAre}>
+        <NavigationContainer>
+          <AuthProvider>
+            <UserProvider>
+              <Stack.Navigator initialRouteName="Login">
+                <Stack.Screen
+                  name="Login"
+                  component={LoginScreen}
+                  options={{ headerShown: false }} // Sin Tab Bar
+                />
+                <Stack.Screen
+                  name="Register"
+                  component={RegisterScreen}
+                  options={{ headerShown: false }} // Sin Tab Bar
+                />
+                <Stack.Screen
+                  name="MainTab" // Cambiamos el nombre de "Home" a "MainTab"
+                  component={TabNavigator} // Muestra la vista con el Tab Navigator
+                  options={{ headerShown: false }} // Sin header
+                />
+                <Stack.Screen
+                  name="Settings"
+                  component={SettingsStack}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="Games"
+                  component={GamesStack}
+                  options={{ headerShown: false }}
+                />
+              </Stack.Navigator>
+            </UserProvider>
+          </AuthProvider>
+        </NavigationContainer>
+      </SafeAreaView>
     </GestureHandlerRootView>
   );
 }
@@ -63,6 +65,9 @@ export default function App() {
 
 const styles = StyleSheet.create({
   containe: {
+    flex: 1,
+  },
+  safeAre: {
     flex: 1,
   },
 });

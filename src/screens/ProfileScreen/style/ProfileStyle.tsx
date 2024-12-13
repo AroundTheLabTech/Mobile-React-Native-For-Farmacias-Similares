@@ -12,9 +12,15 @@ const ProfileStyles = StyleSheet.create({
     alignItems: 'center',
   },
   headerProfile: {
-    padding: spacing.lg,
+    padding: spacing.sm,
     width: '100%',
     alignItems: 'flex-end',
+  },
+
+  ProfileContainer: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
   },
 
   profileImageContainer: {
@@ -22,6 +28,7 @@ const ProfileStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     height: '15%',
+    flex: 0.5,
   },
   imageProfile: {
     resizeMode: 'contain',
@@ -32,13 +39,13 @@ const ProfileStyles = StyleSheet.create({
 
   //Dashboard
   containerDashboard: {
+    flex: 9,
     width: '97%',
+    top: -75,
     backgroundColor: colors.background3,
-    borderTopRightRadius: 12,
-    borderTopLeftRadius: 12,
+    borderRadius: 12,
     padding: spacing.lg,
     alignItems: 'center',
-    marginTop: '-10%',
     height: '100%',
   },
   TextProfile: {

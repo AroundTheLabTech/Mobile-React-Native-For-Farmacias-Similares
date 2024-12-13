@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, Image, TextInput, GestureResponderEvent, Alert } from 'react-native';
 import { colors, fonts, fontSizes, spacing } from '../../../global-class';
 import { useUser } from '@services/UserContext';
-import { getListAvalibleCompetition, getListCompetitionNotification, postCreateCompetition } from '@services/backend';
+import { getCompetitiveStatus, getListAvalibleCompetition, getListCompetitionNotification, postCreateCompetition } from '@services/backend';
 import { TCompetition, TCreateCompetition } from 'src/types/competition';
 import { useAuth } from '../../AuthContext';
 import CompetitionCard from '@components/CompetitionCard/CompetitionCard';
 import Loader from '@components/LoaderComponent/Loader';
 
-const CompetitionModal = () => {
+const CompetitionModal = ({ navigation }) => {
 
   const { uid } = useAuth();
 
@@ -38,6 +38,10 @@ const CompetitionModal = () => {
 
   function handleUpdatePoints(e: GestureResponderEvent, points: number) {
     e.preventDefault();
+
+    if (userPoints?.score_total && userPoints?.score_total > 99) {
+      setCurrentPoints(userPoints.score_total);
+    }
 
     if (points % 100 !== 0) {
       points = Math.floor(points / 100) * 100;
@@ -75,7 +79,10 @@ const CompetitionModal = () => {
         const response = await postCreateCompetition(createCompetition);
 
         if (response?.message) {
+          setUpdateUserPoints(true);
           closeModal();
+        } else {
+          Alert.alert('Error', 'No se puede competir con este jugador');
         }
       }
     } else {
@@ -97,6 +104,10 @@ const CompetitionModal = () => {
     async function fetchData() {
       const response = await getListAvalibleCompetition(uid);
 
+      response.forEach(async (competition) => {
+        await getCompetitiveStatus(uid, competition.UID, competition.id);
+      });
+
       setActiveCompetitions(response);
     }
 
@@ -114,12 +125,22 @@ const CompetitionModal = () => {
   useEffect(() => {
     if (!userPoints) {
       setUpdateUserPoints(true);
+      if (userPoints?.score_total && userPoints?.score_total >= 100) {
+
+        if (!Number.isNaN(userPoints?.score_total)) {
+          setCurrentPoints(userPoints?.score_total);
+          setBasePoints(Math.floor(currentPoints / 100) * 100);
+        } else {
+          setCurrentPoints(100);
+          setBasePoints(Math.floor(currentPoints / 100) * 100);
+        }
+      }
     } else {
       setUpdateUserPoints(false);
     }
-  }, [setUpdateUserPoints, uid, userPoints]);
+  }, [currentPoints, setUpdateUserPoints, uid, userPoints]);
 
-  if(!userPoints) {
+  if (!userPoints) {
     return <Loader visible />;
   }
 
@@ -147,7 +168,31 @@ const CompetitionModal = () => {
                     <Text style={styles.buttonText}>X</Text>
                   </TouchableOpacity>
                 </View>
-                <Text style={styles.modalText}>Parece que no cuentas con puntaje necesario!</Text>
+                <Text style={styles.modalText}>Parece que no cuentas con puntaje necesario para competir!</Text>
+                <View style={styles.competitionsContainer} >
+                  {
+                    !notifications &&
+                    <Text style={styles.informationTitle} >COMPETENCIAS ACTIVAS</Text>
+                  }
+                  <TouchableOpacity onPress={() => {
+                    navigation.navigate('AllCompetitionMain');
+                    closeModal();
+                  }} >
+                    <Text style={styles.seeMore} >Ver más</Text>
+                  </TouchableOpacity>
+                  {
+                    !notifications && activeCompetitions?.length > 0 &&
+                    <View style={styles.competitionsCard} >
+                      {
+                        activeCompetitions.map(competition => {
+                          return (
+                            <CompetitionCard key={competition.UID} competition={competition} notifications={false} ejectFunction={closeModal} />
+                          );
+                        })
+                      }
+                    </View>
+                  }
+                </View>
               </View>
             </View>
           </View>
@@ -201,7 +246,7 @@ const CompetitionModal = () => {
                         <Text style={styles.subtractPlusText} >-100</Text>
                       </TouchableOpacity>
                       <Text style={styles.pointsText} >
-                        {basePoints} <Image source={require('../../../img/iconos/moneda.png')} />
+                        {basePoints} < Image source={require('../../../img/iconos/moneda.png')} />
                       </Text>
                       <TouchableOpacity style={styles.subtractPlus} onPress={(event) => handleUpdatePoints(event, basePoints + 100)} >
                         <Text style={styles.subtractPlusText} >+100</Text>
@@ -215,16 +260,23 @@ const CompetitionModal = () => {
               </View>
               <View style={styles.competitionsContainer} >
                 {
-                  notifications &&
-                  <Text style={styles.informationTitle} >NOTIFICACIONES</Text>
+                  notifications ?
+                    <Text style={styles.informationTitle} >NOTIFICACIONES</Text> :
+                    <Text style={styles.informationTitle} >COMPETENCIAS ACTIVAS</Text>
                 }
+                <TouchableOpacity onPress={() => {
+                  navigation.navigate('AllCompetitionMain');
+                  closeModal();
+                }} >
+                  <Text style={styles.seeMore} >Ver más</Text>
+                </TouchableOpacity>
                 {
                   !notifications && activeCompetitions?.length > 0 ?
                     <View style={styles.competitionsCard} >
                       {
                         activeCompetitions.map(competition => {
                           return (
-                            <CompetitionCard key={competition.UID} competition={competition} notifications={false} closeModal={closeModal} />
+                            <CompetitionCard key={competition.UID} competition={competition} notifications={false} ejectFunction={closeModal} />
                           );
                         })
                       }
@@ -234,7 +286,7 @@ const CompetitionModal = () => {
                         {
                           competitions.map(competition => {
                             return (
-                              <CompetitionCard key={competition.UID} competition={competition} notifications={true} closeModal={closeModal} />
+                              <CompetitionCard key={competition.UID} competition={competition} notifications={true} ejectFunction={closeModal} />
                             );
                           })
                         }
@@ -409,6 +461,9 @@ const styles = StyleSheet.create({
     fontFamily: fonts.rubik,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  seeMore: {
+    color: colors.secondary,
   },
   competitionsContainer: {
     width: '100%',

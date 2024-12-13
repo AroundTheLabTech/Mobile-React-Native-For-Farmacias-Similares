@@ -29,7 +29,7 @@ const ProfileScreen = ({ navigation }) => {
   const { profilePicture, setUpdateProfilePicture, userPoints, setUpdateUserPoints, userInformation } = useUser();
 
   useEffect(() => {
-    if(!userPoints) {
+    if (!userPoints) {
       setUpdateUserPoints(true);
     } else {
       setUpdateUserPoints(false);
@@ -65,7 +65,6 @@ const ProfileScreen = ({ navigation }) => {
 
   return (
     <ScrollView style={ProfileStyles.containerMax} contentContainerStyle={ProfileStyles.container}>
-
       {/* Header Profile */}
       <View style={ProfileStyles.headerProfile}>
         <TouchableOpacity onPress={() => navigation.navigate('Settings')} >
@@ -74,113 +73,106 @@ const ProfileScreen = ({ navigation }) => {
           />
         </TouchableOpacity>
       </View>
-
-
-      {/* Foto de Perfil  */}
-      <View style={ProfileStyles.profileImageContainer}>
-        <Image
-          resizeMode="contain"
-          style={ProfileStyles.imageProfile}
-          source={{ uri: profilePicture }}
-        />
-      </View>
-
-      {/* View Dashboard */}
-      <View style={ProfileStyles.containerDashboard}>
-        <Text style={ProfileStyles.TextProfile}>{userInformation?.name || 'Usuario'}</Text>
-
-        {/* Puntuacion Global */}
-        <View style={ProfileStyles.ContainerPuntaje}>
-          {/* Puntos */}
-          <View style={ProfileStyles.puntajeBox}>
-            {/* Icono */}
-            <View style={ProfileStyles.containerIcono}>
-              <FontAwesomeIcon icon={faStar} size={20} color="#fff" />
-            </View>
-            {/* Title */}
-            <Text style={ProfileStyles.titlePuntaje}>
-              Puntos
-            </Text>
-            {/* Puntos */}
-            <Text style={ProfileStyles.puntajeNumber}>
-              {userPoints?.score_total}
-            </Text>
-          </View>
-
-          {/* Top Mundial */}
-          <View style={ProfileStyles.puntajeBox}>
-            {/* Icono */}
-            <View style={ProfileStyles.containerIcono}>
-              <FontAwesomeIcon icon={faGlobe} size={20} color="#fff" />
-            </View>
-            {/* Title */}
-            <Text style={ProfileStyles.titlePuntaje}>
-              Top Mundial
-            </Text>
-            {/* Puntos */}
-            <Text style={ProfileStyles.puntajeNumber}>
-              #1,438
-            </Text>
-          </View>
-
-          {/* Top Local */}
-          <View style={ProfileStyles.puntajeBox2}>
-            {/* Icono */}
-            <View style={ProfileStyles.containerIcono}>
-              <FontAwesomeIcon icon={faCube} size={20} color="#fff" />
-            </View>
-            {/* Title */}
-            <Text style={ProfileStyles.titlePuntaje}>
-              Top Local
-            </Text>
-            {/* Puntos */}
-            <Text style={ProfileStyles.puntajeNumber}>
-              #56
-            </Text>
-          </View>
+      <View style={ProfileStyles.ProfileContainer} >
+        {/* Foto de Perfil  */}
+        <View style={ProfileStyles.profileImageContainer}>
+          <Image
+            resizeMode="contain"
+            style={ProfileStyles.imageProfile}
+            source={{ uri: profilePicture }}
+          />
         </View>
-
-        {/* Insignias  */}
-
-        <View style={ProfileStyles.containerPuntaje}>
-          {/* NavBar */}
-          <View style={ProfileStyles.containerNavBar}>
-            {/* Botones para cambiar la vista */}
-            <TouchableOpacity onPress={() => setSelectedTab('badges')}>
-              {
-                selectedTab === 'badges' ?
-                  (<>
-                    <Text style={ProfileStyles.TabNabTitle} >Insignias</Text>
-                    <Spacer />
-                    <EllipseComponent width={10} height={10} color={'#6A5AE0'} />
-                  </>) :
-                  (<>
-                    <Text style={ProfileStyles.TabNabTitleSelected} >Insignias</Text>
-                  </>)
-              }
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setSelectedTab('stadistics')}>
-              {
-                selectedTab === 'stadistics' ?
-                  (<>
-                    <Text style={ProfileStyles.TabNabTitle} >Estadisticas</Text>
-                    <Spacer />
-                    <EllipseComponent width={10} height={10} color={'#6A5AE0'} />
-                  </>) :
-                  (<>
-                    <Text style={ProfileStyles.TabNabTitleSelected} >Estadisticas</Text>
-                  </>)
-              }
-            </TouchableOpacity>
-            {/*
+        {/* View Dashboard */}
+        <View style={ProfileStyles.containerDashboard}>
+          <Text style={ProfileStyles.TextProfile}>{userInformation?.name || 'Usuario'}</Text>
+          {/* Puntuacion Global */}
+          <View style={ProfileStyles.ContainerPuntaje}>
+            {/* Puntos */}
+            <View style={ProfileStyles.puntajeBox}>
+              {/* Icono */}
+              <View style={ProfileStyles.containerIcono}>
+                <FontAwesomeIcon icon={faStar} size={20} color="#fff" />
+              </View>
+              {/* Title */}
+              <Text style={ProfileStyles.titlePuntaje}>
+                Puntos
+              </Text>
+              {/* Puntos */}
+              <Text style={ProfileStyles.puntajeNumber}>
+                {userPoints?.score_total}
+              </Text>
+            </View>
+            {/* Top Mundial */}
+            <View style={ProfileStyles.puntajeBox}>
+              {/* Icono */}
+              <View style={ProfileStyles.containerIcono}>
+                <FontAwesomeIcon icon={faGlobe} size={20} color="#fff" />
+              </View>
+              {/* Title */}
+              <Text style={ProfileStyles.titlePuntaje}>
+                Top Mundial
+              </Text>
+              {/* Puntos */}
+              <Text style={ProfileStyles.puntajeNumber}>
+                #1,438
+              </Text>
+            </View>
+            {/* Top Local */}
+            <View style={ProfileStyles.puntajeBox2}>
+              {/* Icono */}
+              <View style={ProfileStyles.containerIcono}>
+                <FontAwesomeIcon icon={faCube} size={20} color="#fff" />
+              </View>
+              {/* Title */}
+              <Text style={ProfileStyles.titlePuntaje}>
+                Top Local
+              </Text>
+              {/* Puntos */}
+              <Text style={ProfileStyles.puntajeNumber}>
+                #56
+              </Text>
+            </View>
+          </View>
+          {/* Insignias  */}
+          <View style={ProfileStyles.containerPuntaje}>
+            {/* NavBar */}
+            <View style={ProfileStyles.containerNavBar}>
+              {/* Botones para cambiar la vista */}
+              <TouchableOpacity onPress={() => setSelectedTab('badges')}>
+                {
+                  selectedTab === 'badges' ?
+                    (<>
+                      <Text style={ProfileStyles.TabNabTitle} >Insignias</Text>
+                      <Spacer />
+                      <EllipseComponent width={10} height={10} color={'#6A5AE0'} />
+                    </>) :
+                    (<>
+                      <Text style={ProfileStyles.TabNabTitleSelected} >Insignias</Text>
+                    </>)
+                }
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setSelectedTab('stadistics')}>
+                {
+                  selectedTab === 'stadistics' ?
+                    (<>
+                      <Text style={ProfileStyles.TabNabTitle} >Estadisticas</Text>
+                      <Spacer />
+                      <EllipseComponent width={10} height={10} color={'#6A5AE0'} />
+                    </>) :
+                    (<>
+                      <Text style={ProfileStyles.TabNabTitleSelected} >Estadisticas</Text>
+                    </>)
+                }
+              </TouchableOpacity>
+              {/*
             <TouchableOpacity disabled onPress={() => setSelectedView('estadisticas')}>
               <Text>Detalles</Text>
             </TouchableOpacity>
             */}
-          </View>
-
-          <View style={ProfileStyles.containerInsignias}>
-            {renderContent()}
+            </View>
+            <View style={ProfileStyles.containerInsignias}>
+              {renderContent()}
+            </View>
           </View>
         </View>
       </View>

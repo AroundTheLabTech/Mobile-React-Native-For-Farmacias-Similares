@@ -12,7 +12,7 @@ import { TCompetitionSession } from 'src/types/competition';
 const GameIframe = ({ navigation, route }) => {
 
   const { uid } = useAuth();
-  const { setUpdateScorePerGame, setUpdateLast3MonthsScores } = useUser();
+  const { setUpdateScorePerGame, setUpdateLast3MonthsScores, setUpdateUserPoints } = useUser();
 
   const { gameUrl, id, score, title } = route.params;
 
@@ -122,6 +122,7 @@ const GameIframe = ({ navigation, route }) => {
 
     setUpdateScorePerGame(true);
     setUpdateLast3MonthsScores(true);
+    setUpdateUserPoints(true);
 
     /*
     if (response && response.message) {

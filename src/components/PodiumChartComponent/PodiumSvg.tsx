@@ -150,7 +150,7 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
         </View>
       </View>
       <View
-        style={{ alignItems: 'center', borderWidth: 0, borderColor: '#000', flex: 1, height: svgHeight }}
+        style={{ alignItems: 'center', borderWidth: 0, borderColor: '#000', flex: 0.99, height: svgHeight }}
         onLayout={handleLayout}
       >
         <View style={{ borderWidth: 0, borderColor: '#000', width: podiumDimensions.width, flex: 1 }} onLayout={handleLayoutInformation1} >

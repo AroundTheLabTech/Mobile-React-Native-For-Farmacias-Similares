@@ -81,7 +81,10 @@ const LeaderBoard: React.FC = () => {
             </View>
           </View>
           <View style={LeaderBoardStyles.containerPosition}>
-            <Text style={LeaderBoardStyles.positionNumber}>#{userPosition?.position}</Text>
+            {
+              userPosition?.position && userPosition?.position > 0 &&
+              <Text style={LeaderBoardStyles.positionNumber}>#{userPosition?.position}</Text>
+            }
             {
               userPercent && userPercent > 0 ?
                 <Text style={LeaderBoardStyles.positionDescription}>Tu estas entre el {userPercent}% de mejores jugadores</Text>

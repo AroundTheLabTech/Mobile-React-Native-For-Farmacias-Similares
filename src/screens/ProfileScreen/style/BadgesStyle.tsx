@@ -159,7 +159,15 @@ const BadgesStyle = StyleSheet.create({
     justifyContent: 'space-between',
   },
 
-
+  notFoundContainer: {
+    padding: spacing.sm,
+  },
+  notFoundText: {
+    textAlign: 'center',
+    fontFamily: fonts.inter,
+    fontWeight: '700',
+    color: colors.secondary,
+  },
 });
 
 export default BadgesStyle;
