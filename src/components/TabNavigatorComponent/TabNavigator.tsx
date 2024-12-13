@@ -5,20 +5,22 @@ import { faHome, faUser, faChartBar, faMagnifyingGlass } from '@fortawesome/free
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { colors } from '../../../global-class';
 
-import HomeScreen from '../../screens/HomeScreen/Home';
+import HomeScreen from '../../screens/HomeScreen/HomeStack';
 import ProfileStack from '../../screens/ProfileScreen/ProfileStack';
 import LeaderBoard from '../../screens/LeaderBoard/LeaderBoard';
 
 import { useAuth } from '../../AuthContext';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
-import NotchBackground from './NotchBackground';
+// import NotchBackground from './NotchBackground';
 // import _404Page from '../../screens/404Screen/404';
 
 const Tab = createBottomTabNavigator();
 
+/*
 const TabBarBackground = () => {
   return <NotchBackground />;
 };
+*/
 
 const TabNavigation = () => {
   const { uid, displayName } = useAuth();
@@ -54,7 +56,7 @@ const TabNavigation = () => {
         tabBarStyle: styles.tabBar,
         tabBarShowLabel: false,
         headerShown: false,
-        tabBarBackground: TabBarBackground,
+        // tabBarBackground: TabBarBackground,
       })}
     >
       <Tab.Screen
@@ -78,8 +80,8 @@ const TabNavigation = () => {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: 'transparent',
-    borderTopWidth: 0,
+    // backgroundColor: 'transparent',
+    borderTopWidth: 1,
     elevation: 0,
     shadowOpacity: 0,
     position: 'absolute',

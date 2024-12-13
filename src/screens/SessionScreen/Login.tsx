@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, TextInput, ScrollView, Dimensions } from 'react-native';
+import { View, Text, Image, TouchableOpacity, TextInput, ScrollView, Dimensions, Keyboard, KeyboardAvoidingView, Platform, TouchableWithoutFeedback } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../NavigationTypes';
 
@@ -68,6 +68,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         const storedExpirationTime = await AsyncStorage.getItem('tokenExpirationTime');
 
         if (!storedAccessToken || !storedExpirationTime) {
+          await AsyncStorage.clear();
           navigation.navigate('Login');
           return;
         }
@@ -149,118 +150,106 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   }, []);
 
   return (
-    <ScrollView
-      key={orientation}
-      style={loginStyles.container}
-      contentContainerStyle={orientation === 'portrait' ? loginStyles.container : loginStyles.containerMax}
-    >
-      <View style={loginStyles.containerLogin}>
-
-
-        <View style={loginStyles.headerContainer}>
-          <Image
-            source={require('../../../img/medallas/medal1.png')}
-            style={loginStyles.headerMedal}
-          />
-
-          <Image
-            source={require('../../../img/medallas/medal1.png')}
-            style={loginStyles.headerMedal}
-          />
-
-
-        </View>
-
-        <View style={loginStyles.containerTitle}>
-          {/* Title */}
-          <Text style={loginStyles.titleLogin}>
-            ¡GANAR NUNCA FUE MÁS DIVERTIDO!
-          </Text>
-          {/* Container Forms */}
-          <View
-            style={loginStyles.containerForms}>
-            {/* Correo Electrónico */}
-            <View
-              style={loginStyles.containerPlaceHolder}
-            >
-              <Text
-                style={loginStyles.placeHolder}
-              >
-                Correo Electrónico</Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={loginStyles.keyboardAvoid}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView
+          key={orientation}
+          style={loginStyles.container}
+          contentContainerStyle={orientation === 'portrait' ? loginStyles.container : loginStyles.containerMax}
+        >
+          <View style={loginStyles.containerLogin}>
+            <View style={loginStyles.headerContainer}>
+              <Image
+                source={require('../../../img/medallas/medal1.png')}
+                style={loginStyles.headerMedal}
+              />
+              <Image
+                source={require('../../../img/medallas/medal1.png')}
+                style={loginStyles.headerMedal}
+              />
             </View>
+            <View style={loginStyles.containerTitle}>
+              {/* Title */}
+              <Text style={loginStyles.titleLogin}>
+                ¡GANAR NUNCA FUE MÁS DIVERTIDO!
+              </Text>
+              {/* Container Forms */}
+              <View
+                style={loginStyles.containerForms}>
+                {/* Correo Electrónico */}
+                <View
+                  style={loginStyles.containerPlaceHolder}
+                >
+                  <Text
+                    style={loginStyles.placeHolder}
+                  >
+                    Correo Electrónico</Text>
+                </View>
+                <TextInput
+                  style={loginStyles.input}
+                  placeholder="Correo electrónico"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={email}
+                  onChangeText={setEmail}
+                />
+                {/* Contraseña */}
+                <View
+                  style={loginStyles.containerPlaceHolder}
+                >
+                  <Text
+                    style={loginStyles.placeHolder}
+                  >
+                    Contraseña</Text>
+                </View>
+                <TextInput
+                  style={loginStyles.input}
+                  placeholder="Correo electrónico"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
 
-            <TextInput
-              style={loginStyles.input}
-              placeholder="Correo electrónico"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              value={email}
-              onChangeText={setEmail}
-            />
+                  onChangeText={setPassword}
+                />
+              </View>
+              {/* Container Button */}
+              <View style={loginStyles.containerButtons}>
+                {/* Boton Login */}
+                <TouchableOpacity
+                  style={loginStyles.botonLogin}
+                  onPress={handleLogin}
+                >
+                  <Text style={loginStyles.textoButtons}>
 
-            {/* Contraseña */}
-            <View
-              style={loginStyles.containerPlaceHolder}
-            >
-              <Text
-                style={loginStyles.placeHolder}
-              >
-                Contraseña</Text>
+                    Login
+                  </Text>
+                </TouchableOpacity>
+                {/* Boton Register */}
+                <TouchableOpacity
+                  style={loginStyles.botonLogin}
+                  onPress={() => navigation.navigate('Register')}
+                >
+                  <Text style={loginStyles.textoButtons}>
+                    Register
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-
-            <TextInput
-              style={loginStyles.input}
-              placeholder="Correo electrónico"
-              keyboardType="email-address"
-              autoCapitalize="none"
-
-              onChangeText={setPassword}
-            />
+            <View style={loginStyles.headerContainer}>
+              <Image
+                source={require('../../../img/medallas/medal1.png')}
+                style={loginStyles.headerMedal}
+              />
+              <Image
+                source={require('../../../img/medallas/medal1.png')}
+                style={loginStyles.headerMedal}
+              />
+            </View>
           </View>
-          {/* Container Button */}
-          <View style={loginStyles.containerButtons}>
-
-            {/* Boton Login */}
-            <TouchableOpacity
-              style={loginStyles.botonLogin}
-              onPress={handleLogin}
-            >
-              <Text style={loginStyles.textoButtons}>
-
-                Login
-              </Text>
-            </TouchableOpacity>
-
-            {/* Boton Register */}
-            <TouchableOpacity
-              style={loginStyles.botonLogin}
-              onPress={() => navigation.navigate('Register')}
-            >
-              <Text style={loginStyles.textoButtons}>
-                Register
-              </Text>
-            </TouchableOpacity>
-
-
-
-          </View>
-
-        </View>
-
-        <View style={loginStyles.headerContainer}>
-          <Image
-            source={require('../../../img/medallas/medal1.png')}
-            style={loginStyles.headerMedal}
-          />
-
-          <Image
-            source={require('../../../img/medallas/medal1.png')}
-            style={loginStyles.headerMedal}
-          />
-        </View>
-
-      </View>
-    </ScrollView>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 

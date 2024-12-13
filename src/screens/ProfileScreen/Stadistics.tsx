@@ -36,6 +36,21 @@ type StatCategory = {
 
 const { width: windowWidth } = Dimensions.get('window');
 
+const monthsInSpanish = {
+  'Enero': 0,
+  'Febrero': 1,
+  'Marzo': 2,
+  'Abril': 3,
+  'Mayo': 4,
+  'Junio': 5,
+  'Julio': 6,
+  'Agosto': 7,
+  'Septiembre': 8,
+  'Octubre': 9,
+  'Noviembre': 10,
+  'Diciembre': 11,
+};
+
 const StadisticsScreen: React.FC = () => {
 
   const { uid } = useAuth();
@@ -53,13 +68,18 @@ const StadisticsScreen: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       const result: TUserCurrentMonthSession = await getUserCurrentMonthSession(uid);
-      const highScore = getMaxScore(result.sessions);
-      setBestGame(highScore);
-      setProgress({
-        'total': 120,
-        'progress': result.currentMonthSessions,
-        'progressPercent': calculatePercentage(120, result.currentMonthSessions),
-      });
+      if (result?.sessions) {
+        const highScore = getMaxScore(result.sessions);
+        setBestGame(highScore);
+
+        const progressData = result?.currentMonthSessions ? result?.currentMonthSessions : 0;
+
+        setProgress({
+          'total': 120,
+          'progress': progressData,
+          'progressPercent': calculatePercentage(120, progressData),
+        });
+      }
     };
 
     fetchData();
@@ -68,48 +88,46 @@ const StadisticsScreen: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       const result: TUserLast3MonthInfo = await getUserLast3MonthsInfo(uid);
+
       const resultGroupByMonth = groupSessionsByMonth(result.sessions);
       const last3MonthsScores = getMaxScorePerMonth(resultGroupByMonth);
       const highestScoreMonth = getMonthWithHighestScore(last3MonthsScores);
       const keys = Object.keys(last3MonthsScores);
-      setLast3MonthsInfo(
-        [
-          {
-            category: 'Puntajes',
-            stats: [
-              {
-                label: keys[0],
-                value: last3MonthsScores[keys[0]],
-                maxValue: last3MonthsScores[highestScoreMonth],
-              },
-            ],
-          },
-          {
-            category: null,
-            stats: [
-              {
-                label: keys[1],
-                value: last3MonthsScores[keys[1]],
-                maxValue: last3MonthsScores[highestScoreMonth],
-              },
-            ],
-          },
-          {
-            category: null,
-            stats: [
-              {
-                label: keys[2],
-                value: last3MonthsScores[keys[2]],
-                maxValue: last3MonthsScores[highestScoreMonth],
-              },
-            ],
-          },
-        ]
-      );
+
+      let newData = [];
+
+      let controller = 0;
+
+      for (let i = keys.length - 1; i >= 0; i--) {
+        if (controller < 3) {
+          newData.push(
+            {
+              category: i === 0 ? 'Puntajes' : null,
+              stats: [
+                {
+                  label: keys[i],
+                  value: last3MonthsScores[keys[i]],
+                  maxValue: last3MonthsScores[highestScoreMonth],
+                },
+              ],
+            }
+          );
+        }
+        controller++;
+      }
+
+      if (newData.length > 0) {
+        const sortData = newData.sort((a, b) => {
+          return monthsInSpanish[a.stats[0].label] - monthsInSpanish[b.stats[0].label];
+        });
+        setLast3MonthsInfo(sortData);
+      }
     };
 
-    fetchData();
-  }, [uid]);
+    if (!last3MonthsInfo) {
+      fetchData();
+    }
+  }, [last3MonthsInfo, uid]);
 
   /*
   const options = [
@@ -213,7 +231,11 @@ const StadisticsScreen: React.FC = () => {
           </View>
         </View>
         <View style={StadiscticsStyle.barChartContainer} >
-          <BarChart data={last3MonthsInfo} barColor="#3498db" listOfColors={listOfColors} />
+          {
+            last3MonthsInfo && (
+              <BarChart data={last3MonthsInfo} barColor="#3498db" listOfColors={listOfColors} />
+            )
+          }
         </View>
       </View>
     </View>

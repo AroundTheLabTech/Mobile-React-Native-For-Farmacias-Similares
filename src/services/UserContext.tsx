@@ -29,7 +29,7 @@ export const UserProvider = ({ children }) => {
   const [userInformation, setUserInformation] = useState<TUserInformation>(null);
   const [updateUserInformation, setUpdateUserInformation] = useState(false);
 
-  const { uid } = useAuth();
+  const { uid, isLogout, setIsLogout } = useAuth();
 
   // Actualizar la imagen de perfil cuando `updateProfilePicture` cambie
   useEffect(() => {
@@ -37,9 +37,14 @@ export const UserProvider = ({ children }) => {
       async function fetchProfilePicture() {
         try {
           const response = await getUserPicture(uid);  // Obtener imagen de perfil
-          setProfilePicture(response.url);  // Asumimos que `response.url` es la URL de la imagen
+          if(response?.url) {
+            setProfilePicture(response?.url);  // Asumimos que `response.url` es la URL de la imagen
+          } else {
+            throw new Error('No hay URL');
+          }
         } catch (error) {
-          console.error('Error fetching profile picture', error);
+          // console.error('Error fetching profile picture', error);
+          return;
         }
       }
 
@@ -55,7 +60,8 @@ export const UserProvider = ({ children }) => {
           const response = await getUserLast3MonthsInfo(uid);  // Obtener imagen de perfil
           setLast3MonthsScores(response);  // Asumimos que `response.url` es la URL de la imagen
         } catch (error) {
-          console.error('Error fetching profile picture', error);
+          // console.error('Error fetching profile picture', error);
+          return;
         }
       }
 
@@ -71,7 +77,8 @@ export const UserProvider = ({ children }) => {
           const response = await getScorePerGames(uid);  // Obtener imagen de perfil
           setScorePerGame(response);  // Asumimos que `response.url` es la URL de la imagen
         } catch (error) {
-          console.error('Error fetching profile picture', error);
+          // console.error('Error fetching profile picture', error);
+          return;
         }
       }
 
@@ -87,7 +94,8 @@ export const UserProvider = ({ children }) => {
           const response = await getUserPoints(uid);  // Obtener imagen de perfil
           setUserPoints(response);  // Asumimos que `response.url` es la URL de la imagen
         } catch (error) {
-          console.error('Error fetching profile picture', error);
+          // console.error('Error fetching profile picture', error);
+          return;
         }
       }
 
@@ -103,7 +111,8 @@ export const UserProvider = ({ children }) => {
           const response = await getUserInformation(uid);  // Obtener imagen de perfil
           setUserInformation(response);  // Asumimos que `response.url` es la URL de la imagen
         } catch (error) {
-          console.error('Error fetching profile picture', error);
+          // console.error('Error fetching profile picture', error);
+          return;
         }
       }
 
@@ -111,6 +120,27 @@ export const UserProvider = ({ children }) => {
       setUpdateUserInformation(false);  // Resetear el estado de actualización después de la carga
     }
   }, [uid, updateUserInformation]);
+
+  useEffect(() => {
+    if (isLogout) {
+      setProfilePicture(null);
+      setUpdateProfilePicture(false);
+
+      setLast3MonthsScores(null);
+      setUpdateLast3MonthsScores(false);
+
+      setScorePerGame(null);
+      setUpdateScorePerGame(false);
+
+      setUserPoints(null);
+      setUpdateUserPoints(false);
+
+      setUserInformation(null);
+      setUpdateUserInformation(false);
+
+      setIsLogout(false);
+    }
+  }, [isLogout, setIsLogout]);
 
   return (
     <ProfileContext.Provider

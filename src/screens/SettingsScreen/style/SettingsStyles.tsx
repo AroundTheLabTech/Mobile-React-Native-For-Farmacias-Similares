@@ -20,7 +20,7 @@ const ProfileStyles = StyleSheet.create({
   },
   containerGoBack: {
     marginTop: spacing.md,
-    marginLeft: spacing.lg,
+    marginLeft: spacing.xxl,
     width: '100%',
   },
   containerProfileInformation: {

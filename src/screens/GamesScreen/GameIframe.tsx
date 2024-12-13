@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { View, TouchableOpacity, ScrollView, StyleSheet, Text, Image, Alert } from 'react-native';
+import { View, TouchableOpacity, ScrollView, StyleSheet, Text, Image } from 'react-native';
 import Orientation from 'react-native-orientation-locker';
 import { WebView } from 'react-native-webview';
 import { colors, fonts, fontSizes, spacing } from '../../../global-class';
-import { updateScoreGame } from '@services/backend';
+import { getListAvalibleCompetition, postSessionGame, putCompetitionSession } from '@services/backend';
 import { useAuth } from '../../AuthContext';
 import { useUser } from '@services/UserContext';
+import { TGameSession } from 'src/types/game';
+import { TCompetitionSession } from 'src/types/competition';
 
 const GameIframe = ({ navigation, route }) => {
 
   const { uid } = useAuth();
-  const { setUpdateScorePerGame, setUpdateLast3MonthsScores } = useUser();
+  const { setUpdateScorePerGame, setUpdateLast3MonthsScores, setUpdateUserPoints } = useUser();
 
   const { gameUrl, id, score, title } = route.params;
 
@@ -18,6 +20,8 @@ const GameIframe = ({ navigation, route }) => {
 
   // const [oldScore, setOldScore] = useState(0)
   const [update, setUpdate] = useState(true);
+
+  const [session, setSession] = useState<TGameSession>();
 
   useEffect(() => {
     // Bloquear orientación en horizontal al montar
@@ -29,17 +33,55 @@ const GameIframe = ({ navigation, route }) => {
     };
   }, []);
 
-  const handleMessage = (event) => {
+  async function addCompetitionSession(sessionId: string) {
+    console.log(uid, sessionId);
+    const activeCompetitions = await getListAvalibleCompetition(uid);
+
+    if (activeCompetitions && activeCompetitions.length > 0) {
+      activeCompetitions.map(async (competition) => {
+
+        const newCompetitionSession: TCompetitionSession = {
+          user_uid: uid,
+          opponent_uid: competition.UID,
+          unique_id: competition.id,
+          session_id: sessionId,
+        };
+
+        const competitionSession = await putCompetitionSession(newCompetitionSession);
+
+        if(competitionSession.message) {
+          console.log(competitionSession.message);
+        }
+      });
+    }
+  }
+
+  const handleMessage = async (event) => {
     console.log('Mensaje recibido del iframe:', event.nativeEvent.data);
     const message = JSON.parse(event.nativeEvent.data);
 
     if (message.score !== undefined) {
       console.log('Puntuación recibida:', message.score);
-      // alert(`Puntuacion: "${message.score}"`);
       if (update) {
         const newCurrentScore = Number(currentScore) + Number(message.score);
         seCurrentScore(newCurrentScore);
         setUpdate(false);
+
+        const gameNumber = id.replace('juego', '');
+
+        const newGameSession: TGameSession = {
+          uid: uid,
+          score: Number(message.score),
+          numberGame: Number(gameNumber),
+        };
+
+        const response = await postSessionGame(newGameSession);
+
+        if (response.message && response.session_id) {
+          console.log('session creada', session);
+          addCompetitionSession(response.session_id);
+          setSession(newGameSession);
+        }
       }
     }
   };
@@ -76,17 +118,20 @@ const GameIframe = ({ navigation, route }) => {
   }
 
   async function handleUpdateScore() {
-    const response = await updateScoreGame(uid, id, currentScore);
+    // const response = await updateScoreGame(uid, id, currentScore);
 
     setUpdateScorePerGame(true);
     setUpdateLast3MonthsScores(true);
+    setUpdateUserPoints(true);
 
+    /*
     if (response && response.message) {
       Alert.prompt('Succes', response.message);
     } else {
       console.log(response);
       // Alert.alert('Error');
     }
+    */
 
     navigation.goBack();
   }

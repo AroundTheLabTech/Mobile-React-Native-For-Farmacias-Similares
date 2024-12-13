@@ -13,11 +13,13 @@ type AuthContextType = {
   ubication: string | null;
   logout: () => void;
   updateUserInformation: (user: TUserLogin) => void;
+  isLogout: boolean;
+  setIsLogout: any;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children })  => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [uid, setUid] = useState<string | null>(null);
   const [age, setAge] = useState<number | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
@@ -26,6 +28,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [lastSession, setLastSession] = useState<string | null>(null);
   const [ubication, setUbication] = useState<string | null>(null);
   const [scoreTotal, setScoreTotal] = useState<number | null>(null); // Placeholder si planeas usarlo más tarde.
+
+  const [isLogout, setIsLogout] = useState<boolean>(false);
 
   const updateUserInformation = (user: TUserLogin) => {
     setUid(user.uid);
@@ -47,8 +51,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLastSession(null);
     setUbication(null);
     setScoreTotal(null);
+    setIsLogout(true);
     await AsyncStorage.removeItem('userAccessToken');
     await AsyncStorage.removeItem('tokenExpirationTime');
+    await AsyncStorage.clear();
   };
 
   return (
@@ -64,6 +70,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         scoreTotal,
         logout,
         updateUserInformation,
+        isLogout,
+        setIsLogout,
       }}
     >
       {children}

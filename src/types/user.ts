@@ -1,9 +1,9 @@
 export type TUserRegister = {
   email: string,
-  name: string,
+  display_name: string,
   password: string,
-  location: string,
-  age: string
+  ubication: string,
+  age: number
 }
 
 export type TUserLogin = {
@@ -88,6 +88,12 @@ export type TUserInformation = {
   age: number,
   last_session: string,
   gender: string,
+}
+
+export type TUpdateUserInformation = {
+  name: string,
+  ubication: string,
+  age: number,
 }
 
 export type TUserPicture = {
