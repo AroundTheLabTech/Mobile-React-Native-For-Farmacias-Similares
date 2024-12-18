@@ -173,3 +173,19 @@ export function validateObjectValues(obj: Record<string, any>): boolean {
   return true;
 }
 
+export const calculateScreenSizeInInches = (Dimensions, PixelRatio) => {
+  const { width, height } = Dimensions.get('screen');
+  const pixelDensity = PixelRatio.get();
+  const dpi = pixelDensity * 160;
+
+  const widthInInches = width / dpi;
+  const heightInInches = height / dpi;
+
+  const screenSizeInInches = Math.sqrt(
+    Math.pow(widthInInches, 2) + Math.pow(heightInInches, 2)
+  );
+
+  return screenSizeInInches.toFixed(2);
+};
+
+

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, TouchableOpacity, ScrollView, Image, Dimensions, PixelRatio } from 'react-native';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import GamesStyles from './style/GamesStyles';
@@ -9,6 +9,7 @@ import Game3 from '../../../img/games/portada/game-3.png';
 import Game4 from '../../../img/games/portada/game-4.png';
 import { useAuth } from '../../AuthContext';
 import { useUser } from '@services/UserContext';
+import { calculateScreenSizeInInches } from '../../utils/helpers';
 
 const Games = ({ navigation, route }) => {
 
@@ -75,7 +76,7 @@ const Games = ({ navigation, route }) => {
       setListGames(games);
     }
 
-    if(!scorePerGame) {
+    if (!scorePerGame) {
       setUpdateScorePerGame(true);
       fetchData();
     } else {
@@ -84,6 +85,9 @@ const Games = ({ navigation, route }) => {
 
     fetchData();
   }, [scorePerGame, setUpdateScorePerGame, uid]);
+
+  const sizeInInches = calculateScreenSizeInInches(Dimensions, PixelRatio);
+
   return (
     <ScrollView style={GamesStyles.container} contentContainerStyle={GamesStyles.containerMax} >
       <TouchableOpacity style={GamesStyles.containerGoBack} onPress={() => navigation.goBack()} >
@@ -91,6 +95,13 @@ const Games = ({ navigation, route }) => {
       </TouchableOpacity>
       <View style={GamesStyles.containerGames} >
         {listGames && listGames.map((game, index) => {
+          if (sizeInInches && Number(sizeInInches) > 9) {
+            return (
+              <TouchableOpacity key={index} style={GamesStyles.gameCard9Inche} onPress={() => navigation.navigate('GameDetails', game)} >
+                <Image style={GamesStyles.coverImage9Inches} source={game.imageUrl} />
+              </TouchableOpacity>
+            );
+          }
           return (
             <TouchableOpacity key={index} style={GamesStyles.gameCard} onPress={() => navigation.navigate('GameDetails', game)} >
               <Image style={GamesStyles.coverImage} source={game.imageUrl} />

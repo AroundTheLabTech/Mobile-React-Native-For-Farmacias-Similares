@@ -190,6 +190,9 @@ const StadiscticsStyle = StyleSheet.create({
     height: 200,
     flex: 2,
   },
+  ringChartContainer9Inches: {
+    height: 400,
+  },
   ringChartView: {
     alignItems: 'center',
   },
@@ -197,6 +200,9 @@ const StadiscticsStyle = StyleSheet.create({
     fontSize: fontSizes.mxxl,
     color: colors.secondary,
     fontWeight: '800',
+  },
+  totalText: {
+    fontSize: fontSizes.lg,
   },
   bestGameContainer: {
     backgroundColor: colors.background2,

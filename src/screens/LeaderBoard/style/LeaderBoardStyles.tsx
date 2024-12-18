@@ -74,10 +74,17 @@ const LeaderBoardStyles = StyleSheet.create({
         flex: 1,
         height: 700,
     },
+    containerPlayersList9Inches: {
+        flex: 1,
+        height: 1250,
+    },
     playersList: {
         backgroundColor: colors.background7,
         padding: spacing.sm,
         height: '100%',
+    },
+    space: {
+        height: spacing.xl,
     },
     leaderBoardContainer: {
         paddingBottom: 70,

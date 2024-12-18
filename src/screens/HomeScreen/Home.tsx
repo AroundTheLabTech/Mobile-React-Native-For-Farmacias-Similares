@@ -14,6 +14,7 @@ import { getMaxScorePerMonth, groupSessionsByMonth } from '../../utils/helpers';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faGamepad } from '@fortawesome/free-solid-svg-icons';
 import { SvgUri } from 'react-native-svg';
+import { imageSize, responsiveHeight } from '../../../global-class';
 
 type Last3MonthHomeData = {
   label: string,
@@ -188,11 +189,11 @@ const HomeScreen = ({ navigation }) => {
                     style={HomeStyles.PerfilImage}
                     resizeMode="contain"
                     source={{ uri: profilePicture }}
-                    width={70}
+                    width={imageSize.sxxl}
                   />
                   :
                   <View style={HomeStyles.containerImage} >
-                    <SvgUri uri={profilePicture} width={70} height={70} />
+                    <SvgUri uri={profilePicture} width={imageSize.sxxl} height={imageSize.sxxl} />
                   </View>
               )
             }
@@ -212,7 +213,7 @@ const HomeScreen = ({ navigation }) => {
             <View style={HomeStyles.columnLeft}>
               <Text style={HomeStyles.nuevoJuego}>Nuevo juego disponible</Text>
               <View style={HomeStyles.containerTitleGameNew}>
-                <Virus1 />
+                <Virus1 width={responsiveHeight(30)} height={responsiveHeight(30)} />
                 <Text style={HomeStyles.titleJuego}>
                   {gameInformation.title.toUpperCase()}
                 </Text>
@@ -281,7 +282,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={HomeStyles.containerGameButton}>
           <Text style={HomeStyles.gameButton}>Visita todos los juegos aquí:</Text>
           <TouchableOpacity style={HomeStyles.playIconContainer} onPress={() => navigation.navigate('Games')} >
-            <FontAwesomeIcon size={50} icon={faGamepad} />
+            <FontAwesomeIcon size={imageSize.xl} icon={faGamepad} />
           </TouchableOpacity>
         </View>
       </View>

@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { colors, fontSizes, spacing, fonts } from '../../../../global-class'; // Importa las variables globales
+import { colors, fontSizes, spacing, fonts, imageSize } from '../../../../global-class'; // Importa las variables globales
 
 const HomeStyles = StyleSheet.create({
     container: {
@@ -35,16 +35,20 @@ const HomeStyles = StyleSheet.create({
     },
     containerInfo: {
         width: '50%',
+        height: 'auto',
     },
     PerfilImage: {
         resizeMode: 'contain',
-        height: 70,
+        height: imageSize.xl,
     },
     textSaludo: {
-        color: '#FFD6DD',
+        flex: 1,
+        color: colors.primary,
+        fontSize: fontSizes.md,
         fontWeight: '600',
     },
     textUsuario: {
+        flex: 1,
         color: colors.primary,
         fontSize: fontSizes.xxl,
         fontWeight: '600',

@@ -99,14 +99,14 @@ Si aún no has configurado tu keystore, sigue estos pasos:
 - Luego, agrega la configuración del keystore en el archivo `android/app/build.gradle` dentro de la sección `signingConfigs`:
 
   ```gradle
-  signingConfigs {
-      release {
-          storeFile file('path/to/my-release-key.keystore')
-          storePassword 'password'
-          keyAlias 'my-key-alias'
-          keyPassword 'password'
-      }
-  }
+    signingConfigs {
+        release {
+            storeFile file(keystoreProperties['MYAPP_UPLOAD_STORE_FILE'])
+            storePassword keystoreProperties['MYAPP_UPLOAD_STORE_PASSWORD']
+            keyAlias keystoreProperties['MYAPP_UPLOAD_KEY_ALIAS']
+            keyPassword keystoreProperties['MYAPP_UPLOAD_KEY_PASSWORD']
+        }
+    }
   ```
 
   Asegúrate de que la ruta y las contraseñas estén correctas.
@@ -130,6 +130,14 @@ Una vez configurado el keystore, puedes generar el APK en modo **release** con e
 cd android
 ./gradlew assembleRelease
 cd ..
+```
+
+#### **Verificar el APK de Release**
+
+Si todo está correctamente configurado, deberías poder generar la APK o el AAB firmado sin problemas. Puedes verificar la firma de la APK usando el siguiente comando:
+
+```bash
+jarsigner -verify -verbose -certs path/to/your/app-release.apk
 ```
 
 Este comando generará el APK de release y lo ubicará en:

@@ -30,10 +30,20 @@ const GamesStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  gameCard9Inche: {
+    width: 260,
+    height: 260,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.md,
+  },
   coverImage: {
     width: 150,
     height: 150,
     borderRadius: 10,
+  },
+  coverImage9Inches: {
+    width: 250,
+    height: 250,
   },
 });
 

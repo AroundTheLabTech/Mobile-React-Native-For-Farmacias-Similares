@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, View, Text, Dimensions } from 'react-native';
+import { ScrollView, View, Text, Dimensions, PixelRatio } from 'react-native';
 import LeaderBoardStyles from './style/LeaderBoardStyles';
 import LeaderBoardCard from '@components/LeaderBoardCardComponents/LeaderBoardCard';
 import DraggableMenu from '@components/DraggableMenuComponent/DraggableMenu';
 import PodiumSvg from '@components/PodiumChartComponent/PodiumSvg';
 import { getTopTwenty } from '@services/backend';
 import { TLeaderBoard } from 'src/types/user';
-import { calculatePercent, splitTopTwenty } from '../../utils/helpers';
+import { calculatePercent, calculateScreenSizeInInches, splitTopTwenty } from '../../utils/helpers';
 import Loader from '@components/LoaderComponent/Loader';
 import { useAuth } from '../../AuthContext';
+import PodiumSvg9Inches from '@components/PodiumChartComponent/PodiumSvg9Inches';
 
 const LeaderBoard: React.FC = () => {
   const { uid } = useAuth();
@@ -65,6 +66,9 @@ const LeaderBoard: React.FC = () => {
     return <Loader visible />;
   }
 
+
+  const sizeInInches = calculateScreenSizeInInches(Dimensions, PixelRatio);
+
   return (
     <ScrollView style={LeaderBoardStyles.containerScroll}>
       {/* Header */}
@@ -95,7 +99,9 @@ const LeaderBoard: React.FC = () => {
           </View>
           {
             topThree && topThree.length > 2 &&
-            <PodiumSvg top3Data={topThree} />
+              sizeInInches && Number(sizeInInches) > 9 ?
+              <PodiumSvg9Inches top3Data={topThree} /> :
+              <PodiumSvg top3Data={topThree} />
           }
           {/*
           <PodiumChart />
@@ -105,7 +111,7 @@ const LeaderBoard: React.FC = () => {
         {
           orientation === 'landscape' ?
             (
-              <View style={LeaderBoardStyles.containerPlayersList} >
+              <View style={sizeInInches && Number(sizeInInches) > 9 ? LeaderBoardStyles.containerPlayersList9Inches : LeaderBoardStyles.containerPlayersList} >
                 <ScrollView style={LeaderBoardStyles.playersList}
                   scrollEnabled={true} // Controla si el scroll está habilitado
                   nestedScrollEnabled={true}
@@ -113,6 +119,7 @@ const LeaderBoard: React.FC = () => {
                   {topTwenty && topTwenty.length > 15 && topTwenty.map((player: TLeaderBoard, index) => (
                     <LeaderBoardCard key={index} player={player} />
                   ))}
+                  <View style={LeaderBoardStyles.space} />
                 </ScrollView>
               </View>
             ) :

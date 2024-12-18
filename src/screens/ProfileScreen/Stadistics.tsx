@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, Dimensions } from 'react-native';
+import { View, Text, Image, Dimensions, PixelRatio } from 'react-native';
 
 // Styles
 import StadiscticsStyle from './style/StadiscticsStyle';
@@ -7,7 +7,7 @@ import StadiscticsStyle from './style/StadiscticsStyle';
 
 import RingChart from '../../components/RingChartComponent/RingChart';
 
-import { calculatePercentage, getMaxScore, getMaxScorePerMonth, getMonthWithHighestScore, groupSessionsByMonth } from '../../utils/helpers';
+import { calculatePercentage, calculateScreenSizeInInches, getMaxScore, getMaxScorePerMonth, getMonthWithHighestScore, groupSessionsByMonth } from '../../utils/helpers';
 
 
 import MedalIcon from '../../../img/iconos/medal.svg';
@@ -17,6 +17,8 @@ import { TUserCurrentMonthSession, TUserLast3MonthInfo } from 'src/types/user';
 import { getUserCurrentMonthSession, getUserLast3MonthsInfo } from '../../services/backend';
 import { useAuth } from '../../AuthContext';
 import Loader from '@components/LoaderComponent/Loader';
+import RingChart9Inches from '@components/RingChartComponent/RingChart9Inches';
+import BarChart9Inches from '@components/BarChartComponent/BarChart9Inches';
 
 
 interface IProgress {
@@ -167,6 +169,8 @@ const StadisticsScreen: React.FC = () => {
     return <Loader visible={true} />;
   }
 
+  const sizeInInches = calculateScreenSizeInInches(Dimensions, PixelRatio);
+
   return (
     <View style={StadiscticsStyle.container}  >
       <View style={StadiscticsStyle.containerEstadistics}>
@@ -177,18 +181,31 @@ const StadisticsScreen: React.FC = () => {
           META MENSUAL DE PARTIDAS
         </Text>
 
-        <View style={StadiscticsStyle.ringChartContainer} >
-          <RingChart
-            progress={progress.progressPercent} // Asegúrate de pasar el porcentaje aquí
-            color="#6A5AE0"
-          >
-            <View style={StadiscticsStyle.ringChartView} >
-              <Text style={StadiscticsStyle.ringChartText}>{Math.round(progress.progress)}/{progress.total}</Text>
-              <Text >Total</Text>
+        {
+          sizeInInches && Number(sizeInInches) > 9 ?
+            <View style={[StadiscticsStyle.ringChartContainer, StadiscticsStyle.ringChartContainer9Inches]} >
+              <RingChart9Inches
+                progress={progress.progressPercent} // Asegúrate de pasar el porcentaje aquí
+                color="#6A5AE0"
+              >
+                <View style={StadiscticsStyle.ringChartView} >
+                  <Text style={StadiscticsStyle.ringChartText}>{Math.round(progress.progress)}/{progress.total}</Text>
+                  <Text style={StadiscticsStyle.totalText}  >Total</Text>
+                </View>
+              </RingChart9Inches>
+            </View> :
+            <View style={StadiscticsStyle.ringChartContainer} >
+              <RingChart
+                progress={progress.progressPercent} // Asegúrate de pasar el porcentaje aquí
+                color="#6A5AE0"
+              >
+                <View style={StadiscticsStyle.ringChartView} >
+                  <Text style={StadiscticsStyle.ringChartText}>{Math.round(progress.progress)}/{progress.total}</Text>
+                  <Text style={StadiscticsStyle.totalText} >Total</Text>
+                </View>
+              </RingChart>
             </View>
-          </RingChart>
-        </View>
-
+        }
         <View style={StadiscticsStyle.rowStadistics}>
           {/* Box */}
           <View style={StadiscticsStyle.containerBestPlay}>
@@ -232,9 +249,13 @@ const StadisticsScreen: React.FC = () => {
         </View>
         <View style={StadiscticsStyle.barChartContainer} >
           {
-            last3MonthsInfo && (
-              <BarChart data={last3MonthsInfo} barColor="#3498db" listOfColors={listOfColors} />
-            )
+            last3MonthsInfo && sizeInInches && Number(sizeInInches) > 9 ?
+              (
+                <BarChart9Inches data={last3MonthsInfo} barColor="#3498db" listOfColors={listOfColors} />
+              ) :
+              (
+                <BarChart data={last3MonthsInfo} barColor="#3498db" listOfColors={listOfColors} />
+              )
           }
         </View>
       </View>
