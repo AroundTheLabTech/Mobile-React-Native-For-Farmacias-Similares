@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { colors, fontSizes, spacing, fonts } from '../../../../global-class'; // Importa las variables globales
+import { colors, fontSizes, spacing, fonts, responsiveHeight, responsiveWidth } from '../../../../global-class'; // Importa las variables globales
 
 const ProfileStyles = StyleSheet.create({
   //Profile Image
@@ -33,7 +33,7 @@ const ProfileStyles = StyleSheet.create({
   imageProfile: {
     resizeMode: 'contain',
     width: '100%',
-    height: 150,
+    height: responsiveHeight(150),
     zIndex: 1000,
   },
 
@@ -41,7 +41,7 @@ const ProfileStyles = StyleSheet.create({
   containerDashboard: {
     flex: 9,
     width: '97%',
-    top: -75,
+    top: responsiveWidth(-48),
     backgroundColor: colors.background3,
     borderRadius: 12,
     padding: spacing.lg,

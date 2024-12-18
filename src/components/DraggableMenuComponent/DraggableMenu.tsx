@@ -1,11 +1,16 @@
 import React, { ReactNode, useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, PanResponder, Animated, Dimensions, ScrollView } from 'react-native';
+import { View, StyleSheet, PanResponder, Animated, Dimensions, ScrollView, PixelRatio } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { colors, spacing } from '../../../global-class';
+import { calculateScreenSizeInInches } from '../../utils/helpers';
 
 const MountainGripSVG = () => {
+
+  const sizeInInches = calculateScreenSizeInInches(Dimensions, PixelRatio);
+
   return (
-    <View style={styles.container}>
+    // eslint-disable-next-line react-native/no-inline-styles
+    <View style={[styles.container, { left: sizeInInches && Number(sizeInInches) > 9 ? '6%' : '0%'  }]}>
       <Svg height="40" width="15%">
         <Path
           d="M0,31 L10,31 32,18 10,31 L25,31"

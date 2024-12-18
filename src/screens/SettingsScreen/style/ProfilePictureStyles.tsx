@@ -97,6 +97,8 @@ const ProfilePictureStyles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.background3,
   },
   buttonSaveText: {
     fontSize: fontSizes.md,

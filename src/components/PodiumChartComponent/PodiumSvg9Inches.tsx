@@ -10,7 +10,7 @@ interface PodiumSvgProps {
 
 const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
   // Definir las dimensiones fijas del SVG
-  const svgHeight = 400; // Alto fijo en píxeles
+  const svgHeight = 700; // Alto fijo en píxeles
 
   // Calcular un factor de escala en función del tamaño de la pantalla
 
@@ -66,7 +66,7 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
   };
 
   return (
-    <View style={{ alignItems: 'center', marginTop: 50, borderWidth: 0, borderColor: '#000', flexDirection: 'row', paddingHorizontal: 10 }}>
+    <View style={{ alignItems: 'center', marginTop: 50, borderWidth: 0, borderColor: '#000', flexDirection: 'row', paddingHorizontal: 35 }}>
       <View
         style={{ alignItems: 'center', borderWidth: 0, borderColor: '#000', flex: 1, height: svgHeight }}
         onLayout={handleLayout}
@@ -75,25 +75,25 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
           <Svg width={podium2DimensionsInformation.width} height={podium2DimensionsInformation.height * 0.5} >
             <SvgImage
               href={{ uri: top3Data[1].profile_mini_pictures_url }}
-              x={'32%'}
-              y={'48%'}
-              width={40}
-              height={40}
+              x={'42%'}
+              y={'20%'}
+              width={80}
+              height={80}
             />
             <SvgImage
               href={{ uri: top3Data[1].flag_url }}
-              x={'52%'}
-              y={'80%'}
-              width={20}
+              x={'54%'}
+              y={'70%'}
+              width={30}
               height={20}
             />
           </Svg>
           <Svg width={podium2DimensionsInformation.width} height={podium2DimensionsInformation.height * 0.25} >
             <Text
               x="50%"
-              y="75%"
+              y="50%"
               fill="white"
-              fontSize={podium2DimensionsInformation.height * 0.08}
+              fontSize={podium2DimensionsInformation.height * 0.15}
               fontWeight="800"
               textAnchor="middle"
               alignmentBaseline="middle">
@@ -103,18 +103,18 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
 
           <Svg width={podium2DimensionsInformation.width} height={podium2DimensionsInformation.height * 0.25} >
             <Rect
-              x="23.5%"
-              y="20%"
-              width={podium1DimensionsInformation.width * 0.5}
-              height={(podium1DimensionsInformation.height * 0.25) * 0.6}
+              x="30%"
+              y="0%"
+              width={podium1DimensionsInformation.width * 0.4}
+              height={(podium1DimensionsInformation.height * 0.25) * 0.8}
               rx={podium1DimensionsInformation.height * 0.05}
               fill={'#9087E5'}
             />
             <Text
-              x="40%"
-              y="50%"
+              x="45%"
+              y="40%"
               fill="white"
-              fontSize={podium1DimensionsInformation.width * 0.09}
+              fontSize={podium1DimensionsInformation.width * 0.06}
               fontWeight="800"
               textAnchor="middle"
               alignmentBaseline="middle">
@@ -138,9 +138,9 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
 
             <Text
               x="50%"
-              y={podium2DimensionsReact.height * 0.25}
+              y={podium2DimensionsReact.height * 0.3}
               fill="white"
-              fontSize={podium2DimensionsInformation.width * 0.5}
+              fontSize={podium2DimensionsInformation.width * 0.4}
               fontWeight="800"
               textAnchor="middle"
               alignmentBaseline="middle">
@@ -155,36 +155,36 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
       >
         <View style={{ borderWidth: 0, borderColor: '#000', width: podiumDimensions.width, flex: 1 }} onLayout={handleLayoutInformation1} >
           <Svg width={podium2DimensionsInformation.width} height={podium2DimensionsInformation.height * 0.3} >
-            <View style={{ borderRadius: 40, width: 40, height: 40, top: '12%', left: '32%', overflow: 'hidden' }} >
+            <View style={{ borderRadius: 80, width: 80, height: 80, top: '0%', left: '40%', overflow: 'hidden' }} >
               <Svg>
                 <SvgImage
                   href={{ uri: top3Data[0].profile_mini_pictures_url }}
                   x={'0%'}
                   y={'0%'}
-                  width={40}
-                  height={40}
+                  width={80}
+                  height={80}
                   preserveAspectRatio="xMidYMid slice"
                 />
               </Svg>
             </View>
-            <View style={{ width: 20, height: 20, top: '80%', left: '52%', overflow: 'visible', display: 'flex', position: 'absolute', zIndex: 10 }} >
+            <View style={{ width: 30, height: 20, top: '80%', left: '52%', overflow: 'visible', display: 'flex', position: 'absolute', zIndex: 10 }} >
               <Svg>
                 <SvgImage
                   href={{ uri: top3Data[0].flag_url }}
                   x={'0%'}
                   y={'0%'}
-                  width={20}
+                  width={30}
                   height={20}
                 />
               </Svg>
             </View>
           </Svg>
-          <Svg width={podium2DimensionsInformation.width} height={podium2DimensionsInformation.height * 0.35} >
+          <Svg width={podium2DimensionsInformation.width} height={podium2DimensionsInformation.height * 0.3} >
             <Text
               x="50%"
-              y="50%"
+              y="70%"
               fill="white"
-              fontSize={podium2DimensionsInformation.height * 0.08}
+              fontSize={podium2DimensionsInformation.height * 0.15}
               fontWeight="800"
               textAnchor="middle"
               alignmentBaseline="middle">
@@ -192,20 +192,20 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
             </Text>
           </Svg>
 
-          <Svg width={podium2DimensionsInformation.width} height={podium2DimensionsInformation.height * 0.35} >
+          <Svg width={podium2DimensionsInformation.width} height={podium2DimensionsInformation.height * 0.3} >
             <Rect
-              x="23.5%"
+              x="30%"
               y="0%"
-              width={podium1DimensionsInformation.width * 0.5}
-              height={(podium1DimensionsInformation.height * 0.25) * 0.6}
+              width={podium1DimensionsInformation.width * 0.4}
+              height={(podium1DimensionsInformation.height * 0.25) * 0.8}
               rx={podium1DimensionsInformation.height * 0.05}
               fill={'#9087E5'}
             />
             <Text
-              x="40%"
-              y="20%"
+              x="45%"
+              y="30%"
               fill="white"
-              fontSize={podium1DimensionsInformation.width * 0.09}
+              fontSize={podium1DimensionsInformation.width * 0.06}
               fontWeight="800"
               textAnchor="middle"
               alignmentBaseline="middle">
@@ -229,9 +229,9 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
 
             <Text
               x="50%"
-              y={podium1DimensionsReact.height * 0.25}
+              y={podium1DimensionsReact.height * 0.3}
               fill="white"
-              fontSize={podium1DimensionsInformation.width * 0.5}
+              fontSize={podium1DimensionsInformation.width * 0.4}
               fontWeight="800"
               textAnchor="middle"
               alignmentBaseline="middle">
@@ -246,24 +246,24 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
       >
         <View style={{ borderWidth: 0, borderColor: '#000', width: podiumDimensions.width, flex: 1.4 }} onLayout={handleLayoutInformation3} >
           <Svg width={podium2DimensionsInformation.width} height={podium2DimensionsInformation.height * 0.7} >
-            <View style={{ borderRadius: 40, width: 40, height: 40, top: '148%', left: '32%', overflow: 'hidden' }} >
+            <View style={{ borderRadius: 80, width: 80, height: 80, top: '60%', left: '35%', overflow: 'hidden' }} >
               <Svg>
                 <SvgImage
                   href={{ uri: top3Data[2].profile_mini_pictures_url }}
                   x={'0%'}
                   y={'0%'}
-                  width={40}
-                  height={40}
+                  width={80}
+                  height={80}
                 />
               </Svg>
             </View>
-            <View style={{ width: 20, height: 20, top: '218%', left: '52%', overflow: 'visible', display: 'flex', position: 'absolute', zIndex: 10 }} >
+            <View style={{ width: 30, height: 20, top: '138%', left: '48%', overflow: 'visible', display: 'flex', position: 'absolute', zIndex: 10 }} >
               <Svg>
                 <SvgImage
                   href={{ uri: top3Data[1].flag_url }}
                   x={'0%'}
                   y={'0%'}
-                  width={20}
+                  width={30}
                   height={20}
                 />
               </Svg>
@@ -271,10 +271,10 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
           </Svg>
           <Svg width={podium2DimensionsInformation.width} height={podium2DimensionsInformation.height * 0.2} >
             <Text
-              x="50%"
-              y="60%"
+              x="45%"
+              y="40%"
               fill="white"
-              fontSize={podium2DimensionsInformation.height * 0.08}
+              fontSize={podium2DimensionsInformation.height * 0.15}
               fontWeight="800"
               textAnchor="middle"
               alignmentBaseline="middle">
@@ -284,18 +284,18 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
 
           <Svg width={podium2DimensionsInformation.width} height={podium2DimensionsInformation.height * 0.3} >
             <Rect
-              x="23.5%"
-              y="30%"
-              width={podium1DimensionsInformation.width * 0.5}
-              height={(podium1DimensionsInformation.height * 0.25) * 0.6}
+              x="25%"
+              y="0%"
+              width={podium1DimensionsInformation.width * 0.4}
+              height={(podium1DimensionsInformation.height * 0.25) * 0.8}
               rx={podium1DimensionsInformation.height * 0.05}
               fill={'#9087E5'}
             />
             <Text
               x="40%"
-              y="55%"
+              y="34%"
               fill="white"
-              fontSize={podium1DimensionsInformation.width * 0.09}
+              fontSize={podium1DimensionsInformation.width * 0.06}
               fontWeight="800"
               textAnchor="middle"
               alignmentBaseline="middle">
@@ -319,9 +319,9 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
 
             <Text
               x="50%"
-              y={podium3DimensionsReact.height * 0.25}
+              y={podium3DimensionsReact.height * 0.3}
               fill="white"
-              fontSize={podium3DimensionsInformation.width * 0.4}
+              fontSize={podium3DimensionsInformation.width * 0.3}
               fontWeight="800"
               textAnchor="middle"
               alignmentBaseline="middle">

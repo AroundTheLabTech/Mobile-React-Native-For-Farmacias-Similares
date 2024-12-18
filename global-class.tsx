@@ -2,12 +2,12 @@ import { Dimensions } from 'react-native';
 const { width, height } = Dimensions.get('window');
 
 // Function to calculate responsive numbers based on width and height
-const responsiveWidth = (value: number) => {
+export const responsiveWidth = (value: number) => {
   const baseWidth = 375; // Ancho base
   return (value / baseWidth) * width;
 };
 
-const responsiveHeight = (value: number) => {
+export const responsiveHeight = (value: number) => {
   const baseHeight = 812; // Altura base (puedes ajustar esto según tus necesidades)
   return (value / baseHeight) * height;
 };
@@ -62,6 +62,19 @@ export const spacing = {
   sxxl: responsiveWidth(60), // 12% del ancho
   xxxl: responsiveWidth(75), // 15% del ancho
   xxxxl: responsiveWidth(100), // 20% del ancho
+};
+
+// Espaciados basados en el ancho de la pantalla
+export const imageSize = {
+  xs: responsiveWidth(10), // 1% del ancho
+  sm: responsiveWidth(20), // 2% del ancho
+  md: responsiveWidth(30), // 4% del ancho
+  lg: responsiveWidth(40), // 6% del ancho
+  xl: responsiveWidth(50), // 8% del ancho
+  xxl: responsiveWidth(60), // 10% del ancho
+  sxxl: responsiveWidth(70), // 12% del ancho
+  xxxl: responsiveWidth(80), // 15% del ancho
+  xxxxl: responsiveWidth(90), // 20% del ancho
 };
 
 export const fontWeight = {

@@ -27,7 +27,7 @@ const LeaderBoardCard: React.FC<LeaderBoardCardProps> = ({ player }) => {
           />
         </View>
         <View style={LeaderBoardCardStyles.containerSubInformation} >
-          <Text style={LeaderBoardCardStyles.name} >{player.username}</Text>
+          <Text style={LeaderBoardCardStyles.name} >{player?.username ? player?.username : 'Usuario'}</Text>
           <Text style={LeaderBoardCardStyles.points} >{player.total_score} points</Text>
         </View>
       </View>
