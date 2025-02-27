@@ -64,6 +64,14 @@ const Games = ({ navigation, route }) => {
           'description': '¡Pilota el avión del SimiFest y lanza Bombas de Vida! Estas bolas de tierra están repletas de semillas listas para transformar el mundo. ¡Conviértete en un héroe ecológico y haz florecer la vida a tu paso!',
           'gameUrl': 'https://simijuegos.com.mx/source-game/game-4/index.html',
         },
+        {
+          'imageUrl': Game4,
+          'id': 'juego5',
+          'title': 'Globito Survivor',
+          'score_given_per_game': 10,
+          'description': 'Usa la tecla para moverte por el cielo y esquivar cada peligro. Inspirado en el día del amor y la amistad, ¡pon a prueba tus reflejos y mantén tu globo intacto!',
+          'gameUrl': 'https://simijuegos-webapp.vercel.app/source-game/game-5/index.html',
+        },
       ];
 
       const games = allGames.map(game => {

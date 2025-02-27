@@ -26,6 +26,9 @@ const CompetitionModal = ({ navigation }) => {
 
   const [isEmailRequired, setIsEmailRequired] = useState<boolean>(false);
 
+  const [competitionMessageError, setCompetitionMessageError] = useState<boolean>(false);
+  const [competitionMessage, setCompetitionMessage] = useState<string | null>(null);
+
   const openModal = () => {
     setCurrentPoints(userPoints?.score_total > 1000 ? 1000 : 100);
     setModalVisible(true);
@@ -80,14 +83,28 @@ const CompetitionModal = ({ navigation }) => {
 
         if (response?.message) {
           setUpdateUserPoints(true);
-          closeModal();
+          setCompetitionMessageError(false);
+          setCompetitionMessage('!Competencia enviada con exito¡');
+          // closeModal();
         } else {
+          setCompetitionMessageError(true);
+          setCompetitionMessage('!No se puede competir con este jugador¡');
           Alert.alert('Error', 'No se puede competir con este jugador');
         }
+      } else {
+        setCompetitionMessageError(true);
+        setCompetitionMessage('!Compite con otro usuario¡');
       }
     } else {
+      setCompetitionMessageError(true);
+      setCompetitionMessage('!Algo no salío bien¡');
       Alert.alert('Error', 'Algo no salío bien');
     }
+  }
+
+  function handleModalMessage() {
+    setCompetitionMessage(null);
+    closeModal();
   }
 
   useEffect(() => {
@@ -215,88 +232,104 @@ const CompetitionModal = ({ navigation }) => {
         visible={isModalVisible}
         onRequestClose={closeModal}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainerShadown} >
-            <View style={styles.modalContainer} >
-              <View style={styles.modalInformation} >
-                <View style={styles.bellContainer} >
-                  {/* Botón para cerrar el modal */}
-                  <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
-                    <Text style={styles.buttonText}>X</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.notificationsContainer} onPress={() => setNotifications(!notifications)} >
-                    <Image source={require('../../../img/iconos/bell.png')} />
-                    {
-                      competitions && competitions.length > 0 && (
-                        <Text style={styles.competitionNotificationCounter} >{competitions.length}</Text>
-                      )
-                    }
+        {
+          competitionMessage ?
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContainerShadown} >
+                <View style={styles.modalContainer} >
+                  <View style={styles.modalInformation} >
+                    <Text style={[styles.modalText, competitionMessageError ? styles.errorMessage : styles.successMessage]}>{competitionMessageError ? 'ERROR' : 'EXCELENTE'}</Text>
+                  </View>
+                  <Text style={styles.modalText}>{competitionMessage}</Text>
+                  <TouchableOpacity style={styles.openButton} onPress={handleModalMessage}>
+                    <Text style={styles.buttonText}>ACEPTAR</Text>
                   </TouchableOpacity>
                 </View>
-                <Text style={styles.modalText}>COMPITE CON UN COMPAÑERO</Text>
-                <View style={styles.formContainer} >
-                  <Text style={styles.label} >Correo electrónico</Text>
-                  <TextInput style={isEmailRequired ? styles.inputRed : styles.input} placeholder="Ingrese su mail" onChangeText={setOpponentEmail} />
-                  <View style={styles.competitionSystem} >
-                    <Text style={styles.basePoints} >
-                      {userPoints?.score_total}
-                    </Text>
-                    <View style={styles.competitionOptions} >
-                      <TouchableOpacity style={styles.subtractPlus} onPress={(event) => handleUpdatePoints(event, basePoints - 100)} >
-                        <Text style={styles.subtractPlusText} >-100</Text>
+              </View>
+            </View> :
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContainerShadown} >
+                <View style={styles.modalContainer} >
+                  <View style={styles.modalInformation} >
+                    <View style={styles.bellContainer} >
+                      {/* Botón para cerrar el modal */}
+                      <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+                        <Text style={styles.buttonText}>X</Text>
                       </TouchableOpacity>
-                      <Text style={styles.pointsText} >
-                        {basePoints} < Image source={require('../../../img/iconos/moneda.png')} />
-                      </Text>
-                      <TouchableOpacity style={styles.subtractPlus} onPress={(event) => handleUpdatePoints(event, basePoints + 100)} >
-                        <Text style={styles.subtractPlusText} >+100</Text>
+                      <TouchableOpacity style={styles.notificationsContainer} onPress={() => setNotifications(!notifications)} >
+                        <Image source={require('../../../img/iconos/bell.png')} />
+                        {
+                          competitions && competitions.length > 0 && (
+                            <Text style={styles.competitionNotificationCounter} >{competitions.length}</Text>
+                          )
+                        }
                       </TouchableOpacity>
                     </View>
-                    <TouchableOpacity disabled={userPoints?.score_total.length < 100 ? true : false} style={styles.competitionButton} onPress={handleCreateCompetition} >
-                      <Text style={styles.competitionText} >COMPETIR</Text>
+                    <Text style={styles.modalText}>COMPITE CON UN COMPAÑERO</Text>
+                    <View style={styles.formContainer} >
+                      <Text style={styles.label} >Correo electrónico</Text>
+                      <TextInput style={isEmailRequired ? styles.inputRed : styles.input} placeholder="Ingrese su mail" onChangeText={setOpponentEmail} />
+                      <View style={styles.competitionSystem} >
+                        <Text style={styles.basePoints} >
+                          {userPoints?.score_total}
+                        </Text>
+                        <View style={styles.competitionOptions} >
+                          <TouchableOpacity style={styles.subtractPlus} onPress={(event) => handleUpdatePoints(event, basePoints - 100)} >
+                            <Text style={styles.subtractPlusText} >-100</Text>
+                          </TouchableOpacity>
+                          <Text style={styles.pointsText} >
+                            {basePoints} < Image source={require('../../../img/iconos/moneda.png')} />
+                          </Text>
+                          <TouchableOpacity style={styles.subtractPlus} onPress={(event) => handleUpdatePoints(event, basePoints + 100)} >
+                            <Text style={styles.subtractPlusText} >+100</Text>
+                          </TouchableOpacity>
+                        </View>
+                        <TouchableOpacity disabled={userPoints?.score_total.length < 100 ? true : false} style={styles.competitionButton} onPress={handleCreateCompetition} >
+                          <Text style={styles.competitionText} >COMPETIR</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </View>
+                  <View style={styles.competitionsContainer} >
+                    {
+                      notifications ?
+                        <Text style={styles.informationTitle} >NOTIFICACIONES</Text> :
+                        <Text style={styles.informationTitle} >COMPETENCIAS ACTIVAS</Text>
+                    }
+                    <TouchableOpacity onPress={() => {
+                      navigation.navigate('AllCompetitionMain');
+                      closeModal();
+                    }} >
+                      <Text style={styles.seeMore} >Ver más</Text>
                     </TouchableOpacity>
+                    {
+                      !notifications && activeCompetitions?.length > 0 ?
+                        <View style={styles.competitionsCard} >
+                          {
+                            activeCompetitions.map(competition => {
+                              return (
+                                <CompetitionCard key={competition.UID} competition={competition} notifications={false} ejectFunction={closeModal} />
+                              );
+                            })
+                          }
+                        </View> :
+                        notifications && competitions?.length > 0 ?
+                          <View style={styles.competitionsCard} >
+                            {
+                              competitions.map(competition => {
+                                return (
+                                  <CompetitionCard key={competition.UID} competition={competition} notifications={true} ejectFunction={closeModal} />
+                                );
+                              })
+                            }
+                          </View> :
+                          <Text style={styles.informationTitle} >No hay competiciones para mostrar!</Text>
+                    }
                   </View>
                 </View>
               </View>
-              <View style={styles.competitionsContainer} >
-                {
-                  notifications ?
-                    <Text style={styles.informationTitle} >NOTIFICACIONES</Text> :
-                    <Text style={styles.informationTitle} >COMPETENCIAS ACTIVAS</Text>
-                }
-                <TouchableOpacity onPress={() => {
-                  navigation.navigate('AllCompetitionMain');
-                  closeModal();
-                }} >
-                  <Text style={styles.seeMore} >Ver más</Text>
-                </TouchableOpacity>
-                {
-                  !notifications && activeCompetitions?.length > 0 ?
-                    <View style={styles.competitionsCard} >
-                      {
-                        activeCompetitions.map(competition => {
-                          return (
-                            <CompetitionCard key={competition.UID} competition={competition} notifications={false} ejectFunction={closeModal} />
-                          );
-                        })
-                      }
-                    </View> :
-                    notifications && competitions?.length > 0 ?
-                      <View style={styles.competitionsCard} >
-                        {
-                          competitions.map(competition => {
-                            return (
-                              <CompetitionCard key={competition.UID} competition={competition} notifications={true} ejectFunction={closeModal} />
-                            );
-                          })
-                        }
-                      </View> :
-                      <Text style={styles.informationTitle} >No hay competiciones para mostrar!</Text>
-                }
-              </View>
             </View>
-          </View>
-        </View>
+        }
       </Modal>
     </View>
   );
@@ -378,6 +411,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: fonts.rubik,
     fontWeight: 'bold',
+  },
+  errorMessage: {
+    color: '#FF4D4D',
+  },
+  successMessage: {
+    color: '#28A745',
   },
   formContainer: {
     justifyContent: 'center',

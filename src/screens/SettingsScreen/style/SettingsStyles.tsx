@@ -32,7 +32,7 @@ const ProfileStyles = StyleSheet.create({
   },
   profilePicture: {
     top: responsiveWidth(-50),
-    width: responsiveWidth(60),
+    width: responsiveWidth(100),
     height: responsiveHeight(100),
   },
   containerAccountInformation: {
