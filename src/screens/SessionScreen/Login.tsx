@@ -15,6 +15,7 @@ import { getUserInformation, loginUserByEmailAndPassword, validateToken } from '
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../AuthContext';
 import { TUserLogin } from 'src/types/user';
+import Loader from '@components/LoaderComponent/Loader';
 // import { checkLoginStatus, getUserInformation } from '@services/authService';
 
 
@@ -32,10 +33,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const [loading, setLoading] = useState<boolean>(false);
+
   const { updateUserInformation } = useAuth();
 
 
   const handleLogin = async () => {
+    setLoading(true);
     if (!email || !password) {
       console.error('Por favor, completa todos los campos.');
       return;
@@ -51,11 +55,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       await AsyncStorage.setItem('updateProfileInformation', 'false');
 
       updateUserInformation(user);
-
+      setLoading(false);
       if (user.id_token) {
         navigation.navigate('MainTab', { screen: 'Home' });
       }
     } catch (error) {
+      setLoading(false);
       console.error('Error de login:', error);
     }
   };
@@ -206,7 +211,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 </View>
                 <TextInput
                   style={loginStyles.input}
-                  placeholder="Correo electrónico"
+                  placeholder="Contraseña"
                   keyboardType="email-address"
                   autoCapitalize="none"
 
@@ -220,10 +225,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                   style={loginStyles.botonLogin}
                   onPress={handleLogin}
                 >
-                  <Text style={loginStyles.textoButtons}>
-
-                    Login
-                  </Text>
+                  {loading ?
+                    <Loader visible={loading} message="" /> :
+                    <Text style={loginStyles.textoButtons}>
+                      Login
+                    </Text>
+                  }
                 </TouchableOpacity>
                 {/* Boton Register */}
                 <TouchableOpacity

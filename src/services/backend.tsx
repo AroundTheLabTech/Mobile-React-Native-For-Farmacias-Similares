@@ -28,6 +28,8 @@ export const loginUserByEmailAndPassword = async (email: string, password: strin
       }),
     };
 
+    console.log(BACKEND_BASE_URL);
+
     const response = await fetch(`${BACKEND_BASE_URL}/users/login_with_email_and_password`, requestOptions);
 
     if (!response.ok) {

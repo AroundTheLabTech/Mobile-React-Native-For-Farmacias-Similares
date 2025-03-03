@@ -6,6 +6,7 @@ import { RootStackParamList } from '../../NavigationTypes';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { TUserRegister } from 'src/types/user';
 import { postUserRegister } from '@services/backend';
+import Loader from '@components/LoaderComponent/Loader';
 
 // Definir el tipo de navegación para la pantalla Register
 type RegisterScreenNavigationProp = StackNavigationProp<
@@ -25,7 +26,10 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
   const [location, setLocation] = useState<string>();
   const [age, setAge] = useState<string>();
 
+  const [loading, setLoading] = useState<boolean>(false);
+
   async function handleRegister() {
+    setLoading(true);
     if (!email || email.trim() === '') {
       console.log('completar el email');
       return;
@@ -62,6 +66,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
     } else {
       navigation.navigate('Login');
     }
+    setLoading(false);
   }
 
   return (
@@ -180,9 +185,13 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
                 <TouchableOpacity onPress={handleRegister}
                   style={loginStyles.botonLogin}
                 >
-                  <Text style={loginStyles.textoButtons}>
-                    Register
-                  </Text>
+                  {
+                    loading ?
+                      <Loader visible={loading} message="" /> :
+                      <Text style={loginStyles.textoButtons}>
+                        Register
+                      </Text>
+                  }
                 </TouchableOpacity>
               </View>
             </View>
