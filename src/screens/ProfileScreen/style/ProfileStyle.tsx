@@ -1,8 +1,8 @@
 import { StyleSheet } from 'react-native';
-import { colors, fontSizes, spacing, fonts } from '../../../../global-class'; // Importa las variables globales
+import { colors, fontSizes, spacing, fonts, responsiveHeight, responsiveWidth } from '../../../../global-class'; // Importa las variables globales
 
 const ProfileStyles = StyleSheet.create({
-  //Profile Image 
+  //Profile Image
   containerMax: {
     flex: 1,
     backgroundColor: colors.background2,
@@ -12,9 +12,15 @@ const ProfileStyles = StyleSheet.create({
     alignItems: 'center',
   },
   headerProfile: {
-    padding: spacing.lg,
+    padding: spacing.sm,
     width: '100%',
     alignItems: 'flex-end',
+  },
+
+  ProfileContainer: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
   },
 
   profileImageContainer: {
@@ -22,23 +28,24 @@ const ProfileStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     height: '15%',
+    flex: 0.5,
   },
   imageProfile: {
     resizeMode: 'contain',
     width: '100%',
-    height: 150,
+    height: responsiveHeight(150),
     zIndex: 1000,
   },
 
   //Dashboard
   containerDashboard: {
+    flex: 9,
     width: '97%',
+    top: responsiveWidth(-48),
     backgroundColor: colors.background3,
-    borderTopRightRadius: 12,
-    borderTopLeftRadius: 12,
+    borderRadius: 12,
     padding: spacing.lg,
     alignItems: 'center',
-    marginTop: '-10%',
     height: '100%',
   },
   TextProfile: {
@@ -71,7 +78,7 @@ const ProfileStyles = StyleSheet.create({
   },
   titlePuntaje: {
     color: 'rgba(255, 255, 255, 0.4)', // Color blanco con 40% de opacidad
-    fontSize: fontSizes.md,
+    fontSize: fontSizes.sm,
   },
   puntajeNumber: {
     color: colors.primary,

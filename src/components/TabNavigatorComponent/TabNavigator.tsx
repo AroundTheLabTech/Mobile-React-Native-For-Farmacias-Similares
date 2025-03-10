@@ -1,20 +1,26 @@
 import React, { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faHome, faUser, faChartBar, faGamepad, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faUser, faChartBar, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { colors } from '../../../global-class';
 
-import HomeScreen from '../../screens/HomeScreen/Home';
+import HomeScreen from '../../screens/HomeScreen/HomeStack';
 import ProfileStack from '../../screens/ProfileScreen/ProfileStack';
 import LeaderBoard from '../../screens/LeaderBoard/LeaderBoard';
 
 import { useAuth } from '../../AuthContext';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
-import NotchBackground from './NotchBackground';
-import _404Page from '../../screens/404Screen/404';
+// import NotchBackground from './NotchBackground';
+// import _404Page from '../../screens/404Screen/404';
 
 const Tab = createBottomTabNavigator();
+
+/*
+const TabBarBackground = () => {
+  return <NotchBackground />;
+};
+*/
 
 const TabNavigation = () => {
   const { uid, displayName } = useAuth();
@@ -50,16 +56,18 @@ const TabNavigation = () => {
         tabBarStyle: styles.tabBar,
         tabBarShowLabel: false,
         headerShown: false,
-        tabBarBackground: () => <NotchBackground />,
+        // tabBarBackground: TabBarBackground,
       })}
     >
       <Tab.Screen
         name="Home"
         component={HomeScreen}
       />
+      {/**
       <Tab.Screen name="Search"
-        component={_404Page}
+        component={HomeScreen}
       />
+      */}
       <Tab.Screen name="Leaderboard"
         component={LeaderBoard}
       />
@@ -72,8 +80,8 @@ const TabNavigation = () => {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: 'transparent',
-    borderTopWidth: 0,
+    // backgroundColor: 'transparent',
+    borderTopWidth: 1,
     elevation: 0,
     shadowOpacity: 0,
     position: 'absolute',

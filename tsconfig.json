@@ -13,8 +13,8 @@
     "module": "esnext",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "types": ["react-native", "i18next", "react"],
-    "baseUrl": ".",
+    "types": ["react-native", "react"],
+    "baseUrl": "./",
     "paths": {
       "@components/*": ["src/components/*"],
       "@screens/*": ["src/screens/*"],

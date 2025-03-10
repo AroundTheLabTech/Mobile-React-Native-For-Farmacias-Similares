@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { colors, fontSizes, spacing, fonts } from '../../../../global-class'; // Importa las variables globales
+import { colors, fontSizes, spacing, fonts, responsiveWidth, responsiveHeight } from '../../../../global-class'; // Importa las variables globales
 
 const ProfileStyles = StyleSheet.create({
   container: {
@@ -20,7 +20,7 @@ const ProfileStyles = StyleSheet.create({
   },
   containerGoBack: {
     marginTop: spacing.md,
-    marginLeft: spacing.lg,
+    marginLeft: spacing.xxl,
     width: '100%',
   },
   containerProfileInformation: {
@@ -31,7 +31,9 @@ const ProfileStyles = StyleSheet.create({
     height: spacing.xl,
   },
   profilePicture: {
-    top: '-150%',
+    top: responsiveWidth(-50),
+    width: responsiveWidth(100),
+    height: responsiveHeight(100),
   },
   containerAccountInformation: {
     backgroundColor: colors.background2,

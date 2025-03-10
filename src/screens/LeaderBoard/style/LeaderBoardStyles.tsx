@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { colors, fontSizes, spacing, fonts } from '../../../../global-class'; // Importa las variables globales
+import { colors, fontSizes, spacing } from '../../../../global-class'; // Importa las variables globales
 
 const LeaderBoardStyles = StyleSheet.create({
     containerScroll: {
@@ -40,11 +40,12 @@ const LeaderBoardStyles = StyleSheet.create({
         borderRadius: 10,
         fontSize: fontSizes.sm,
         fontWeight: '400',
-        color: colors.primary
+        color: colors.primary,
     },
     containerPosition: {
         backgroundColor: colors.background5,
         margin: spacing.md,
+        marginBottom: 0,
         padding: spacing.sm,
         borderRadius: 15,
         flexDirection: 'row',
@@ -56,15 +57,16 @@ const LeaderBoardStyles = StyleSheet.create({
         fontSize: fontSizes.sm,
         color: colors.primary,
         fontWeight: '700',
-        flex: 1,
+        flex: 2,
         marginRight: spacing.sm,
+        textAlign: 'center',
     },
     positionDescription: {
         fontSize: fontSizes.md,
         marginLeft: spacing.sm,
         fontWeight: '700',
         color: colors.primary,
-        flex: 15,
+        flex: 13,
     },
     containerPositions: {
     },
@@ -72,10 +74,20 @@ const LeaderBoardStyles = StyleSheet.create({
         flex: 1,
         height: 700,
     },
+    containerPlayersList9Inches: {
+        flex: 1,
+        height: 1250,
+    },
     playersList: {
         backgroundColor: colors.background7,
         padding: spacing.sm,
         height: '100%',
+    },
+    space: {
+        height: spacing.xl,
+    },
+    leaderBoardContainer: {
+        paddingBottom: 70,
     },
 });
 

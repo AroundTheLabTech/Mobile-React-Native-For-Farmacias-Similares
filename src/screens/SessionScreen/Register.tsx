@@ -1,11 +1,12 @@
-import React from 'react';
-import { View, Text, Button, StyleSheet, Image, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import loginStyles from './style/registerStyle'; // Importamos los estilos de login
 import { ScrollView } from 'react-native-gesture-handler';
-import { RootStackParamList } from '../../NavigationTypes'; 
+import { RootStackParamList } from '../../NavigationTypes';
 import { StackNavigationProp } from '@react-navigation/stack';
-
-
+import { TUserRegister } from 'src/types/user';
+import { postUserRegister } from '@services/backend';
+import Loader from '@components/LoaderComponent/Loader';
 
 // Definir el tipo de navegación para la pantalla Register
 type RegisterScreenNavigationProp = StackNavigationProp<
@@ -14,171 +15,201 @@ type RegisterScreenNavigationProp = StackNavigationProp<
 >;
 
 type RegisterScreenProps = {
-    navigation: RegisterScreenNavigationProp;
-  };
+  navigation: RegisterScreenNavigationProp;
+};
 
-  const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
-    return (
-    <ScrollView>
-         <View style={loginStyles.headerContainer}>
+const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
+
+  const [email, setEmail] = useState<string>();
+  const [name, setName] = useState<string>();
+  const [password, setPassword] = useState<string>();
+  const [location, setLocation] = useState<string>();
+  const [age, setAge] = useState<string>();
+
+  const [loading, setLoading] = useState<boolean>(false);
+
+  async function handleRegister() {
+    setLoading(true);
+    if (!email || email.trim() === '') {
+      console.log('completar el email');
+      return;
+    }
+    if (!name || email.trim() === '') {
+      console.log('completar el name');
+      return;
+    }
+    if (!password || email.trim() === '') {
+      console.log('completar el password');
+      return;
+    }
+    if (!location || email.trim() === '') {
+      console.log('completar el location');
+      return;
+    }
+    if (!age || Number(age) <= 0) {
+      console.log('completar el age');
+      return;
+    }
+
+    const newUser: TUserRegister = {
+      email,
+      display_name: name,
+      password,
+      ubication: location,
+      age: Number(age),
+    };
+
+    const response = await postUserRegister(newUser);
+
+    if (response.message) {
+      navigation.navigate('Login');
+    } else {
+      navigation.navigate('Login');
+    }
+    setLoading(false);
+  }
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={loginStyles.keyboardAvoid}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView>
+          <View style={loginStyles.headerContainer}>
+            <Image
+              source={require('../../../img/medallas/medal1.png')}
+              style={loginStyles.headerMedal}
+            />
+            <Image
+              source={require('../../../img/medallas/medal1.png')}
+              style={loginStyles.headerMedal}
+            />
+          </View>
+          <View style={loginStyles.containerLogin}>
+            <View style={loginStyles.containerTitle}>
+              {/* Title */}
+              <Text style={loginStyles.titleLogin}>
+                ¡Registro!
+              </Text>
+              {/* Container Forms */}
+              <View
+                style={loginStyles.containerForms}>
+                {/* Correo Electronico */}
+                <View style={loginStyles.containerPlaceHolder}
+                >
+                  <Text
+                    style={loginStyles.placeHolder}
+                  >
+                    Correo Electrónico</Text>
+                </View>
+                <TextInput
+                  style={loginStyles.input}
+                  placeholder="Correo electrónico"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  onChangeText={setEmail}
+                />
+                {/* Nombre */}
+                <View style={loginStyles.containerPlaceHolder}
+                >
+                  <Text
+                    style={loginStyles.placeHolder}
+                  >
+                    Nombre</Text>
+                </View>
+                <TextInput
+                  style={loginStyles.input}
+                  placeholder="Nombre"
+                  keyboardType="default"
+                  autoCapitalize="none"
+                  onChangeText={setName}
+                />
+                {/* Contraseña */}
+                <View style={loginStyles.containerPlaceHolder}
+                >
+                  <Text
+                    style={loginStyles.placeHolder}
+                  >
+                    Contraseña</Text>
+                </View>
+                <TextInput
+                  style={loginStyles.input}
+                  placeholder="Contraseña"
+                  keyboardType="default"
+                  autoCapitalize="none"
+                  onChangeText={setPassword}
+                />
+                {/* Ubicación */}
+                <View style={loginStyles.containerPlaceHolder}
+                >
+                  <Text
+                    style={loginStyles.placeHolder}
+                  >
+                    Ubicación</Text>
+                </View>
+                <TextInput
+                  style={loginStyles.input}
+                  placeholder="Ubicacion"
+                  keyboardType="default"
+                  autoCapitalize="none"
+                  onChangeText={setLocation}
+                />
+                {/* Edad */}
+                <View style={loginStyles.containerPlaceHolder}
+                >
+                  <Text
+                    style={loginStyles.placeHolder}
+                  >
+                    Edad</Text>
+                </View>
+                <TextInput
+                  style={loginStyles.input}
+                  placeholder="Edad"
+                  keyboardType="default"
+                  autoCapitalize="none"
+                  onChangeText={setAge}
+                />
+              </View>
+              {/* Container Button */}
+              <View style={loginStyles.containerButtons}>
+                {/* Boton Login */}
+                <TouchableOpacity
+                  style={loginStyles.botonLogin}
+                  onPress={() => navigation.navigate('Login')} // Asegúrate de que onPress esté dentro de TouchableOpacity
+                >
+                  <Text style={loginStyles.textoButtons}>
+                    Login
+                  </Text>
+                </TouchableOpacity>
+                {/* Boton Register */}
+                <TouchableOpacity onPress={handleRegister}
+                  style={loginStyles.botonLogin}
+                >
+                  {
+                    loading ?
+                      <Loader visible={loading} message="" /> :
+                      <Text style={loginStyles.textoButtons}>
+                        Register
+                      </Text>
+                  }
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={loginStyles.headerContainer}>
               <Image
                 source={require('../../../img/medallas/medal1.png')}
                 style={loginStyles.headerMedal}
-            />
-
-            <Image
+              />
+              <Image
                 source={require('../../../img/medallas/medal1.png')}
                 style={loginStyles.headerMedal}
-            />
-        </View>
-        <View style={loginStyles.containerLogin}>
-  
-        <View style={loginStyles.containerTitle}>
-          {/* Title */}
-          <Text style={loginStyles.titleLogin}>
-            ¡Registro! 
-          </Text>  
-          {/* Container Forms */}
-          <View 
-          style={loginStyles.containerForms}>
-
-            {/* Correo Electronico */}
-            <View style ={loginStyles.containerPlaceHolder}
-            >
-              <Text
-              style ={loginStyles.placeHolder}
-              >
-                Correo Electrónico</Text>
+              />
             </View>
-
-            <TextInput
-              style={loginStyles.input}
-              placeholder="Correo electrónico"
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-
-
-             {/* Nombre */}
-            <View style ={loginStyles.containerPlaceHolder}
-            >
-              <Text
-              style ={loginStyles.placeHolder}
-              >
-                Nombre</Text>
-            </View>
-
-       
-             <TextInput
-              style={loginStyles.input}
-              placeholder="Correo electrónico"
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-
-            
-            {/* Contraseña */}
-            <View style ={loginStyles.containerPlaceHolder}
-            >
-              <Text
-              style ={loginStyles.placeHolder}
-              >
-                Contraseña</Text>
-            </View>
-  
-            <TextInput
-              style={loginStyles.input}
-              placeholder="Correo electrónico"
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-               
-            {/* Ubicación */}
-            <View style ={loginStyles.containerPlaceHolder}
-            >
-              <Text
-              style ={loginStyles.placeHolder}
-              >
-                Ubicación</Text>
-            </View>
-  
-            <TextInput
-              style={loginStyles.input}
-              placeholder="Correo electrónico"
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-
-            {/* Edad */}
-            <View style ={loginStyles.containerPlaceHolder}
-            >
-              <Text
-              style ={loginStyles.placeHolder}
-              >
-                Eda                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             d</Text>
-            </View>
-  
-            <TextInput
-              style={loginStyles.input}
-              placeholder="Correo electrónico"
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          
-          
           </View>
-
-
-          {/* Container Button */}
-          <View style={loginStyles.containerButtons}>
-  
-               {/* Boton Login */}
-            <TouchableOpacity
-              style= {loginStyles.botonLogin}
-              onPress={() => navigation.navigate('Login')} // Asegúrate de que onPress esté dentro de TouchableOpacity
-
-            >
-              <Text style={loginStyles.textoButtons}>
-                Login
-              </Text>
-            </TouchableOpacity>
-  
-            {/* Boton Register */}
-            <TouchableOpacity 
-                style={loginStyles.botonLogin}
-              >
-                <Text style={loginStyles.textoButtons}>
-                  Register
-                </Text>
-              </TouchableOpacity>
-  
-         
-  
-          </View>
-  
-        </View> 
-  
-        <View style={loginStyles.headerContainer}>
-         
-          
-        </View> 
-  
-        </View>
-      
-    </ScrollView>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#000',
-  },
-  text: {
-    fontSize: 24,
-  },
-});
 
 export default RegisterScreen;

@@ -1,9 +1,13 @@
 import React from 'react';
 import { View, Text, Image } from 'react-native';
 import LeaderBoardCardStyles from './style/LeaderBoardCardStyles';
+import { TLeaderBoard } from 'src/types/user';
 
+interface LeaderBoardCardProps {
+  player: TLeaderBoard
+}
 
-const LeaderBoardCard = ({ player }) => {
+const LeaderBoardCard: React.FC<LeaderBoardCardProps> = ({ player }) => {
   return (
     <View style={LeaderBoardCardStyles.container} >
       <View style={LeaderBoardCardStyles.containerPosition} >
@@ -12,17 +16,19 @@ const LeaderBoardCard = ({ player }) => {
       <View style={LeaderBoardCardStyles.containerInformation} >
         <View style={LeaderBoardCardStyles.containerProfileImages} >
           <Image
-            src='https://via.placeholder.com/50'
-            style={{ width: 50, height: 50, borderRadius: 100, top: 5 }}
+            source={{ uri: player.profile_mini_pictures_url }}
+            style={LeaderBoardCardStyles.profilePicture}
           />
           <Image
-            src='https://via.placeholder.com/20'
-            style={{ width: 20, height: 20, borderRadius: 100, top: -10, right: -35 }}
+            src={player.flag_url}
+            width={20}
+            height={20}
+            style={LeaderBoardCardStyles.flagPicture}
           />
         </View>
         <View style={LeaderBoardCardStyles.containerSubInformation} >
-          <Text style={LeaderBoardCardStyles.name} >{player.name}</Text>
-          <Text style={LeaderBoardCardStyles.points} >{player.points} points</Text>
+          <Text style={LeaderBoardCardStyles.name} >{player?.username ? player?.username : 'Usuario'}</Text>
+          <Text style={LeaderBoardCardStyles.points} >{player.total_score} points</Text>
         </View>
       </View>
     </View>

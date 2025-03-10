@@ -3,7 +3,9 @@ import { colors, fontSizes, spacing, fonts } from '../../../../global-class'; //
 
 
 const loginStyles = StyleSheet.create({
-
+    keyboardAvoid: {
+        flex: 1,
+    },
     container: {
         flex: 1,
         backgroundColor: '#fff',
@@ -98,8 +100,7 @@ const loginStyles = StyleSheet.create({
     },
     containerPlaceHolder: {
         width: '80%',
-    }
-
+    },
 });
 
 export default loginStyles;

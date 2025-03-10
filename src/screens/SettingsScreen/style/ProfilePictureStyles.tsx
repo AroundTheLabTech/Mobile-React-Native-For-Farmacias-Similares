@@ -1,7 +1,10 @@
 import { StyleSheet } from 'react-native';
-import { colors, fontSizes, spacing, fonts } from '../../../../global-class'; // Importa las variables globales
+import { colors, fontSizes, spacing } from '../../../../global-class'; // Importa las variables globales
 
 const ProfilePictureStyles = StyleSheet.create({
+  profileMainContainer: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: colors.background2,
@@ -20,7 +23,7 @@ const ProfilePictureStyles = StyleSheet.create({
   },
   containerGoBack: {
     marginTop: spacing.md,
-    marginLeft: spacing.lg,
+    marginLeft: spacing.xxl,
     width: '100%',
     flex: 1,
   },
@@ -44,6 +47,12 @@ const ProfilePictureStyles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: spacing.md,
   },
+  subContainerMainPicture: {
+    borderRadius: 150,
+    width: 150,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
   mainPicture: {
     width: 180,
     height: 180,
@@ -64,17 +73,23 @@ const ProfilePictureStyles = StyleSheet.create({
     marginLeft: spacing.sm,
     marginRight: spacing.sm,
     marginTop: spacing.sm,
+    paddingBottom: spacing.xxxl,
+    gap: spacing.sm,
   },
   profilePicture: {
     margin: spacing.sm,
   },
+  profilePicturesAvalibleContainer: {
+    marginBottom: spacing.md,
+  },
   containerSave: {
-    flex: 1,
     width: '100%',
     paddingRight: spacing.md,
     paddingLeft: spacing.md,
     alignItems: 'flex-end',
     marginVertical: spacing.lg,
+    position: 'absolute',
+    bottom: 0,
   },
   containerButtonSave: {
     width: '40%',
@@ -82,6 +97,8 @@ const ProfilePictureStyles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.background3,
   },
   buttonSaveText: {
     fontSize: fontSizes.md,

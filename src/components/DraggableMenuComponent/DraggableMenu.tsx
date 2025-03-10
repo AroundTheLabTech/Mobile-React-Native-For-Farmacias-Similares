@@ -1,12 +1,16 @@
 import React, { ReactNode, useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, PanResponder, Animated, Dimensions, ScrollView } from 'react-native';
-import Svg, { Ellipse, Path } from 'react-native-svg';
+import { View, StyleSheet, PanResponder, Animated, Dimensions, ScrollView, PixelRatio } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import { colors, spacing } from '../../../global-class';
-import EllipseComponent from '../../components/ElipseComponent/ElipseComponent';
+import { calculateScreenSizeInInches } from '../../utils/helpers';
 
 const MountainGripSVG = () => {
+
+  const sizeInInches = calculateScreenSizeInInches(Dimensions, PixelRatio);
+
   return (
-    <View style={styles.container}>
+    // eslint-disable-next-line react-native/no-inline-styles
+    <View style={[styles.container, { left: sizeInInches && Number(sizeInInches) > 9 ? '6%' : '0%'  }]}>
       <Svg height="40" width="15%">
         <Path
           d="M0,31 L10,31 32,18 10,31 L25,31"
@@ -43,6 +47,7 @@ const MountainGripSVG = () => {
 const { height: screenHeight } = Dimensions.get('window');
 const INITIAL_POSITION = screenHeight * 0.65;
 const MAX_DRAG_POSITION = screenHeight * 0.15;
+const MIN_DRAG_POSITION = screenHeight * 0.68;
 const GRIP_HEIGHT = 40; // Altura de la sección superior para activar el arrastre
 
 interface DraggableMenuProps {
@@ -54,7 +59,7 @@ const DraggableMenu: React.FC<DraggableMenuProps> = ({ children }) => {
   const scrollViewRef = useRef<ScrollView>(null);
   const [scrollEnabled, setScrollEnabled] = useState(false);
 
-  const [move, setMove] = useState(false)
+  const [move, setMove] = useState(false);
 
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: (e) => {
@@ -71,11 +76,11 @@ const DraggableMenu: React.FC<DraggableMenuProps> = ({ children }) => {
     onPanResponderMove: (e, gestureState) => {
       // Mueve el menú verticalmente solo si está en el área permitida
       if (e.nativeEvent.pageY >= MAX_DRAG_POSITION - 20) {
-        setMove(true)
-        const newY = Math.max(MAX_DRAG_POSITION, INITIAL_POSITION + gestureState.dy);
+        setMove(true);
+        const newY = Math.min(Math.max(MAX_DRAG_POSITION, INITIAL_POSITION + gestureState.dy), MIN_DRAG_POSITION);
         panY.setValue(newY);
       } else {
-        setMove(false)
+        setMove(false);
       }
     },
     onPanResponderRelease: (_, gestureState) => {
@@ -93,9 +98,9 @@ const DraggableMenu: React.FC<DraggableMenuProps> = ({ children }) => {
 
   useEffect(() => {
     if (!scrollEnabled) {
-      scrollViewRef.current?.scrollTo({ y: 0, animated: true })
+      scrollViewRef.current?.scrollTo({ y: 0, animated: true });
     }
-  }, [scrollEnabled])
+  }, [scrollEnabled]);
 
   return (
     <Animated.View
@@ -107,7 +112,7 @@ const DraggableMenu: React.FC<DraggableMenuProps> = ({ children }) => {
     >
       <MountainGripSVG />
       <ScrollView
-        style={{ width: '90%', height: '100%' }}
+        style={styles.scrollViewStyle}
         scrollEnabled={scrollEnabled} // Controla si el scroll está habilitado
         nestedScrollEnabled={true}
         ref={scrollViewRef}
@@ -121,6 +126,10 @@ const DraggableMenu: React.FC<DraggableMenuProps> = ({ children }) => {
 };
 
 const styles = StyleSheet.create({
+  scrollViewStyle: {
+    width: '90%',
+    height: '100%',
+  },
   container: {
     alignItems: 'center',
     justifyContent: 'center',

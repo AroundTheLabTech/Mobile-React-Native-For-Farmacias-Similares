@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { colors, fontSizes, spacing, fonts } from '../../../../global-class'; // Importa las variables globales
+import { colors, fontSizes, spacing, fonts, imageSize } from '../../../../global-class'; // Importa las variables globales
 
 const HomeStyles = StyleSheet.create({
     container: {
@@ -14,6 +14,7 @@ const HomeStyles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.background2,
         width: '100%',
+        marginBottom: '10%',
     },
 
     //   Header Profile
@@ -27,18 +28,27 @@ const HomeStyles = StyleSheet.create({
         width: '20%',
         alignItems: 'flex-end',
     },
+    containerSvgImage: {
+        width: '20%',
+        alignItems: 'flex-end',
+        overflow: 'hidden',
+    },
     containerInfo: {
         width: '50%',
+        height: 'auto',
     },
     PerfilImage: {
         resizeMode: 'contain',
-        height: 70,
+        height: imageSize.xl,
     },
     textSaludo: {
-        color: '#FFD6DD',
+        flex: 1,
+        color: colors.primary,
+        fontSize: fontSizes.md,
         fontWeight: '600',
     },
     textUsuario: {
+        flex: 1,
         color: colors.primary,
         fontSize: fontSizes.xxl,
         fontWeight: '600',
@@ -69,10 +79,9 @@ const HomeStyles = StyleSheet.create({
     containerTitleGameNew: {
         flexDirection: 'row',
         width: '100%',
-        marginTop: spacing.sm
+        marginTop: spacing.sm,
     },
-    imageTitleGameNew: {
-    },
+    imageTitleGameNew: {},
     columnLeft: {
         width: '85%',
     },
@@ -128,7 +137,7 @@ const HomeStyles = StyleSheet.create({
         color: colors.background2,
         fontFamily: fonts.rubik,
         fontWeight: '800',
-        fontSize: fontSizes.lg
+        fontSize: fontSizes.lg,
     },
     // Games Section
     containerGamesSection: {
@@ -144,12 +153,12 @@ const HomeStyles = StyleSheet.create({
     },
     titleSectionGames: {
         fontWeight: '700',
-        fontSize: fontSizes.lg,
+        fontSize: fontSizes.sm,
         color: colors.secondary,
     },
 
     //ContainerGames
-    containerGame: {
+    containerScores: {
         width: '100%',
         padding: spacing.sm,
         flexDirection: 'row',
@@ -162,8 +171,24 @@ const HomeStyles = StyleSheet.create({
 
     },
 
-    titleGame: {
-        width: '70%',
+    scoresPerMonth: {
+        width: '100%',
+        flexDirection: 'row',
+        gap: 10,
+    },
+    monthLabel: {
+        fontWeight: '800',
+        fontFamily: fonts.rubik,
+        fontSize: fontSizes.md,
+        color: colors.secondary,
+        flex: 1,
+    },
+    monthValue: {
+        fontFamily: fonts.rubik,
+        fontSize: fontSizes.md,
+        color: colors.secondary,
+        textAlign: 'right',
+        flex: 1,
     },
     imageGame: {
         width: '10%',
@@ -172,7 +197,9 @@ const HomeStyles = StyleSheet.create({
         width: '14%',
     },
     playIconContainer: {
-
+        alignContent: 'center',
+        alignItems: 'center',
+        flex: 1,
     },
     gameTitle: {
         fontWeight: '800',
@@ -180,7 +207,22 @@ const HomeStyles = StyleSheet.create({
         fontSize: fontSizes.xl,
         color: colors.secondary,
     },
-
+    gameButton: {
+        flex: 1,
+        fontSize: fontSizes.xxs,
+        fontFamily: fonts.press,
+        textAlignVertical: 'center',
+        color: colors.secondary,
+    },
+    containerGameButton: {
+        width: '95%',
+        flexDirection: 'row',
+        padding: spacing.sm,
+        borderWidth: 1,
+        marginHorizontal: '2.5%',
+        marginVertical: '5%',
+        borderRadius: 10,
+    },
     //Dashboard
 
 

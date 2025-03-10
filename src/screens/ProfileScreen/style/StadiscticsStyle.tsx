@@ -139,6 +139,7 @@ const StadiscticsStyle = StyleSheet.create({
     fontWeight: '700',
     padding: spacing.md,
     fontSize: fontSizes.xxl,
+    flex: 1,
   },
 
   // Estadisticas
@@ -181,11 +182,16 @@ const StadiscticsStyle = StyleSheet.create({
   rowStadistics: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    flex: 1,
   },
 
   ringChartContainer: {
     alignItems: 'center',
     height: 200,
+    flex: 2,
+  },
+  ringChartContainer9Inches: {
+    height: 400,
   },
   ringChartView: {
     alignItems: 'center',
@@ -194,6 +200,9 @@ const StadiscticsStyle = StyleSheet.create({
     fontSize: fontSizes.mxxl,
     color: colors.secondary,
     fontWeight: '800',
+  },
+  totalText: {
+    fontSize: fontSizes.lg,
   },
   bestGameContainer: {
     backgroundColor: colors.background2,
