@@ -171,7 +171,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
                 />
               </View>
               {/* Container Button */}
-              <View style={loginStyles.containerButtons}>
+              <View style={loginStyles.containerLoginButtons}>
                 {/* Boton Login */}
                 <TouchableOpacity
                   style={loginStyles.botonLogin}

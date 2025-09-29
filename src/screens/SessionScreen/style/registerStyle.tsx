@@ -48,22 +48,33 @@ const loginStyles = StyleSheet.create({
     },
 
     // Botones de Inicio de Sesion
-
-    botonLogin: {
-        borderWidth: 1,
-        borderColor: '#FFFFFF',
-        width: '35%',
-        padding: spacing.sm,
-        justifyContent: 'center',
-        alignItems: 'center',
-
-    },
-    containerButtons: {
+    containerLoginButtons: {
         marginTop: spacing.lg,
         flexDirection: 'row',
         width: '100%',
-        padding: spacing.md,
+        paddingHorizontal: spacing.md,
+        paddingBottom: spacing.md,
         justifyContent: 'space-evenly',
+    },
+    botonLogin: {
+        borderWidth: 1,
+        borderColor: '#FFFFFF',
+        width: '45%',
+        padding: spacing.sm,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    containerButtons: {
+        // borderWidth: 1,
+        // borderColor: '#FFFFFF',
+        // marginTop: spacing.lg,
+        flexDirection: 'column',
+        width: '100%',
+        height: 'auto',
+        paddingHorizontal: spacing.md,
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: spacing.sm,
     },
     textoButtons: {
         color: colors.primary,
