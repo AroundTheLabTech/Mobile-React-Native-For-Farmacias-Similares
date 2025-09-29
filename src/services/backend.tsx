@@ -1,6 +1,6 @@
 import { Alert } from 'react-native';
 import { BACKEND_BASE_URL } from '@env';
-import { TUserCurrentMonthSession, TUserLast3MonthInfo, TUserPoints, TUserInformation, TUserPicture, TBackResponse, TGameCard, TUserLogin, TUserProfilePictures, TScorePerGame, TTopTwenty, TUserTokenValidate, TUserBadges, TUpdateUserInformation, TUserRegister } from '../types/user';
+import { TUserCurrentMonthSession, TUserLast3MonthInfo, TUserPoints, TUserInformation, TUserPicture, TBackResponse, TGameCard, TUserLogin, TUserProfilePictures, TScorePerGame, TTopTwenty, GetTopTwentyOpts, TUserTokenValidate, TUserBadges, TUpdateUserInformation, TUserRegister } from '../types/user';
 import { TCompetition, TCompetitionSession, TCompetitiveStatus, TCreateCompetition, TScoreSessions } from '../types/competition';
 import { TGameSession } from '../types/game';
 import { validateObjectValues } from '../utils/helpers';
@@ -33,11 +33,26 @@ export const loginUserByEmailAndPassword = async (email: string, password: strin
     const response = await fetch(`${BACKEND_BASE_URL}/users/login_with_email_and_password`, requestOptions);
 
     if (!response.ok) {
-      throw new Error(`Error en la solicitud: ${response.status}`);
+      let msg = `HTTP ${response.status}`;
+      try {
+        const err = await response.json();
+        if (err?.detail) msg = String(err.detail);
+        if (err?.message) msg = String(err.message);
+      } catch { }
+      throw new Error(msg);
     }
 
-    const result = await response.json();
-    return result as TUserLogin;
+    const data = await response.json();
+
+    // Normaliza/valida shape
+    const id_token = data?.id_token ?? data?.access_token;
+    const expires_in = data?.expires_in ?? data?.expires ?? null;
+
+    if (!id_token || expires_in == null) {
+      throw new Error('Respuesta de login incompleta.');
+    }
+
+    return data as TUserLogin;
   } catch (error) {
     Alert.alert('Error', 'Fallo la autenticacion del usuario');
     return null;
@@ -479,6 +494,33 @@ export const getTopTwenty = async (): Promise<TTopTwenty[] | null> => {
   }
 };
 
+export const getTopTwentyMonthly = async (opts?: GetTopTwentyOpts): Promise<TTopTwenty[] | null> => {
+  const { monthly = false, timeoutMs = 10_000 } = opts ?? {};
+  const endpoint = monthly
+    ? `${BACKEND_BASE_URL}/scores/top_twenty_monthly?monthly=true`
+    : `${BACKEND_BASE_URL}/scores/top_twenty`;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(endpoint, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+    });
+
+    if (!res.ok) {throw new Error(`HTTP ${res.status}`);}
+    const data = (await res.json()) as TTopTwenty[];
+    return data;
+  } catch (err) {
+    console.log('getTopTwenty error:', err);
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+};
+
 export const getUserBadges = async (uid: string): Promise<TUserBadges | null> => {
   try {
     const requestOptions = {
@@ -747,5 +789,32 @@ export const getCompetitiveStatus = async (userUid: string, opponentUid: string,
     return result as TCompetitiveStatus;
   } catch (error) {
     return null;
+  }
+};
+
+export const putResetPassword = async (email: string) => {
+  try {
+    if (!email) {
+      throw new Error('Email inválido');
+    }
+
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    };
+
+    const response = await fetch(`${BACKEND_BASE_URL}/users/reset_password/${email}`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    return error.message;
   }
 };

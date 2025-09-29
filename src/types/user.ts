@@ -134,6 +134,11 @@ export type TTopTwenty = {
   flag_url: string
 }
 
+export type GetTopTwentyOpts = {
+  monthly?: boolean;
+  timeoutMs?: number;
+};
+
 export type TLeaderBoard = TTopTwenty & {
   position: number
 }
