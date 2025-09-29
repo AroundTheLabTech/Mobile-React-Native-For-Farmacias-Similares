@@ -6,7 +6,7 @@ import HomeStyles from './style/HomeStyle';
 
 import { useAuth } from '../../AuthContext'; // Importa el hook useAuth
 import { useUser } from '../../services/UserContext';
-import CompetitionModal from '../../components/CompetitionComponent/CompetitionModal';
+// import CompetitionModal from '../../components/CompetitionComponent/CompetitionModal';
 import Loader from '@components/LoaderComponent/Loader';
 import Virus1 from '@img/personajes/virus-1.svg';
 import Game1 from '@img/games/portada/game-1.png';
@@ -228,8 +228,6 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </TouchableOpacity>
 
-        {/* Referidos */}
-
         <View style={HomeStyles.containerReferidos}>
           <View style={HomeStyles.containerTitleReferidos}>
             {/*
@@ -237,9 +235,8 @@ const HomeScreen = ({ navigation }) => {
               REFERIDOS
             </Text>
             */}
-            <CompetitionModal navigation={navigation} />
             <Text style={HomeStyles.subtitleReferidos}>
-              ¡Compite con tus amigos para lograr mayor puntaje!
+              ¡Disfruta de nuestros increibles juegos!
             </Text>
             {/**
             <TouchableOpacity style={HomeStyles.botonInvitar}>
@@ -252,42 +249,67 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </View>
 
-
-      </View>
-
-      {/* Points and games */}
-      <View style={HomeStyles.containerGamesSection}>
-        <View style={HomeStyles.containerTitleGames}>
-          <Text style={HomeStyles.titleSectionGames}>
-            ¡Esta es tu puntuacion de los ultimos 3 meses!
-          </Text>
+        {/* Referidos */}
+            {/* 
+        <View style={HomeStyles.containerReferidos}>
+          <View style={HomeStyles.containerTitleReferidos}>
+            {/*
+            <Text style={HomeStyles.titleReferidos}>
+              REFERIDOS
+            </Text>
+            * /}
+            <CompetitionModal navigation={navigation} />
+            <Text style={HomeStyles.subtitleReferidos}>
+              ¡Compite con tus amigos para lograr mayor puntaje!
+            </Text>
+            {/**
+            <TouchableOpacity style={HomeStyles.botonInvitar}>
+              <Image
+                source={require('../../../img/personajes/doctor-simi-invade.png')}
+              />
+              <Text style={HomeStyles.textoBoton}>Invitar</Text>
+            </TouchableOpacity>
+            * /}
+          </View>
         </View>
-        {
-          scoresLats3Months && scoresLats3Months.map((score, index) => {
-            if (score.label && score.value) {
-              return (
-                <View key={index} style={HomeStyles.containerScores}>
-                  <View style={HomeStyles.scoresPerMonth}>
-                    <Text style={HomeStyles.monthLabel}>{score.label}:</Text>
-                    <Text style={HomeStyles.monthValue}>{score.value}</Text>
-                  </View>
-                </View>
-              );
-            } else {
-              return null;
+        */}
+
+
+          </View>
+
+          {/* Points and games */}
+          <View style={HomeStyles.containerGamesSection}>
+            <View style={HomeStyles.containerTitleGames}>
+              <Text style={HomeStyles.titleSectionGames}>
+                ¡Esta es tu puntuacion de los ultimos 3 meses!
+              </Text>
+            </View>
+            {
+              scoresLats3Months && scoresLats3Months.map((score, index) => {
+                if (score.label && score.value) {
+                  return (
+                    <View key={index} style={HomeStyles.containerScores}>
+                      <View style={HomeStyles.scoresPerMonth}>
+                        <Text style={HomeStyles.monthLabel}>{score.label}:</Text>
+                        <Text style={HomeStyles.monthValue}>{score.value}</Text>
+                      </View>
+                    </View>
+                  );
+                } else {
+                  return null;
+                }
+              })
             }
-          })
-        }
-        {/* Boton para los juegos */}
-        <View style={HomeStyles.containerGameButton}>
-          <Text style={HomeStyles.gameButton}>Visita todos los juegos aquí:</Text>
-          <TouchableOpacity style={HomeStyles.playIconContainer} onPress={() => navigation.navigate('Games')} >
-            <FontAwesomeIcon size={imageSize.xl} icon={faGamepad} />
-          </TouchableOpacity>
-        </View>
-      </View>
-    </ScrollView>
-  );
+            {/* Boton para los juegos */}
+            <View style={HomeStyles.containerGameButton}>
+              <Text style={HomeStyles.gameButton}>Visita todos los juegos aquí:</Text>
+              <TouchableOpacity style={HomeStyles.playIconContainer} onPress={() => navigation.navigate('Games')} >
+                <FontAwesomeIcon size={imageSize.xl} icon={faGamepad} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+        );
 };
 
-export default HomeScreen;
+        export default HomeScreen;

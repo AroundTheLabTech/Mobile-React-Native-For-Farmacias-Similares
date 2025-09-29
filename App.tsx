@@ -7,6 +7,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 // Importar las pantallas
 import LoginScreen from './src/screens/SessionScreen/Login';
 import RegisterScreen from './src/screens/SessionScreen/Register';
+import ForgotPasswordScreen from './src/screens/SessionScreen/ForgotPassword';
 import TabNavigator from './src/components/TabNavigatorComponent/TabNavigator';
 import SettingsStack from './src/screens/SettingsScreen/SettingsStack';
 import GamesStack from './src/screens/GamesScreen/GamesStack';
@@ -36,6 +37,11 @@ export default function App() {
                 <Stack.Screen
                   name="Register"
                   component={RegisterScreen}
+                  options={{ headerShown: false }} // Sin Tab Bar
+                />
+                <Stack.Screen
+                  name="ForgotPassword"
+                  component={ForgotPasswordScreen}
                   options={{ headerShown: false }} // Sin Tab Bar
                 />
                 <Stack.Screen

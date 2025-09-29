@@ -4,7 +4,7 @@ import LeaderBoardStyles from './style/LeaderBoardStyles';
 import LeaderBoardCard from '@components/LeaderBoardCardComponents/LeaderBoardCard';
 import DraggableMenu from '@components/DraggableMenuComponent/DraggableMenu';
 import PodiumSvg from '@components/PodiumChartComponent/PodiumSvg';
-import { getTopTwenty } from '@services/backend';
+import { getTopTwentyMonthly } from '@services/backend';
 import { TLeaderBoard } from 'src/types/user';
 import { calculatePercent, calculateScreenSizeInInches, splitTopTwenty } from '../../utils/helpers';
 import Loader from '@components/LoaderComponent/Loader';
@@ -41,9 +41,11 @@ const LeaderBoard: React.FC = () => {
 
   useEffect(() => {
     async function fetchData() {
-      const response = await getTopTwenty();
+      const response = await getTopTwentyMonthly({ monthly: true, timeoutMs: 10_000 });
 
       const tops = splitTopTwenty(response);
+
+      console.log('Tops fetched:', tops);
 
       setTopThree(tops.topThree);
       setTopTwenty(tops.topRest);
@@ -78,10 +80,12 @@ const LeaderBoard: React.FC = () => {
             <Text style={LeaderBoardStyles.title}>Leaderboard</Text>
             <View style={LeaderBoardStyles.containerLeaderrboardTime}>
               <Text style={LeaderBoardStyles.timeOption}>MENSUAL</Text>
-              {/**
-              <Text style={LeaderBoardStyles.timeOption}>Width: {width1}</Text>
-              <Text style={LeaderBoardStyles.timeOption}>Height: {height1}</Text>
-              */}
+              {
+                /**
+                <Text style={LeaderBoardStyles.timeOption}>Width: {width1}</Text>
+                <Text style={LeaderBoardStyles.timeOption}>Height: {height1}</Text>
+                */
+              }
             </View>
           </View>
           <View style={LeaderBoardStyles.containerPosition}>
@@ -95,7 +99,6 @@ const LeaderBoard: React.FC = () => {
                 :
                 <Text style={LeaderBoardStyles.positionDescription}>No estás en el top 20, pero recuerda que puedes mejorar jugando</Text>
             }
-
           </View>
           {
             topThree && topThree.length > 2 &&
