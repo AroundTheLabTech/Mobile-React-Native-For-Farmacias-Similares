@@ -4,16 +4,21 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, Dimensions, Alert } from 'react-native';
 import ReportProblemStyles from './style/ReportProblemStyles';
 import { useAuth } from '../../AuthContext';
-import { postReportProblem } from '../../services/backend';
+import { postReportProblem, getProblemReports } from '../../services/backend';
+import { ProblemReport } from '../../types/report';
 
 const ReportProblem = ({ navigation }) => {
 
   const { uid } = useAuth();
 
+  const [page, setPage] = useState('ReportProblem');
+
   const [orientation, setOrientation] = useState('portrait');
 
   const [issue, setIssue] = useState<string>('');
   const [description, setDescription] = useState<string>('');
+
+  const [reportedProblems, setReportedProblems] = useState<ProblemReport[]>([]);
 
   useEffect(() => {
     const updateOrientation = () => {
@@ -29,6 +34,28 @@ const ReportProblem = ({ navigation }) => {
       subscription?.remove();
     };
   }, []);
+
+  useEffect(() => {
+    async function fetchData() {
+      const reports: ProblemReport[] = await getProblemReports(uid);
+
+      reports.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      reports.forEach(report => {
+        const date = new Date(report.created_at);
+        report.created_at = date.toLocaleDateString('es-MX', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      });
+
+      setReportedProblems(reports);
+    }
+
+    fetchData();
+  }, [uid]);
 
   async function handleProblemReport() {
     if (!issue.trim() || !description.trim()) {
@@ -49,31 +76,38 @@ const ReportProblem = ({ navigation }) => {
     }
   }
 
-  return (
-    <ScrollView
+  if (page === 'ReportProblemList') {
+    return <ScrollView
       style={ReportProblemStyles.container}
       contentContainerStyle={orientation === 'portrait' ? ReportProblemStyles.container : ReportProblemStyles.containerMax}
     >
       <View style={ReportProblemStyles.containerSettings} >
-        <TouchableOpacity style={ReportProblemStyles.containerGoBack} onPress={() => navigation.goBack()} >
+        <TouchableOpacity style={ReportProblemStyles.containerGoBack} onPress={() => setPage("ReportProblem")} >
           <FontAwesomeIcon icon={faArrowLeft} />
         </TouchableOpacity>
-        <Text style={ReportProblemStyles.reportProblemTitle} >Reportar un problema</Text>
+        <Text style={ReportProblemStyles.reportProblemTitle} >Lista de problemas reportados</Text>
         <View style={ReportProblemStyles.containerForm}>
-          <View style={ReportProblemStyles.containerInput} >
-            <Text style={ReportProblemStyles.formLabel} >Asunto</Text>
-            <TextInput style={ReportProblemStyles.formInput} onChangeText={(e) => setIssue(e)} />
-          </View>
-          <View style={ReportProblemStyles.containerInput} >
-            <Text style={ReportProblemStyles.formLabel}  >Descripcion</Text>
-            <TextInput
-              style={ReportProblemStyles.formTextArea}
-              multiline={true}
-              numberOfLines={5}
-              placeholder="Escribe aquí tu texto..."
-              onChangeText={(e) => setDescription(e)}
-            />
-          </View>
+          {/*
+            Aquí se mostrarán los problemas reportados en formato de lista.
+            Puedes mapear un array de problemas y mostrar los campos requeridos.
+          */}
+          {Array.isArray([]) && [].length === 0 && (
+            <Text style={ReportProblemStyles.infoText}>No hay problemas reportados.</Text>
+          )}
+          {/* Reemplaza el array vacío [] por el array real de problemas cuando esté disponible */}
+          {reportedProblems.map((problem, idx) => (
+            <View key={idx} style={ReportProblemStyles.reportedProblemItem}>
+              <Text style={ReportProblemStyles.reportedProblemDate}>
+                {problem.created_at}
+              </Text>
+              <Text style={ReportProblemStyles.reportedProblemIssue}>
+                {problem.issue}
+              </Text>
+              <Text style={ReportProblemStyles.reportedProblemDescription}>
+                {problem.description}
+              </Text>
+            </View>
+          ))}
         </View>
         <View style={ReportProblemStyles.containerSave} >
           <TouchableOpacity style={ReportProblemStyles.containerButtonSave} onPress={handleProblemReport} >
@@ -81,8 +115,50 @@ const ReportProblem = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </View>
-    </ScrollView>
-  );
+    </ScrollView>;
+  } else {
+    return (
+      <ScrollView
+        style={ReportProblemStyles.container}
+        contentContainerStyle={orientation === 'portrait' ? ReportProblemStyles.container : ReportProblemStyles.containerMax}
+      >
+        <View style={ReportProblemStyles.containerSettings} >
+          <TouchableOpacity style={ReportProblemStyles.containerGoBack} onPress={() => navigation.goBack()} >
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </TouchableOpacity>
+          <Text style={ReportProblemStyles.reportProblemTitle} >Reportar un problema</Text>
+          <View style={ReportProblemStyles.containerForm}>
+            <View style={ReportProblemStyles.containerInput} >
+              <Text style={ReportProblemStyles.formLabel} >Asunto</Text>
+              <TextInput style={ReportProblemStyles.formInput} onChangeText={(e) => setIssue(e)} />
+            </View>
+            <View style={ReportProblemStyles.containerInput} >
+              <Text style={ReportProblemStyles.formLabel}  >Descripcion</Text>
+              <TextInput
+                style={ReportProblemStyles.formTextArea}
+                multiline={true}
+                numberOfLines={5}
+                placeholder="Escribe aquí tu texto..."
+                onChangeText={(e) => setDescription(e)}
+              />
+            </View>
+          </View>
+          <View style={ReportProblemStyles.containerInfo} >
+            <Text style={ReportProblemStyles.infoText} >Gracias por ayudarnos a mejorar. Tu reporte será revisado por nuestro equipo.</Text>
+            <Text style={ReportProblemStyles.infoText} >Nos pondremos en contacto contigo si necesitamos más información.</Text>
+            <TouchableOpacity onPress={() => setPage("ReportProblemList")} >
+              <Text style={ReportProblemStyles.linkText} >Ver la lista de reportes</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={ReportProblemStyles.containerSave} >
+            <TouchableOpacity style={ReportProblemStyles.containerButtonSave} onPress={handleProblemReport} >
+              <Text style={ReportProblemStyles.buttonSaveText} >Guardar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    );
+  }
 };
 
 export default ReportProblem;
