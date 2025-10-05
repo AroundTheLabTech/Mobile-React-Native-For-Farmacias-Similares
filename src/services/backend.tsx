@@ -4,6 +4,7 @@ import { TUserCurrentMonthSession, TUserLast3MonthInfo, TUserPoints, TUserInform
 import { TCompetition, TCompetitionSession, TCompetitiveStatus, TCreateCompetition, TScoreSessions } from '../types/competition';
 import { TGameSession } from '../types/game';
 import { validateObjectValues } from '../utils/helpers';
+import { ProblemReport } from '../types/report';
 
 
 export const loginUserByEmailAndPassword = async (email: string, password: string): Promise<TUserLogin | null> => {
@@ -510,7 +511,7 @@ export const getTopTwentyMonthly = async (opts?: GetTopTwentyOpts): Promise<TTop
       signal: controller.signal,
     });
 
-    if (!res.ok) {throw new Error(`HTTP ${res.status}`);}
+    if (!res.ok) { throw new Error(`HTTP ${res.status}`); }
     const data = (await res.json()) as TTopTwenty[];
     return data;
   } catch (err) {
@@ -816,5 +817,76 @@ export const putResetPassword = async (email: string) => {
     return result;
   } catch (error) {
     return error.message;
+  }
+};
+
+export const getTopGlobalByUser = async (uid: string): Promise<number | null> => {
+  try {
+    if (!uid) {
+      throw new Error('UID inválido');
+    }
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+    const response = await fetch(`${BACKEND_BASE_URL}/scores/top_global/${uid}`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+    const result = await response.json();
+
+    return result as number;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const getTopMonthlyByUser = async (uid: string): Promise<number | null> => {
+  try {
+    if (!uid) {
+      throw new Error('UID inválido');
+    }
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+    const response = await fetch(`${BACKEND_BASE_URL}/scores/top_monthly/${uid}`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+    const result = await response.json();
+
+    return result as number;
+  }
+  catch (error) {
+    return null;
+  }
+};
+
+export const getProblemReports = async (uid: string): Promise<ProblemReport[] | null> => {
+  try {
+    if (!uid) {
+      throw new Error('UID inválido');
+    }
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+    const response = await fetch(`${BACKEND_BASE_URL}/reports/reports_by_uid/${uid}`, requestOptions);
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+    const { reports } = await response.json();
+    return reports as any[];
+  } catch (error) {
+    return null;
   }
 };

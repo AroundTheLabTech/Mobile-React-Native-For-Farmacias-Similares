@@ -126,6 +126,13 @@ const StadiscticsStyle = StyleSheet.create({
 
   //Estadisticas
 
+  noDataText: {
+    fontSize: fontSizes.lg,
+    color: colors.secondary,
+    fontWeight: '600',
+    marginTop: spacing.md,
+  },
+
   containerEstadistics: {
     backgroundColor: '#D9D4F7',
     width: '100%',
