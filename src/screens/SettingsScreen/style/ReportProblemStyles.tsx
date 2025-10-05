@@ -60,6 +60,7 @@ const ReportProblemStyles = StyleSheet.create({
     textAlignVertical: 'center',
   },
   formTextArea: {
+    color: colors.secondary,
     borderWidth: 1,
     borderRadius: 8,
     textAlignVertical: 'top',
@@ -85,6 +86,63 @@ const ReportProblemStyles = StyleSheet.create({
     fontWeight: '700',
     color: colors.primary,
     textAlign: 'center',
+  },
+  containerInfo: {
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.md,
+    flex: 2,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  infoText: {
+    fontSize: fontSizes.sm,
+    color: colors.secondary,
+    textAlign: 'center',
+    marginBottom: spacing.xs,
+  },
+  linkText: {
+    fontSize: fontSizes.sm,
+    color: colors.secondary,
+    textAlign: 'center',
+    textDecorationLine: 'underline',
+    marginTop: spacing.xs,
+  },
+  reportedProblemContainer: {
+    backgroundColor: colors.background2,
+    width: '100%',
+    borderRadius: 15,
+    padding: spacing.md,
+    marginTop: spacing.md,
+    marginBottom: spacing.md,
+  },
+  reportedProblemTitle: {
+    fontSize: fontSizes.lg,
+    fontWeight: '700',
+    color: colors.primary,
+    marginBottom: spacing.sm,
+  },
+  reportedProblemItem: {
+    borderBottomWidth: 1,
+    borderBottomColor: colors.background4,
+    paddingVertical: spacing.sm,
+  },
+  reportedProblemDate: {
+    fontSize: fontSizes.xs,
+    color: colors.secondary,
+    marginBottom: spacing.xs,
+    fontWeight: '600',
+  },
+  reportedProblemIssue: {
+    fontSize: fontSizes.sm,
+    color: colors.secondary,
+    fontWeight: '700',
+    marginBottom: spacing.xs,
+  },
+  reportedProblemDescription: {
+    fontSize: fontSizes.sm,
+    color: colors.secondary,
+    fontWeight: '400',
   },
 });
 
