@@ -57,6 +57,8 @@ const StadisticsScreen: React.FC = () => {
 
   const { uid } = useAuth();
 
+  const [loading, setLoading] = useState<boolean>(true);
+
   const [progress, setProgress] = useState<IProgress>({
     'total': 0,
     'progress': 0,
@@ -69,6 +71,7 @@ const StadisticsScreen: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       const result: TUserCurrentMonthSession = await getUserCurrentMonthSession(uid);
       if (result?.sessions) {
         const highScore = getMaxScore(result.sessions);
@@ -82,6 +85,7 @@ const StadisticsScreen: React.FC = () => {
           'progressPercent': calculatePercentage(120, progressData),
         });
       }
+      setLoading(false);
     };
 
     fetchData();
@@ -89,6 +93,7 @@ const StadisticsScreen: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       const result: TUserLast3MonthInfo = await getUserLast3MonthsInfo(uid);
 
       const resultGroupByMonth = groupSessionsByMonth(result.sessions);
@@ -124,6 +129,8 @@ const StadisticsScreen: React.FC = () => {
         });
         setLast3MonthsInfo(sortData);
       }
+
+      setLoading(false);
     };
 
     if (!last3MonthsInfo) {
@@ -165,8 +172,16 @@ const StadisticsScreen: React.FC = () => {
     };
   }, [orientation, screenWidth]);
 
-  if (!bestGame || (!last3MonthsInfo && last3MonthsInfo?.length < 3)) {
+  if (loading) {
     return <Loader visible={true} />;
+  }
+
+  if (!bestGame || (!last3MonthsInfo && last3MonthsInfo?.length < 3)) {
+    return (
+      <View style={StadiscticsStyle.container}  >
+        <Text style={StadiscticsStyle.noDataText}>No hay datos disponibles</Text>
+      </View>
+    );
   }
 
   const sizeInInches = calculateScreenSizeInInches(Dimensions, PixelRatio);
