@@ -9,8 +9,6 @@ import { faStar, faGlobe, faCube } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../../AuthContext'; // Importa el hook useAuth
 
 //Services
-
-
 import StadisticsScreen from './Stadistics';
 import _404Page from '../404Screen/404';
 import Badges from './Badges';
@@ -18,13 +16,17 @@ import EllipseComponent from '../../components/ElipseComponent/ElipseComponent';
 import Spacer from '../../components/SpacerComponent/Spacer';
 import Loader from '@components/LoaderComponent/Loader';
 import { useUser } from '@services/UserContext';
+import { getTopGlobalByUser, getTopMonthlyByUser } from '../../services/backend';
 
 
 const ProfileScreen = ({ navigation }) => {
 
   const { uid } = useAuth();
 
-  const [selectedTab, setSelectedTab] = useState('badges');
+  const [selectedTab, setSelectedTab] = useState('stadistics');
+
+  const [topGlobal, setTopGlobal] = useState<number | null>(null);
+  const [topMonthly, setTopMonthly] = useState<number | null>(null);
 
   const { profilePicture, setUpdateProfilePicture, userPoints, setUpdateUserPoints, userInformation } = useUser();
 
@@ -36,11 +38,40 @@ const ProfileScreen = ({ navigation }) => {
     }
   }, [setUpdateUserPoints, userPoints]);
 
+  useEffect(() => {
+    async function fetchData() {
+      const topGlobalPosition = await getTopGlobalByUser(uid);
+      if (topGlobalPosition !== null
+        && topGlobalPosition !== undefined
+        && !isNaN(topGlobalPosition)
+        && topGlobalPosition > 0
+      ) {
+        setTopGlobal(topGlobalPosition);
+      } else {
+        setTopGlobal(0);
+      }
+
+      const topMonthlyPosition = await getTopMonthlyByUser(uid);
+      if (topMonthlyPosition !== null
+        && topMonthlyPosition !== undefined
+        && !isNaN(topMonthlyPosition)
+        && topMonthlyPosition > 0
+      ) {
+        setTopMonthly(topMonthlyPosition);
+      } else {
+        setTopMonthly(0);
+      }
+
+    }
+    fetchData();
+  }, [uid]);
+
   const renderContent = () => {
     switch (selectedTab) {
       case 'badges':
         return <Badges />;
       case 'stadistics':
+        console.log('Rendering StadisticsScreen');
         return <StadisticsScreen />;
       default:
         return <_404Page />;
@@ -114,10 +145,10 @@ const ProfileScreen = ({ navigation }) => {
               </Text>
               {/* Puntos */}
               <Text style={ProfileStyles.puntajeNumber}>
-                #1,438
+                #{topGlobal !== null ? topGlobal : '...'}
               </Text>
             </View>
-            {/* Top Local */}
+            {/* Top Mensual */}
             <View style={ProfileStyles.puntajeBox2}>
               {/* Icono */}
               <View style={ProfileStyles.containerIcono}>
@@ -125,11 +156,11 @@ const ProfileScreen = ({ navigation }) => {
               </View>
               {/* Title */}
               <Text style={ProfileStyles.titlePuntaje}>
-                Top Local
+                Top Mensual
               </Text>
               {/* Puntos */}
               <Text style={ProfileStyles.puntajeNumber}>
-                #56
+                #{topMonthly !== null ? topMonthly : '...'}
               </Text>
             </View>
           </View>
@@ -138,7 +169,7 @@ const ProfileScreen = ({ navigation }) => {
             {/* NavBar */}
             <View style={ProfileStyles.containerNavBar}>
               {/* Botones para cambiar la vista */}
-              <TouchableOpacity onPress={() => setSelectedTab('badges')}>
+              <TouchableOpacity /* onPress={() => setSelectedTab('badges')} */ disabled>
                 {
                   selectedTab === 'badges' ?
                     (<>
