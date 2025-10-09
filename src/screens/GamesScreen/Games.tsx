@@ -40,12 +40,10 @@ type Game = {
   score?: number;
 };
 
-const Games = ({ navigation, route }) => {
+const Games = ({ navigation }) => {
 
   const { uid } = useAuth();
   const { scorePerGame, setUpdateScorePerGame } = useUser();
-
-  const { params } = route;
 
   const [listGames, setListGames] = useState(null);
 
@@ -68,14 +66,6 @@ const Games = ({ navigation, route }) => {
 
     return ordered;
   }
-
-  useEffect(() => {
-    if (params) {
-      console.log('Parámetros recibidos:', params);
-    } else {
-      console.log('No se recibieron parámetros');
-    }
-  }, [params]);
 
   useEffect(() => {
     async function fetchData() {
