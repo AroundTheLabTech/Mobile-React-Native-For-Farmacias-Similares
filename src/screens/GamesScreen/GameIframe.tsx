@@ -67,8 +67,8 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
   useFocusEffect(
     React.useCallback(() => {
       resetBridge();
-      return () => {};
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      return () => { };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id, gameUrl])
   );
 
@@ -88,7 +88,9 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
           session_id: sessionId,
         };
         const competitionSession = await putCompetitionSession(newCompetitionSession);
-        if (competitionSession?.message) console.log(competitionSession.message);
+        if (competitionSession?.message) {
+          console.log('Sesión de competencia añadida:', competitionSession);
+        }
       });
     }
   }
@@ -259,17 +261,13 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
       // Logs útiles
       // console.log('Juego ID:', id, 'msg:', raw, { previusScore, scoreHistory, currentScore, initialScoreDb, delta });
 
-      console.log('Juego ID:', id, 'delta:', delta, 'appliedAbsolute:', appliedAbsolute);
-      console.log('Juego ID:', id, 'msg:', raw);
-      console.log({ previusScore, scoreHistory, currentScore, initialScoreDb });
-
       // Actualiza puntaje local
       if (delta > 0 && !appliedAbsolute) {
         // Modo incremental para la mayoría
         setCurrentScore(prev => prev + delta);
       }
     } catch (e) {
-      console.log('Mensaje no JSON o desconocido:', event?.nativeEvent?.data);
+      console.error('Mensaje no JSON o desconocido:', event?.nativeEvent?.data);
     }
   };
 
@@ -292,7 +290,7 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
         }
       }
     } catch (e) {
-      console.log('Error al guardar score:', e);
+      console.error('Error al guardar score:', e);
     } finally {
       isPostingRef.current = false;
       setUpdateScorePerGame(true);

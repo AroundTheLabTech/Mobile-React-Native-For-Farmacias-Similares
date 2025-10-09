@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { StyleSheet } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faHome, faUser, faChartBar, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
@@ -9,7 +9,6 @@ import HomeScreen from '../../screens/HomeScreen/HomeStack';
 import ProfileStack from '../../screens/ProfileScreen/ProfileStack';
 import LeaderBoard from '../../screens/LeaderBoard/LeaderBoard';
 
-import { useAuth } from '../../AuthContext';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 // import NotchBackground from './NotchBackground';
 // import _404Page from '../../screens/404Screen/404';
@@ -23,14 +22,6 @@ const TabBarBackground = () => {
 */
 
 const TabNavigation = () => {
-  const { uid, displayName } = useAuth();
-
-  useEffect(() => {
-    if (uid) {
-      console.log('El UID del usuario es:', uid);
-      console.log('El nombre de usuario es:', displayName);
-    }
-  }, [displayName, uid]);
 
   const tabBarIconOptions = (route: RouteProp<ParamListBase, string>, { color, size }) => {
     let iconName = faHome;

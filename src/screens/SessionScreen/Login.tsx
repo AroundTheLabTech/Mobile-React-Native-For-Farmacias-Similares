@@ -9,6 +9,7 @@ import { useAuth } from '../../AuthContext';
 import { TUserLogin } from 'src/types/user';
 import Loader from '@components/LoaderComponent/Loader';
 import AppMessage from '@components/AppMessage/AppMessage';
+import { ToastState, ToastType } from 'src/types/toast';
 
 type LoginScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -19,9 +20,6 @@ type LoginScreenProps = {
   navigation: LoginScreenNavigationProp;
 };
 
-type ToastState = { type: string; text: string } | null;
-
-// ✅ Claves de almacenamiento centralizadas
 const STORAGE_KEYS = {
   accessToken: 'userAccessToken',
   expiresAt: 'tokenExpiresAt', // timestamp en ms
@@ -30,28 +28,25 @@ const STORAGE_KEYS = {
   updateProfileInformation: 'updateProfileInformation',
 };
 
-// ✅ helpers de tiempo
 const nowMs = () => Date.now();
 const secondsToMs = (s: number) => s * 1000;
 
-// ✅ comprobar expiración con pequeño “margen” (p.ej., 10s)
 const isExpired = (expiresAtMs: number, leewayMs = 10_000) => nowMs() >= (expiresAtMs - leewayMs);
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState(''); // ✅
   const [loading, setLoading] = useState<boolean>(false);
-  const { updateUserInformation } = useAuth();
+  const { updateUserInformation, isLogout, setIsLogout } = useAuth();
   const [toast, setToast] = useState<ToastState>(null);
-  const showMessage = (type: string, text: string) => setToast({ type, text });
+  const showMessage = (type: ToastType, text: string) => setToast({ type, text });
 
   const hasRestoredRef = useRef(false);
   const isNavigatingRef = useRef(false);
 
-  // ✅ LOGIN: guarda token y expiración real (timestamp)
   const handleLogin = async () => {
     setLoading(true);
-    if (!email || !password) {
+    if (!email || !password || isLogout) {
       showMessage('error', 'Por favor, completa todos los campos.');
       setLoading(false);
       return;
@@ -93,6 +88,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
       showMessage('success', 'Login exitoso. Redirigiendo...');
       setLoading(false);
+      setIsLogout(false);
 
       // opcional: pequeño delay para ver el toast
       setTimeout(() => {
@@ -104,7 +100,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     } catch (error) {
       setLoading(false);
       showMessage('error', 'Error de login. Verifica tus credenciales.');
-      console.error('Error de login:', error);
     }
   };
 
@@ -247,7 +242,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                   <TextInput
                     style={loginStyles.input}
                     placeholder="Contraseña"
-                    // ❌ estaba en email-address
                     keyboardType="default" // ✅
                     autoCapitalize="none"
                     value={password}
@@ -261,17 +255,19 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 {/* Botones */}
                 <View style={loginStyles.containerLoginButtons}>
                   <TouchableOpacity style={loginStyles.botonLogin} onPress={handleLogin} disabled={loading}>
-                    {loading ? <Loader visible={loading} message="" /> : <Text style={loginStyles.textoButtons}>Login</Text>}
+                    {loading ?
+                      <Loader visible={loading} message="" size='small' /> :
+                      <Text style={loginStyles.textoButtons}>Inicio sesión</Text>}
                   </TouchableOpacity>
 
                   <TouchableOpacity style={loginStyles.botonLogin} onPress={() => navigation.navigate('Register')} disabled={loading}>
-                    <Text style={loginStyles.textoButtons}>Register</Text>
+                    <Text style={loginStyles.textoButtons}>Registro</Text>
                   </TouchableOpacity>
                 </View>
 
                 <View style={loginStyles.containerButtons}>
                   <TouchableOpacity style={loginStyles.botonForgot} onPress={() => navigation.navigate('ForgotPassword')} disabled={loading}>
-                    <Text style={loginStyles.textoButtons}>Forgot Password</Text>
+                    <Text style={loginStyles.textoButtons}>Recuperar contraseña</Text>
                   </TouchableOpacity>
                 </View>
               </View>

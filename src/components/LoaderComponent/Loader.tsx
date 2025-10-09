@@ -4,15 +4,16 @@ import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
 interface LoaderProps {
   message?: string; // Mensaje opcional
   visible: boolean; // Controlar si se muestra o no el loader
+  size?: 'small' | 'large';
 }
 
-const Loader: React.FC<LoaderProps> = ({ message = 'Cargando...', visible }) => {
+const Loader: React.FC<LoaderProps> = ({ message = 'Cargando...', visible, size = "large" }) => {
   if (!visible) {return null;}
 
   return (
     <View style={styles.container}>
       <View style={styles.loaderBox}>
-        <ActivityIndicator size="large" color="#6200EE" />
+        <ActivityIndicator size={size} color="#6200EE" />
         <Text style={styles.loaderText}>{message}</Text>
       </View>
     </View>
