@@ -42,7 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setScoreTotal(0); // Ejemplo, ajusta esto según tu lógica.
   };
 
-  const logout = async () => {
+  const logout = async (): Promise<void> => {
     setUid(null);
     setAge(null);
     setDisplayName(null);
@@ -52,8 +52,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUbication(null);
     setScoreTotal(null);
     setIsLogout(true);
-    await AsyncStorage.removeItem('userAccessToken');
-    await AsyncStorage.removeItem('tokenExpirationTime');
+
+    await AsyncStorage.multiRemove(['userAccessToken', 'tokenExpirationTime']);
     await AsyncStorage.clear();
   };
 
