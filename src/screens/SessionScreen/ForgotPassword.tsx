@@ -109,15 +109,6 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
                   </View>
                   {/* Container Button */}
                   <View style={forgotPasswordStyle.containerButtons}>
-                    {/* Boton Login */}
-                    <TouchableOpacity
-                      style={forgotPasswordStyle.botonLogin}
-                      onPress={() => navigation.navigate('Login')} // Asegúrate de que onPress esté dentro de TouchableOpacity
-                    >
-                      <Text style={forgotPasswordStyle.textoButtons}>
-                        Login
-                      </Text>
-                    </TouchableOpacity>
                     {/* Boton ForgotPassword */}
                     <TouchableOpacity onPress={handleForgotPassword}
                       style={forgotPasswordStyle.botonLogin}
@@ -126,9 +117,18 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
                         loading ?
                           <Loader visible={loading} message="" /> :
                           <Text style={forgotPasswordStyle.textoButtons}>
-                            ForgotPassword
+                            Enviar
                           </Text>
                       }
+                    </TouchableOpacity>
+                                       {/* Boton Login */}
+                    <TouchableOpacity
+                      style={forgotPasswordStyle.botonLogin}
+                      onPress={() => navigation.navigate('Login')} // Asegúrate de que onPress esté dentro de TouchableOpacity
+                    >
+                      <Text style={forgotPasswordStyle.textoButtons}>
+                        Ir a Login
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 </View>
