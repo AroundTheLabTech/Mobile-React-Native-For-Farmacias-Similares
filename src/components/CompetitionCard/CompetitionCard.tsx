@@ -25,14 +25,12 @@ const CompetitionCard: React.FC<ICompetitionCard> = ({ competition, notification
   const [opponentCompetitionPlaysScore, setOpponentCompetitionPlaysScore] = useState<number>(0);
 
   async function handleReject() {
-    console.log('Rechazar');
 
     await putRejectCompetition(uid, competition.UID, competition.id);
     ejectFunction();
   }
 
   async function handleApprove() {
-    console.log('Aprobar');
 
     await putAcceptCompetition(uid, competition.UID, competition.id);
     ejectFunction();
