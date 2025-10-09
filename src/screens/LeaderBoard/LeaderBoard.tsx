@@ -45,8 +45,6 @@ const LeaderBoard: React.FC = () => {
 
       const tops = splitTopTwenty(response);
 
-      console.log('Tops fetched:', tops);
-
       setTopThree(tops.topThree);
       setTopTwenty(tops.topRest);
 
