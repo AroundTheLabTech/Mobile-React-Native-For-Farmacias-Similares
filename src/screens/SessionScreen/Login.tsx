@@ -261,17 +261,17 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 {/* Botones */}
                 <View style={loginStyles.containerLoginButtons}>
                   <TouchableOpacity style={loginStyles.botonLogin} onPress={handleLogin} disabled={loading}>
-                    {loading ? <Loader visible={loading} message="" /> : <Text style={loginStyles.textoButtons}>Login</Text>}
+                    {loading ? <Loader visible={loading} message="" /> : <Text style={loginStyles.textoButtons}>Inicio sesión</Text>}
                   </TouchableOpacity>
 
                   <TouchableOpacity style={loginStyles.botonLogin} onPress={() => navigation.navigate('Register')} disabled={loading}>
-                    <Text style={loginStyles.textoButtons}>Register</Text>
+                    <Text style={loginStyles.textoButtons}>Registro</Text>
                   </TouchableOpacity>
                 </View>
 
                 <View style={loginStyles.containerButtons}>
                   <TouchableOpacity style={loginStyles.botonForgot} onPress={() => navigation.navigate('ForgotPassword')} disabled={loading}>
-                    <Text style={loginStyles.textoButtons}>Forgot Password</Text>
+                    <Text style={loginStyles.textoButtons}>Recuperar contraseña</Text>
                   </TouchableOpacity>
                 </View>
               </View>
