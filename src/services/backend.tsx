@@ -1,4 +1,3 @@
-import { Alert } from 'react-native';
 import { BACKEND_BASE_URL } from '@env';
 import { TUserCurrentMonthSession, TUserLast3MonthInfo, TUserPoints, TUserInformation, TUserPicture, TBackResponse, TGameCard, TUserLogin, TUserProfilePictures, TScorePerGame, TTopTwenty, GetTopTwentyOpts, TUserTokenValidate, TUserBadges, TUpdateUserInformation, TUserRegister } from '../types/user';
 import { TCompetition, TCompetitionSession, TCompetitiveStatus, TCreateCompetition, TScoreSessions } from '../types/competition';
@@ -29,8 +28,6 @@ export const loginUserByEmailAndPassword = async (email: string, password: strin
       }),
     };
 
-    console.log(BACKEND_BASE_URL);
-
     const response = await fetch(`${BACKEND_BASE_URL}/users/login_with_email_and_password`, requestOptions);
 
     if (!response.ok) {
@@ -55,7 +52,6 @@ export const loginUserByEmailAndPassword = async (email: string, password: strin
 
     return data as TUserLogin;
   } catch (error) {
-    Alert.alert('Error', 'Fallo la autenticacion del usuario');
     return null;
   }
 };
@@ -84,7 +80,6 @@ export const validateToken = async (idToken: string): Promise<TUserTokenValidate
     const result = await response.json();
     return result as TUserTokenValidate;
   } catch (error) {
-    Alert.alert('Error', 'Fallo la autenticacion del usuario');
     return null;
   }
 };
@@ -174,7 +169,6 @@ export const getUserInformation = async (uid: string): Promise<TUserInformation 
     const result = await response.json();
     return result as TUserInformation;
   } catch (err) {
-    Alert.alert('Error', 'No se pudo encontrar la informacion del usuario');
     return null;
   }
 };
@@ -226,7 +220,6 @@ export const getUserPicture = async (uid: string): Promise<TUserPicture | null> 
     const result = await response.json();
     return result as TUserPicture;
   } catch (err) {
-    // Alert.alert('Error', 'No se pudo encontrar la foto de perfil del usuario');
     return null;
   }
 };
@@ -253,7 +246,6 @@ export const getUserProfilePictures = async (uid: string): Promise<TUserProfileP
     const result = await response.json();
     return result as TUserProfilePictures;
   } catch (err) {
-    Alert.alert('Error', 'No se pudo encontrar las fotos de perfil del usuario');
     return null;
   }
 };
@@ -304,7 +296,6 @@ export const getUserPoints = async (uid: string): Promise<TUserPoints | null> =>
     const result = await response.json();
     return result as TUserPoints;
   } catch (err) {
-    // Alert.alert('Error', 'No se pudo obtener el puntaje del usuario');
     return null;
   }
 };
@@ -331,7 +322,7 @@ export const getUserCurrentMonthSession = async (uid: string): Promise<TUserCurr
     const result = await response.json();
     return result as TUserCurrentMonthSession;
   } catch (error) {
-    Alert.alert('Error', 'No se pudo obtener el mes actual');
+    return null;
   }
 };
 
@@ -357,7 +348,6 @@ export const getUserLast3MonthsInfo = async (uid: string): Promise<TUserLast3Mon
     const result = await response.json();
     return result as TUserLast3MonthInfo;
   } catch (error) {
-    // Alert.alert('Error', 'No se pudo obtener el mes actual');
     return null;
   }
 };
@@ -515,7 +505,7 @@ export const getTopTwentyMonthly = async (opts?: GetTopTwentyOpts): Promise<TTop
     const data = (await res.json()) as TTopTwenty[];
     return data;
   } catch (err) {
-    console.log('getTopTwenty error:', err);
+    console.error('getTopTwenty error:', err);
     return null;
   } finally {
     clearTimeout(timeout);
@@ -559,11 +549,8 @@ export const postSessionGame = async (gameSession: TGameSession): Promise<Record
       body: JSON.stringify(gameSession),
     };
 
-    console.log(requestOptions);
-
     const response = await fetch(`${BACKEND_BASE_URL}/games/`, requestOptions);
 
-    console.log(response);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
