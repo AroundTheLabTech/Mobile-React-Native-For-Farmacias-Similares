@@ -24,26 +24,26 @@ const GamesStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   gameCard: {
-    width: 160,
-    height: 160,
+    width: 120,
+    height: 120,
     marginHorizontal: spacing.sm,
     justifyContent: 'center',
     alignItems: 'center',
   },
   gameCard9Inche: {
-    width: 260,
-    height: 260,
+    width: 210,
+    height: 210,
     marginHorizontal: spacing.md,
     marginBottom: spacing.md,
   },
   coverImage: {
-    width: 150,
-    height: 150,
+    width: 110,
+    height: 110,
     borderRadius: 10,
   },
   coverImage9Inches: {
-    width: 250,
-    height: 250,
+    width: 200,
+    height: 200,
   },
 });
 
