@@ -172,15 +172,6 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
               </View>
               {/* Container Button */}
               <View style={loginStyles.containerLoginButtons}>
-                {/* Boton Login */}
-                <TouchableOpacity
-                  style={loginStyles.botonLogin}
-                  onPress={() => navigation.navigate('Login')} // Asegúrate de que onPress esté dentro de TouchableOpacity
-                >
-                  <Text style={loginStyles.textoButtons}>
-                    Login
-                  </Text>
-                </TouchableOpacity>
                 {/* Boton Register */}
                 <TouchableOpacity onPress={handleRegister}
                   style={loginStyles.botonLogin}
@@ -189,9 +180,18 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
                     loading ?
                       <Loader visible={loading} message="" /> :
                       <Text style={loginStyles.textoButtons}>
-                        Register
+                        Registrar
                       </Text>
                   }
+                </TouchableOpacity>
+                {/* Boton Login */}
+                <TouchableOpacity
+                  style={loginStyles.botonLogin}
+                  onPress={() => navigation.navigate('Login')} // Asegúrate de que onPress esté dentro de TouchableOpacity
+                >
+                  <Text style={loginStyles.textoButtons}>
+                    Ir a Login
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
