@@ -71,7 +71,6 @@ const ProfileScreen = ({ navigation }) => {
       case 'badges':
         return <Badges />;
       case 'stadistics':
-        console.log('Rendering StadisticsScreen');
         return <StadisticsScreen />;
       default:
         return <_404Page />;
@@ -90,7 +89,7 @@ const ProfileScreen = ({ navigation }) => {
     fetchData();
   }, [profilePicture, setUpdateProfilePicture, uid]);
 
-  if (!userInformation.name || !userPoints) {
+  if (!userInformation || !userInformation.name || !userPoints) {
     return <Loader visible={true} />;
   }
 
