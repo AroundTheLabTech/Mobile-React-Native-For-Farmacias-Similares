@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet, Image, TextInput, GestureResponderEvent, Alert } from 'react-native';
+import { Modal, View, Text, TouchableOpacity, StyleSheet, Image, TextInput, GestureResponderEvent } from 'react-native';
 import { colors, fonts, fontSizes, spacing } from '../../../global-class';
 import { useUser } from '@services/UserContext';
 import { getCompetitiveStatus, getListAvalibleCompetition, getListCompetitionNotification, postCreateCompetition } from '@services/backend';
@@ -89,7 +89,6 @@ const CompetitionModal = ({ navigation }) => {
         } else {
           setCompetitionMessageError(true);
           setCompetitionMessage('!No se puede competir con este jugador¡');
-          Alert.alert('Error', 'No se puede competir con este jugador');
         }
       } else {
         setCompetitionMessageError(true);
@@ -98,7 +97,6 @@ const CompetitionModal = ({ navigation }) => {
     } else {
       setCompetitionMessageError(true);
       setCompetitionMessage('!Algo no salío bien¡');
-      Alert.alert('Error', 'Algo no salío bien');
     }
   }
 
