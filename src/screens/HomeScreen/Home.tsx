@@ -75,12 +75,6 @@ const HomeScreen = ({ navigation }) => {
 
   }, [gameInformation, scorePerGame, setUpdateScorePerGame, uid]);
 
-  useEffect(() => {
-    if (uid) {
-      console.log('El UID del usuario es:', uid);
-    }
-  }, [uid]);
-
   const [scoresLats3Months, setScoresLast3Months] = useState<Last3MonthHomeData[]>();
 
   useEffect(() => {
