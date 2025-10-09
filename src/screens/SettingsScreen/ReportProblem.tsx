@@ -1,11 +1,13 @@
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, Dimensions, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, Dimensions } from 'react-native';
 import ReportProblemStyles from './style/ReportProblemStyles';
 import { useAuth } from '../../AuthContext';
 import { postReportProblem, getProblemReports } from '../../services/backend';
 import { ProblemReport } from '../../types/report';
+import AppMessage from '@components/AppMessage/AppMessage';
+import { ToastState, ToastType } from 'src/types/toast';
 
 const ReportProblem = ({ navigation }) => {
 
@@ -19,6 +21,9 @@ const ReportProblem = ({ navigation }) => {
   const [description, setDescription] = useState<string>('');
 
   const [reportedProblems, setReportedProblems] = useState<ProblemReport[]>([]);
+
+  const [toast, setToast] = useState<ToastState>(null);
+  const showMessage = (type: ToastType, text: string) => setToast({ type, text });
 
   useEffect(() => {
     const updateOrientation = () => {
@@ -59,20 +64,20 @@ const ReportProblem = ({ navigation }) => {
 
   async function handleProblemReport() {
     if (!issue.trim() || !description.trim()) {
-      Alert.alert('Error', 'Por favor completa todos los campos');
+      showMessage('error', 'Por favor completa todos los campos');
       return;
     }
 
     try {
       const response = await postReportProblem(uid, issue, description);
       if (response && response.message) {
-        Alert.alert('Éxito', response.message);
+        showMessage('success', response.message);
       } else {
-        Alert.alert('Error', 'Ocurrió un error al enviar el reporte.');
+        showMessage('info', 'Ocurrió un error al enviar el reporte.');
       }
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', 'No se pudo enviar el reporte. Inténtalo más tarde.');
+      showMessage('error', 'No se pudo enviar el reporte. Inténtalo más tarde');
     }
   }
 
@@ -81,38 +86,50 @@ const ReportProblem = ({ navigation }) => {
       style={ReportProblemStyles.container}
       contentContainerStyle={orientation === 'portrait' ? ReportProblemStyles.container : ReportProblemStyles.containerMax}
     >
-      <View style={ReportProblemStyles.containerSettings} >
-        <TouchableOpacity style={ReportProblemStyles.containerGoBack} onPress={() => setPage("ReportProblem")} >
-          <FontAwesomeIcon icon={faArrowLeft} />
-        </TouchableOpacity>
-        <Text style={ReportProblemStyles.reportProblemTitle} >Lista de problemas reportados</Text>
-        <View style={ReportProblemStyles.containerForm}>
-          {/*
+      <View style={{ flex: 1 }}>
+        {/* AppMessage flotante */}
+        {toast && (
+          <AppMessage
+            type={toast.type}
+            message={toast.text}
+            onHide={() => setToast(null)}
+            duration={2500}
+          />
+        )}
+
+        <View style={ReportProblemStyles.containerSettings} >
+          <TouchableOpacity style={ReportProblemStyles.containerGoBack} onPress={() => setPage("ReportProblem")} >
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </TouchableOpacity>
+          <Text style={ReportProblemStyles.reportProblemTitle} >Lista de problemas reportados</Text>
+          <View style={ReportProblemStyles.containerForm}>
+            {/*
             Aquí se mostrarán los problemas reportados en formato de lista.
             Puedes mapear un array de problemas y mostrar los campos requeridos.
           */}
-          {Array.isArray([]) && [].length === 0 && (
-            <Text style={ReportProblemStyles.infoText}>No hay problemas reportados.</Text>
-          )}
-          {/* Reemplaza el array vacío [] por el array real de problemas cuando esté disponible */}
-          {reportedProblems.map((problem, idx) => (
-            <View key={idx} style={ReportProblemStyles.reportedProblemItem}>
-              <Text style={ReportProblemStyles.reportedProblemDate}>
-                {problem.created_at}
-              </Text>
-              <Text style={ReportProblemStyles.reportedProblemIssue}>
-                {problem.issue}
-              </Text>
-              <Text style={ReportProblemStyles.reportedProblemDescription}>
-                {problem.description}
-              </Text>
-            </View>
-          ))}
-        </View>
-        <View style={ReportProblemStyles.containerSave} >
-          <TouchableOpacity style={ReportProblemStyles.containerButtonSave} onPress={handleProblemReport} >
-            <Text style={ReportProblemStyles.buttonSaveText} >Guardar</Text>
-          </TouchableOpacity>
+            {Array.isArray([]) && [].length === 0 && (
+              <Text style={ReportProblemStyles.infoText}>No hay problemas reportados.</Text>
+            )}
+            {/* Reemplaza el array vacío [] por el array real de problemas cuando esté disponible */}
+            {reportedProblems.map((problem, idx) => (
+              <View key={idx} style={ReportProblemStyles.reportedProblemItem}>
+                <Text style={ReportProblemStyles.reportedProblemDate}>
+                  {problem.created_at}
+                </Text>
+                <Text style={ReportProblemStyles.reportedProblemIssue}>
+                  {problem.issue}
+                </Text>
+                <Text style={ReportProblemStyles.reportedProblemDescription}>
+                  {problem.description}
+                </Text>
+              </View>
+            ))}
+          </View>
+          <View style={ReportProblemStyles.containerSave} >
+            <TouchableOpacity style={ReportProblemStyles.containerButtonSave} onPress={handleProblemReport} >
+              <Text style={ReportProblemStyles.buttonSaveText} >Guardar</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </ScrollView>;

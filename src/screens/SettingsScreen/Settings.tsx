@@ -77,7 +77,7 @@ const Settings = ({ navigation }) => {
   }, [profilePicture, setUpdateProfilePicture, uid]);
 
   useEffect(() => {
-    if(!userPoints) {
+    if (!userPoints) {
       setUpdateUserPoints(true);
     } else {
       setUpdateUserPoints(false);
@@ -104,7 +104,13 @@ const Settings = ({ navigation }) => {
       label: 'Cerrar session',
       backIcon: faArrowRight,
       path: 'Login',
-      fn: () => logout(),
+      fn: async () => {
+        await logout();
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Login' }],
+        });
+      },
     },
   ];
 
@@ -121,7 +127,7 @@ const Settings = ({ navigation }) => {
           <View style={SettingsStyles.containerProfilePicture} >
             <Image
               style={SettingsStyles.profilePicture}
-              source={{uri: profilePicture}}
+              source={{ uri: profilePicture }}
               width={100}
               height={100}
             />
@@ -135,7 +141,7 @@ const Settings = ({ navigation }) => {
             <View style={SettingsStyles.accountInformationRigth} >
               <Image
                 style={SettingsStyles.simiAccountImage}
-                source={{uri: profilePicture}}
+                source={{ uri: profilePicture }}
               />
               <Text style={SettingsStyles.userPoints} >
                 <Image source={require('../../../img/iconos/moneda.png')} /> {userPoints?.score_total ? formatNumber(userPoints.score_total) : 0}
