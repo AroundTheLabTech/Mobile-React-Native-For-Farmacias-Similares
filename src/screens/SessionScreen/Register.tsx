@@ -28,6 +28,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
   const [location, setLocation] = useState<string>();
   const [age, setAge] = useState<string>();
 
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
   const [toast, setToast] = useState<ToastState>(null);
@@ -39,16 +40,19 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
       showMessage('info', 'Por favor, completa el email.');
       return;
     }
-    if (!name || email.trim() === '') {
-      showMessage('info', 'Por favor, completa el name.');
+    if (!name || name.trim() === '') {
+      showMessage('info', 'Por favor, completa el nombre.');
+      setLoading(false);
       return;
     }
-    if (!password || email.trim() === '') {
+    if (!password || password.trim() === '') {
       showMessage('info', 'Por favor, completa la contraseña.');
+      setLoading(false);
       return;
     }
-    if (!location || email.trim() === '') {
-      showMessage('info', 'Por favor, completa la ubicación}.');
+    if (!location || location.trim() === '') {
+      showMessage('info', 'Por favor, completa la ubicación.');
+      setLoading(false);
       return;
     }
     if (!age || Number(age) <= 0) {
@@ -66,10 +70,11 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 
     const response = await postUserRegister(newUser);
 
-    if (response.message) {
-      navigation.navigate('Login');
+    if (response && response.message) {
+      showMessage('success', 'Registro exitoso. Redirigiendo...');
+      setTimeout(() => navigation.navigate('Login'), 1500);
     } else {
-      navigation.navigate('Login');
+      showMessage('error', 'Error al registrar. Intenta de nuevo.');
     }
     setLoading(false);
   }
@@ -148,13 +153,19 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
                     >
                       Contraseña</Text>
                   </View>
-                  <TextInput
-                    style={loginStyles.input}
-                    placeholder="Contraseña"
-                    keyboardType="default"
-                    autoCapitalize="none"
-                    onChangeText={setPassword}
-                  />
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <TextInput
+                      style={[loginStyles.input, { flex: 1 }]}
+                      placeholder="Contraseña"
+                      keyboardType="default"
+                      autoCapitalize="none"
+                      secureTextEntry={!showPassword}
+                      onChangeText={setPassword}
+                    />
+                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: 10 }}>
+                      <Text style={{ color: '#6A5AE0', fontSize: 12 }}>{showPassword ? 'Ocultar' : 'Mostrar'}</Text>
+                    </TouchableOpacity>
+                  </View>
                   {/* Ubicación */}
                   <View style={loginStyles.containerPlaceHolder}
                   >
@@ -181,7 +192,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
                   <TextInput
                     style={loginStyles.input}
                     placeholder="Edad"
-                    keyboardType="default"
+                    keyboardType="numeric"
                     autoCapitalize="none"
                     onChangeText={setAge}
                   />
