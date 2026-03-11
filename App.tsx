@@ -23,8 +23,8 @@ const Stack = createStackNavigator();
 export default function App() {
 
   return (
-    <GestureHandlerRootView style={styles.containe}>
-      <SafeAreaView style={styles.safeAre}>
+    <GestureHandlerRootView style={styles.container}>
+      <SafeAreaView style={styles.safeArea}>
         <NavigationContainer>
           <AuthProvider>
             <UserProvider>
@@ -70,10 +70,10 @@ export default function App() {
 
 
 const styles = StyleSheet.create({
-  containe: {
+  container: {
     flex: 1,
   },
-  safeAre: {
+  safeArea: {
     flex: 1,
   },
 });

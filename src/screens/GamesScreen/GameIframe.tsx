@@ -43,19 +43,16 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
   const [currentScore, setCurrentScore] = useState<number>(Number(score) || 0);
 
   // Estados para replicar reglas de la web (en memoria; NO persisten solos)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [scoreHistory, setScoreHistory] = useState<number[]>([]); // máx 2
   const [previusScore, setPreviusScore] = useState<number>(0);
   const initialScoreDb = useMemo<number>(() => Number(score) || 0, [score]);
 
   // Control de envío al backend (solo en Guardar y salir)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [session, setSession] = useState<TGameSession | undefined>();
   const isPostingRef = useRef<boolean>(false);
 
   // WebView refs y control de reinyección
   const webviewRef = useRef<WebView | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [webKey, setWebKey] = useState<number>(0);
 
   // Orientación landscape mientras está montado
@@ -80,18 +77,15 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
   async function addCompetitionSession(sessionId: string) {
     const activeCompetitions = await getListAvalibleCompetition(uid);
     if (activeCompetitions && activeCompetitions.length > 0) {
-      activeCompetitions.map(async (competition) => {
+      await Promise.all(activeCompetitions.map(async (competition) => {
         const newCompetitionSession: TCompetitionSession = {
           user_uid: uid,
           opponent_uid: competition.UID,
           unique_id: competition.id,
           session_id: sessionId,
         };
-        const competitionSession = await putCompetitionSession(newCompetitionSession);
-        if (competitionSession?.message) {
-          console.log('Sesión de competencia añadida:', competitionSession);
-        }
-      });
+        await putCompetitionSession(newCompetitionSession);
+      }));
     }
   }
 
@@ -162,6 +156,37 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
     // setWebKey(k => k + 1);
   }
 
+  // Scoring strategies — data-driven replacement of the if/else chain
+  type ScoringStrategy = {
+    mode: 'history' | 'direct' | 'absolute' | 'history-progressive';
+    divisor?: number;
+    requireType?: string;
+    useNumberField?: boolean;
+    dedup?: boolean;           // juego2: skip if value already in history
+    normalizeMin?: number;     // juego2: clamp to min 1
+  };
+
+  const SCORING_STRATEGIES: Record<string, ScoringStrategy> = {
+    juego1:  { mode: 'history' },
+    juego2:  { mode: 'history', divisor: 100, dedup: true, normalizeMin: 1 },
+    juego3:  { mode: 'direct', useNumberField: true },
+    juego4:  { mode: 'absolute', divisor: 100 },
+    juego5:  { mode: 'history-progressive', requireType: 'scoreUpdate' },
+    juego6:  { mode: 'history', requireType: 'scoreUpdate' },
+    juego7:  { mode: 'direct', requireType: 'scoreUpdate' },
+    juego8:  { mode: 'history', requireType: 'scoreUpdate' },
+    juego9:  { mode: 'history', requireType: 'scoreUpdate' },
+    juego10: { mode: 'history', requireType: 'scoreUpdate' },
+    juego11: { mode: 'history', requireType: 'scoreUpdate' },
+    juego12: { mode: 'history', requireType: 'scoreUpdate' },
+    juego13: { mode: 'history', requireType: 'scoreUpdate' },
+    juego14: { mode: 'history', requireType: 'scoreUpdate' },
+    juego15: { mode: 'history', requireType: 'scoreUpdate', divisor: 100 },
+    juego16: { mode: 'history', requireType: 'scoreUpdate' },
+    juego17: { mode: 'history', requireType: 'scoreUpdate', divisor: 100 },
+    juego18: { mode: 'history', requireType: 'scoreUpdate' },
+  };
+
   // Recibir mensajes y actualizar score local
   const handleMessage = (event: WebViewMessageEvent) => {
     try {
@@ -170,104 +195,61 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
       const numberValue = Number(raw?.number);
       const typeValue = raw?.type ? String(raw.type) : undefined;
 
-      let delta = 0;
-      let appliedAbsolute = false; // evita doble suma cuando se usa score absoluto
+      const strategy = SCORING_STRATEGIES[id];
+      if (!strategy) return;
 
-      if (id === 'juego1') {
-        if (!Number.isNaN(scoreValue) && scoreValue > 0) {
-          setScoreHistory(prev => {
-            const u = pushAndShift(prev, scoreValue);
-            if (u[1] > 0) delta = u[1];
-            return u;
-          });
-        }
-      } else if (id === 'juego2') {
-        if (!Number.isNaN(scoreValue)) {
-          const v = scoreValue / 100 > 1 ? scoreValue / 100 : 1;
-          setScoreHistory(prev => {
-            if (prev.indexOf(v) !== -1) return prev;
-            const u = pushAndShift(prev, v);
-            delta = u[1] || 0;
-            return u;
-          });
-        }
-      } else if (id === 'juego3') {
-        if (!Number.isNaN(numberValue)) {
-          // En tu web originalmente usabas 1 por evento, pero si el juego manda el conteo, respeta el valor:
-          delta = numberValue; // o delta = 1 si quieres igualar a la web exacta
-        }
-      } else if (id === 'juego4') {
-        if (!Number.isNaN(scoreValue)) {
-          // Modo ABSOLUTO (si reinicia el juego y hace 90, mostramos 90; no acumulamos)
-          const normalized = scoreValue > 100 ? (scoreValue - 10) / 100 : 1;
-          setCurrentScore(initialScoreDb + normalized);
-          appliedAbsolute = true;
-          delta = normalized; // solo para logs
-        }
-      } else if (id === 'juego5') {
-        if (typeValue === 'scoreUpdate' && !Number.isNaN(scoreValue) && scoreValue > 0) {
+      // Check type filter
+      if (strategy.requireType && typeValue !== strategy.requireType) return;
+
+      let delta = 0;
+      let appliedAbsolute = false;
+
+      const inputValue = strategy.useNumberField ? numberValue : scoreValue;
+      if (Number.isNaN(inputValue)) return;
+
+      if (strategy.mode === 'direct') {
+        if (inputValue > 0) delta = inputValue;
+      } else if (strategy.mode === 'absolute') {
+        const normalized = scoreValue > 100 ? (scoreValue - 10) / (strategy.divisor || 1) : 1;
+        setCurrentScore(initialScoreDb + normalized);
+        appliedAbsolute = true;
+      } else if (strategy.mode === 'history-progressive') {
+        // juego5 special: only count if score increases over previous
+        if (scoreValue > 0) {
           setScoreHistory(prev => {
             if (previusScore !== scoreValue && scoreValue > previusScore) {
               const u = pushAndShift(prev, scoreValue);
               const v = u[1];
               if (v > 0) { delta = v; setPreviusScore(v); }
-              else if (v === 0 || v === 1) { delta = 1; setPreviusScore(1); }
+              else { delta = 1; setPreviusScore(1); }
               return u;
             }
             return prev;
           });
         }
-      } else if (id === 'juego6') {
-        if (typeValue === 'scoreUpdate' && !Number.isNaN(scoreValue) && scoreValue > 0) {
-          setScoreHistory(prev => {
-            const u = pushAndShift(prev, scoreValue);
-            delta = u[1] || 0;
-            return u;
-          });
-        }
-      } else if (id === 'juego7') {
-        if (typeValue === 'scoreUpdate' && !Number.isNaN(scoreValue) && scoreValue > 0) {
-          delta = scoreValue; // directo
-        }
-      } else if (['juego8', 'juego9', 'juego10', 'juego11', 'juego12', 'juego13', 'juego14', 'juego16'].indexOf(id) !== -1) {
-        if (typeValue === 'scoreUpdate' && !Number.isNaN(scoreValue) && scoreValue > 0) {
-          setScoreHistory(prev => {
-            const u = pushAndShift(prev, scoreValue);
-            delta = u[1] || 0;
-            return u;
-          });
-        }
-      } else if (id === 'juego15') {
-        if (typeValue === 'scoreUpdate' && !Number.isNaN(scoreValue) && scoreValue > 0) {
-          const v = scoreValue / 100;
-          setScoreHistory(prev => {
-            const u = pushAndShift(prev, v);
-            delta = u[1] || 0;
-            return u;
-          });
-        }
-      } else if (id === 'juego17') {
-        if (typeValue === 'scoreUpdate' && !Number.isNaN(scoreValue) && scoreValue > 0) {
-          const v = scoreValue / 100;
-          setScoreHistory(prev => {
-            const u = pushAndShift(prev, v);
-            delta = u[1] || 0;
-            return u;
-          });
-        }
-      }
-      // juego18: agrega regla si tiene formato distinto
+      } else if (strategy.mode === 'history') {
+        if (scoreValue <= 0 && !strategy.dedup) return;
 
-      // Logs útiles
-      // console.log('Juego ID:', id, 'msg:', raw, { previusScore, scoreHistory, currentScore, initialScoreDb, delta });
+        let v = scoreValue;
+        if (strategy.divisor) {
+          v = scoreValue / strategy.divisor;
+          if (strategy.normalizeMin != null) v = v > strategy.normalizeMin ? v : strategy.normalizeMin;
+        }
+
+        setScoreHistory(prev => {
+          if (strategy.dedup && prev.indexOf(v) !== -1) return prev;
+          const u = pushAndShift(prev, v);
+          delta = u[1] || 0;
+          return u;
+        });
+      }
 
       // Actualiza puntaje local
       if (delta > 0 && !appliedAbsolute) {
-        // Modo incremental para la mayoría
         setCurrentScore(prev => prev + delta);
       }
     } catch (e) {
-      console.error('Mensaje no JSON o desconocido:', event?.nativeEvent?.data);
+      // Mensaje no JSON o desconocido
     }
   };
 
@@ -290,7 +272,7 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
         }
       }
     } catch (e) {
-      console.error('Error al guardar score:', e);
+      // Error al guardar score
     } finally {
       isPostingRef.current = false;
       setUpdateScorePerGame(true);

@@ -3,6 +3,7 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { getScorePerGames, getUserInformation, getUserLast3MonthsInfo, getUserPicture, getUserPoints } from '@services/backend';  // Función que obtiene la imagen de perfil
 import { useAuth } from '../AuthContext';
 import { TScorePerGame, TUserInformation, TUserLast3MonthInfo, TUserPoints } from '../types/user';
+import { DEV_SKIP_LOGIN, MOCK_USER_INFORMATION, MOCK_USER_POINTS, MOCK_LAST_3_MONTHS, MOCK_SCORE_PER_GAME } from '../config/dev';
 
 // Crear el contexto
 const ProfileContext = createContext(undefined);
@@ -17,16 +18,16 @@ export const UserProvider = ({ children }) => {
   const [profilePicture, setProfilePicture] = useState<string>(null);
   const [updateProfilePicture, setUpdateProfilePicture] = useState(false);
 
-  const [last3MonthsScores, setLast3MonthsScores] = useState<TUserLast3MonthInfo>(null);
+  const [last3MonthsScores, setLast3MonthsScores] = useState<TUserLast3MonthInfo>(DEV_SKIP_LOGIN ? MOCK_LAST_3_MONTHS : null);
   const [updateLast3MonthsScores, setUpdateLast3MonthsScores] = useState(false);
 
-  const [scorePerGame, setScorePerGame] = useState<TScorePerGame>(null);
+  const [scorePerGame, setScorePerGame] = useState<TScorePerGame>(DEV_SKIP_LOGIN ? MOCK_SCORE_PER_GAME : null);
   const [updateScorePerGame, setUpdateScorePerGame] = useState(false);
 
-  const [userPoints, setUserPoints] = useState<TUserPoints>(null);
+  const [userPoints, setUserPoints] = useState<TUserPoints>(DEV_SKIP_LOGIN ? MOCK_USER_POINTS : null);
   const [updateUserPoints, setUpdateUserPoints] = useState(false);
 
-  const [userInformation, setUserInformation] = useState<TUserInformation>(null);
+  const [userInformation, setUserInformation] = useState<TUserInformation>(DEV_SKIP_LOGIN ? MOCK_USER_INFORMATION : null);
   const [updateUserInformation, setUpdateUserInformation] = useState(false);
 
   const { uid, isLogout, setIsLogout } = useAuth();

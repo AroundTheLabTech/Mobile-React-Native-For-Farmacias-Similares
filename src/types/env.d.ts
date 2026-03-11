@@ -1,7 +1,4 @@
 declare module '@env' {
-  // Iframes
-  export const BACKEND_BASE_URL: string;
-
   // Backend
   export const BACKEND_BASE_URL: string;
 

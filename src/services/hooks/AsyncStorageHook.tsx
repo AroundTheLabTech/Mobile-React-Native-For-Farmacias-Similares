@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /**
@@ -9,24 +9,28 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
  */
 function useAsyncStorage(key: string, defaultValue: any) {
   const [value, setValue] = useState(defaultValue);
+  const hasLoadedRef = useRef(false);
 
-  // Cargar el valor desde AsyncStorage cuando el componente se monta
+  // Load value from AsyncStorage on mount
   useEffect(() => {
+    if (hasLoadedRef.current) return;
+
     const fetchValue = async () => {
       try {
         const storedValue = await AsyncStorage.getItem(key);
         if (storedValue !== null) {
-          setValue(JSON.parse(storedValue)); // Si el valor existe, se establece el valor almacenado
+          setValue(JSON.parse(storedValue));
         } else {
-          setValue(defaultValue); // Si no existe, se usa el valor por defecto
+          setValue(defaultValue);
         }
-      } catch (error) {
-        console.error('Error leyendo desde AsyncStorage:', error);
+        hasLoadedRef.current = true;
+      } catch (_error) {
+        // Silently handle read errors
       }
     };
 
     fetchValue();
-  }, [key, defaultValue, value]);
+  }, [key, defaultValue]);
 
   /**
    * Actualiza el valor almacenado en AsyncStorage y en el estado.
@@ -36,8 +40,8 @@ function useAsyncStorage(key: string, defaultValue: any) {
     try {
       await AsyncStorage.setItem(key, JSON.stringify(newValue)); // Guarda el valor en AsyncStorage
       setValue(newValue); // Actualiza el valor en el estado del componente
-    } catch (error) {
-      console.error('Error escribiendo en AsyncStorage:', error);
+    } catch (_error) {
+      // Silently handle write errors
     }
   };
 

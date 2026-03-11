@@ -82,3 +82,5 @@ yarn-error.log
 
 # .env
 .env
+.claude
+docs_dev

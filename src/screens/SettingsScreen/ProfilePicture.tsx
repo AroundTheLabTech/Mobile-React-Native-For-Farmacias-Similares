@@ -28,7 +28,7 @@ const ProfilePicture = ({ navigation }) => {
         navigation.goBack();
       }
     } catch (error) {
-      console.error(error);
+      // error handled silently
     }
   }
 
@@ -40,7 +40,7 @@ const ProfilePicture = ({ navigation }) => {
         if (!response.current_profile_picture_url) {
           const responsePicture = await getUserPicture(uid);
           if (responsePicture && responsePicture.url) {
-            setProfileUrl(profileUrl);
+            setProfileUrl(responsePicture.url);
           }
         } else {
           setProfileUrl(response.current_profile_picture_url);

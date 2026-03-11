@@ -1,10 +1,26 @@
 import { BACKEND_BASE_URL } from '@env';
 import { TUserCurrentMonthSession, TUserLast3MonthInfo, TUserPoints, TUserInformation, TUserPicture, TBackResponse, TGameCard, TUserLogin, TUserProfilePictures, TScorePerGame, TTopTwenty, GetTopTwentyOpts, TUserTokenValidate, TUserBadges, TUpdateUserInformation, TUserRegister } from '../types/user';
 import { TCompetition, TCompetitionSession, TCompetitiveStatus, TCreateCompetition, TScoreSessions } from '../types/competition';
-import { TGameSession } from '../types/game';
+import { TGameSession, TGameCatalogResponse } from '../types/game';
 import { validateObjectValues } from '../utils/helpers';
 import { ProblemReport } from '../types/report';
 
+const DEFAULT_TIMEOUT_MS = 10_000;
+
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit = {},
+  timeoutMs: number = DEFAULT_TIMEOUT_MS,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    return response;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 
 export const loginUserByEmailAndPassword = async (email: string, password: string): Promise<TUserLogin | null> => {
   try {
@@ -28,7 +44,7 @@ export const loginUserByEmailAndPassword = async (email: string, password: strin
       }),
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/users/login_with_email_and_password`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/login_with_email_and_password`, requestOptions);
 
     if (!response.ok) {
       let msg = `HTTP ${response.status}`;
@@ -59,7 +75,7 @@ export const loginUserByEmailAndPassword = async (email: string, password: strin
 export const validateToken = async (idToken: string): Promise<TUserTokenValidate | null> => {
   try {
     if (!idToken) {
-      throw new Error('Email inválido');
+      throw new Error('Token inválido');
     }
 
     const requestOptions = {
@@ -68,10 +84,9 @@ export const validateToken = async (idToken: string): Promise<TUserTokenValidate
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({}),
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/users/validate_token?id_token=${idToken}`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/validate_token?id_token=${idToken}`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -87,7 +102,7 @@ export const validateToken = async (idToken: string): Promise<TUserTokenValidate
 export const postLogout = async (idToken: string): Promise<Record<string, string> | null> => {
   try {
     if (!idToken) {
-      throw new Error('Email inválido');
+      throw new Error('Token inválido');
     }
 
     const requestOptions = {
@@ -96,10 +111,9 @@ export const postLogout = async (idToken: string): Promise<Record<string, string
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({}),
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/users/logout?id_token${idToken}`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/logout?id_token=${idToken}`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -134,7 +148,7 @@ export const postUserRegister = async (userRegister: TUserRegister): Promise<TBa
       body: JSON.stringify(userRegister),
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/users/register`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/register`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -143,7 +157,7 @@ export const postUserRegister = async (userRegister: TUserRegister): Promise<TBa
     const result = await response.json();
     return result as TBackResponse;
   } catch (error) {
-    return error.message;
+    return null;
   }
 };
 
@@ -160,7 +174,7 @@ export const getUserInformation = async (uid: string): Promise<TUserInformation 
       },
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/users/user_information/${uid}`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/user_information/${uid}`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -178,7 +192,7 @@ export const putUserInformation = async (uid: string, userInformation: TUpdateUs
     if (!uid) {
       throw new Error('UID inválido');
     }
-    const response = await fetch(`${BACKEND_BASE_URL}/users/user_information/${uid}`, {
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/user_information/${uid}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -211,7 +225,7 @@ export const getUserPicture = async (uid: string): Promise<TUserPicture | null> 
       },
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/users/user_profile_picture/${uid}`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/user_profile_picture/${uid}`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -237,7 +251,7 @@ export const getUserProfilePictures = async (uid: string): Promise<TUserProfileP
       },
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/users/profile_pictures/${uid}`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/profile_pictures/${uid}`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -252,7 +266,7 @@ export const getUserProfilePictures = async (uid: string): Promise<TUserProfileP
 
 export const updateUserProfilePicture = async (uid: string, url: string): Promise<TBackResponse | null> => {
   try {
-    const response = await fetch(`${BACKEND_BASE_URL}/users/update_profile_picture/${uid}`, {
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/update_profile_picture/${uid}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -270,7 +284,6 @@ export const updateUserProfilePicture = async (uid: string, url: string): Promis
     const data = await response.json();
     return data as TBackResponse;
   } catch (error) {
-    console.error('Error:', error);
   }
 };
 
@@ -287,7 +300,7 @@ export const getUserPoints = async (uid: string): Promise<TUserPoints | null> =>
       },
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/scores/score_user/${uid}`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/scores/score_user/${uid}`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -313,7 +326,7 @@ export const getUserCurrentMonthSession = async (uid: string): Promise<TUserCurr
       },
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/scores/current_month_sessions/${uid}`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/scores/current_month_sessions/${uid}`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -339,7 +352,7 @@ export const getUserLast3MonthsInfo = async (uid: string): Promise<TUserLast3Mon
       },
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/scores/last_3_months_info/${uid}`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/scores/last_3_months_info/${uid}`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -370,7 +383,7 @@ export const postReportProblem = async (uid: string, issue: string, description:
       }),
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/reports/problem_report/${uid}`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/reports/problem_report/${uid}`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -379,7 +392,7 @@ export const postReportProblem = async (uid: string, issue: string, description:
     const result = await response.json();
     return result as TBackResponse;
   } catch (error) {
-    return error.message;
+    return null;
   }
 };
 
@@ -396,7 +409,7 @@ export const getGameCard = async (uid: string): Promise<TGameCard | null> => {
       },
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/users/user_game_card/${uid}`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/user_game_card/${uid}`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -405,7 +418,7 @@ export const getGameCard = async (uid: string): Promise<TGameCard | null> => {
     const result = await response.json();
     return result as TGameCard;
   } catch (error) {
-    return error.message;
+    return null;
   }
 };
 
@@ -422,7 +435,7 @@ export const getScorePerGames = async (uid: string): Promise<TScorePerGame | nul
       },
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/scores/score_per_game/${uid}`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/scores/score_per_game/${uid}`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -440,7 +453,7 @@ export const updateScoreGame = async (uid: string, game_id: string, score: numbe
     if (!uid) {
       throw new Error('UID inválido');
     }
-    const response = await fetch(`${BACKEND_BASE_URL}/scores/update_user_score_game/${uid}`, {
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/scores/update_user_score_game/${uid}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -472,7 +485,7 @@ export const getTopTwenty = async (): Promise<TTopTwenty[] | null> => {
       },
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/scores/top_twenty`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/scores/top_twenty`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -491,24 +504,17 @@ export const getTopTwentyMonthly = async (opts?: GetTopTwentyOpts): Promise<TTop
     ? `${BACKEND_BASE_URL}/scores/top_twenty_monthly?monthly=true`
     : `${BACKEND_BASE_URL}/scores/top_twenty`;
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-
   try {
-    const res = await fetch(endpoint, {
+    const res = await fetchWithTimeout(endpoint, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-      signal: controller.signal,
-    });
+    }, timeoutMs);
 
     if (!res.ok) { throw new Error(`HTTP ${res.status}`); }
     const data = (await res.json()) as TTopTwenty[];
     return data;
   } catch (err) {
-    console.error('getTopTwenty error:', err);
     return null;
-  } finally {
-    clearTimeout(timeout);
   }
 };
 
@@ -521,7 +527,7 @@ export const getUserBadges = async (uid: string): Promise<TUserBadges | null> =>
       },
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/users/user_badges/${uid}`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/user_badges/${uid}`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -549,7 +555,7 @@ export const postSessionGame = async (gameSession: TGameSession): Promise<Record
       body: JSON.stringify(gameSession),
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/games/`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/games/`, requestOptions);
 
 
     if (!response.ok) {
@@ -559,7 +565,7 @@ export const postSessionGame = async (gameSession: TGameSession): Promise<Record
     const result = await response.json();
     return result;
   } catch (error) {
-    return error.message;
+    return null;
   }
 };
 
@@ -572,7 +578,7 @@ export const getListAvalibleCompetition = async (uid: string): Promise<TCompetit
       },
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/competition/active_competitions/${uid}`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/competition/active_competitions/${uid}`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -594,7 +600,7 @@ export const getListCompetitionNotification = async (uid: string): Promise<TComp
       },
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/competition/competitions/${uid}`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/competition/competitions/${uid}`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -622,7 +628,7 @@ export const postCreateCompetition = async (newCompetition: TCreateCompetition):
       body: JSON.stringify(newCompetition),
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/competition/create`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/competition/create`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -631,7 +637,7 @@ export const postCreateCompetition = async (newCompetition: TCreateCompetition):
     const result = await response.json();
     return result;
   } catch (error) {
-    return error.message;
+    return null;
   }
 };
 
@@ -640,7 +646,7 @@ export const putRejectCompetition = async (uid: string, competitionUid: string, 
     if (!uid) {
       throw new Error('UID inválido');
     }
-    const response = await fetch(`${BACKEND_BASE_URL}/competition/reject/${uid}/${competitionUid}/${id}`, {
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/competition/reject/${uid}/${competitionUid}/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -665,7 +671,7 @@ export const putAcceptCompetition = async (uid: string, competitionUid: string, 
     if (!uid) {
       throw new Error('UID inválido');
     }
-    const response = await fetch(`${BACKEND_BASE_URL}/competition/accept/${uid}/${competitionUid}/${id}`, {
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/competition/accept/${uid}/${competitionUid}/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -694,7 +700,7 @@ export const putCompetitionSession = async (competitionSession: TCompetitionSess
       throw new Error('Objecto no valido');
     }
 
-    const response = await fetch(`${BACKEND_BASE_URL}/competition/competition_session`, {
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/competition/competition_session`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -723,7 +729,7 @@ export const getCompetitionSessions = async (userUid: string, opponentUid: strin
       },
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/competition/competition_plays/${userUid}/${opponentUid}/${competitionId}`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/competition/competition_plays/${userUid}/${opponentUid}/${competitionId}`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -745,7 +751,7 @@ export const getAllCompetition = async (userUid: string): Promise<TCompetition[]
       },
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/competition/all_competition/${userUid}`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/competition/all_competition/${userUid}`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -767,7 +773,7 @@ export const getCompetitiveStatus = async (userUid: string, opponentUid: string,
       },
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/competition/competitive_status/${userUid}/${opponentUid}/${uniqueId}`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/competition/competitive_status/${userUid}/${opponentUid}/${uniqueId}`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -794,7 +800,7 @@ export const putResetPassword = async (email: string) => {
       body: JSON.stringify({}),
     };
 
-    const response = await fetch(`${BACKEND_BASE_URL}/users/reset_password/${email}`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/reset_password/${email}`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -803,7 +809,7 @@ export const putResetPassword = async (email: string) => {
     const result = await response.json();
     return result;
   } catch (error) {
-    return error.message;
+    return null;
   }
 };
 
@@ -818,7 +824,7 @@ export const getTopGlobalByUser = async (uid: string): Promise<number | null> =>
         'Content-Type': 'application/json',
       },
     };
-    const response = await fetch(`${BACKEND_BASE_URL}/scores/top_global/${uid}`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/scores/top_global/${uid}`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -842,7 +848,7 @@ export const getTopMonthlyByUser = async (uid: string): Promise<number | null> =
         'Content-Type': 'application/json',
       },
     };
-    const response = await fetch(`${BACKEND_BASE_URL}/scores/top_monthly/${uid}`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/scores/top_monthly/${uid}`, requestOptions);
 
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
@@ -867,12 +873,34 @@ export const getProblemReports = async (uid: string): Promise<ProblemReport[] | 
         'Content-Type': 'application/json',
       },
     };
-    const response = await fetch(`${BACKEND_BASE_URL}/reports/reports_by_uid/${uid}`, requestOptions);
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/reports/reports_by_uid/${uid}`, requestOptions);
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
     }
     const { reports } = await response.json();
     return reports as any[];
+  } catch (error) {
+    return null;
+  }
+};
+
+export const getGamesCatalog = async (): Promise<TGameCatalogResponse | null> => {
+  try {
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/games/catalog`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result as TGameCatalogResponse;
   } catch (error) {
     return null;
   }

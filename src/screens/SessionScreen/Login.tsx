@@ -10,6 +10,7 @@ import { TUserLogin } from 'src/types/user';
 import Loader from '@components/LoaderComponent/Loader';
 import AppMessage from '@components/AppMessage/AppMessage';
 import { ToastState, ToastType } from 'src/types/toast';
+import { DEV_SKIP_LOGIN, MOCK_USER } from '../../config/dev';
 
 type LoginScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -53,11 +54,18 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     }
 
     try {
-      const user = await loginUserByEmailAndPassword(email, password); // devuelve { id_token, expires_in, ... }
+      const user = await loginUserByEmailAndPassword(email, password);
+
+      if (!user) {
+        showMessage('error', 'Credenciales inválidas o error de conexión.');
+        setLoading(false);
+        return;
+      }
 
       // convierte expires_in (segundos) → fecha futura absoluta
       const expiresAtMs = nowMs() + secondsToMs(Number(user.expires_in || 0));
 
+      // TODO: Migrate to react-native-keychain for secure token storage
       await AsyncStorage.multiSet([
         [STORAGE_KEYS.accessToken, user.id_token],
         [STORAGE_KEYS.expiresAt, String(expiresAtMs)],
@@ -109,6 +117,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     hasRestoredRef.current = true;
 
     const restoreSession = async () => {
+      if (DEV_SKIP_LOGIN) {
+        updateUserInformation(MOCK_USER);
+        navigation.reset({ index: 0, routes: [{ name: 'MainTab', params: { screen: 'Home' } }] });
+        return;
+      }
+
       try {
         setLoading(true);
 
@@ -178,7 +192,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   useEffect(() => {
     const updateOrientation = () => {
       const { width, height } = Dimensions.get('window');
-      setOrientation(width > height ? 'c' : 'portrait');
+      setOrientation(width > height ? 'landscape' : 'portrait');
     };
 
     const subscription = Dimensions.addEventListener('change', updateOrientation);

@@ -4,9 +4,8 @@ import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
 // Styles
 import HomeStyles from './style/HomeStyle';
 
-import { useAuth } from '../../AuthContext'; // Importa el hook useAuth
+import { useAuth } from '../../AuthContext';
 import { useUser } from '../../services/UserContext';
-// import CompetitionModal from '../../components/CompetitionComponent/CompetitionModal';
 import Loader from '@components/LoaderComponent/Loader';
 import Virus1 from '@img/personajes/virus-1.svg';
 import Game1 from '@img/games/portada/game-1.png';
@@ -15,6 +14,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faGamepad } from '@fortawesome/free-solid-svg-icons';
 import { SvgUri } from 'react-native-svg';
 import { imageSize, responsiveHeight } from '../../../global-class';
+import { getGamesCatalog } from '@services/backend';
 
 type Last3MonthHomeData = {
   label: string,
@@ -37,43 +37,51 @@ const HomeScreen = ({ navigation }) => {
   } = useUser();
   // const [profilePicture, setProfilePicture] = useState<string>();
 
-  const [gameInformation, setGameInformation] = useState(
-    {
-      'imageUrl': Game1 ? Game1 : 'https://icon-library.com/images/xbox-controller-icon/xbox-controller-icon-26.jpg',
-      'id': 'juego1',
-      'score': 0,
-      'score_given_per_game': 20,
-      'title': 'Dr. Simi Invide',
-      'description': '¡No dejes caer ninguna Rosca de Reyes! Corta todos los objetos y evita encender la mecha . Acumula puntos por cada Rosca de Reyes que logres cortar.',
-      'gameUrl': 'https://simijuegos-game2.web.app/',
+  const [gameInformation, setGameInformation] = useState({
+    imageUrl: Game1,
+    id: 'juego1',
+    score: 0,
+    score_given_per_game: 20,
+    title: 'Doctor Simi Invade',
+    description: '¡Defiende el Centro como un pro! Mejora ataque, defensa y velocidad mientras enfrentas olas brutales. ¿Listo para salvarlo?',
+    gameUrl: 'https://simijuegos.com.mx/source-game/game-1/public-game/index.html',
+  });
+
+  // Fetch featured game from catalog on mount
+  useEffect(() => {
+    let mounted = true;
+    async function fetchFeaturedGame() {
+      const catalog = await getGamesCatalog();
+      if (catalog?.games?.length > 0 && mounted) {
+        const newest = catalog.games[catalog.games.length - 1];
+        setGameInformation(prev => ({
+          ...prev,
+          id: newest.id,
+          title: newest.title,
+          description: newest.description,
+          gameUrl: newest.gameUrl,
+          score_given_per_game: newest.scorePerGame,
+        }));
+      }
     }
-  );
+    fetchFeaturedGame();
+    return () => { mounted = false; };
+  }, []);
 
   useEffect(() => {
-    async function fetchData() {
-
-      if (scorePerGame && scorePerGame?.score_per_game[gameInformation.id]) {
-        const score = scorePerGame.score_per_game[gameInformation.id];
-        gameInformation.score = score;
-
-        setGameInformation(gameInformation);
+    if (scorePerGame && scorePerGame?.score_per_game[gameInformation.id]) {
+      const newScore = scorePerGame.score_per_game[gameInformation.id];
+      if (newScore !== gameInformation.score) {
+        setGameInformation(prev => ({ ...prev, score: newScore }));
       }
     }
 
-    if (!gameInformation.score || gameInformation.score <= 0) {
-      fetchData();
-    }
-
     if (!scorePerGame) {
-      fetchData();
       setUpdateScorePerGame(true);
     } else {
       setUpdateScorePerGame(false);
     }
-
-    fetchData();
-
-  }, [gameInformation, scorePerGame, setUpdateScorePerGame, uid]);
+  }, [scorePerGame, setUpdateScorePerGame, uid, gameInformation.id, gameInformation.score]);
 
   const [scoresLats3Months, setScoresLast3Months] = useState<Last3MonthHomeData[]>();
 
