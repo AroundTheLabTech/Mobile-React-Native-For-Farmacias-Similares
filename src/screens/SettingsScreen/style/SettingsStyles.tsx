@@ -1,145 +1,328 @@
 import { StyleSheet } from 'react-native';
-import { colors, fontSizes, spacing, fonts, responsiveWidth, responsiveHeight } from '../../../../global-class'; // Importa las variables globales
+import { colors, spacing, fonts } from '../../../../global-class';
 
-const ProfileStyles = StyleSheet.create({
-  container: {
+const SettingsStyles = StyleSheet.create({
+  // ─── 1. Container & Header ────────────────────────────────────────────
+  screen: {
     flex: 1,
-    backgroundColor: colors.background2,
+    backgroundColor: colors.darkPurpleBg,
   },
-  containerMax: {
-    backgroundColor: colors.background2,
+  scrollContent: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: 40,
   },
-  containerSettings: {
-    backgroundColor: colors.background3,
-    borderRadius: 50,
-    marginTop: spacing.lg,
-    marginLeft: spacing.xs,
-    marginRight: spacing.xs,
+  header: {
+    flexDirection: 'row',
     alignItems: 'center',
-    height: '100%',
-  },
-  containerGoBack: {
-    marginTop: spacing.md,
-    marginLeft: spacing.xxl,
-    width: '100%',
-  },
-  containerProfileInformation: {
-    alignItems: 'center',
-    width: '100%',
-  },
-  containerProfilePicture: {
-    height: spacing.xl,
-  },
-  profilePicture: {
-    top: responsiveWidth(-50),
-    width: responsiveWidth(100),
-    height: responsiveHeight(100),
-  },
-  containerAccountInformation: {
-    backgroundColor: colors.background2,
-    width: '95%',
-    borderRadius: 25,
-    marginBottom: spacing.sm,
     padding: spacing.md,
-    flexDirection: 'row',
-  },
-  accountInformationLeft: {
-    flex: 2,
-    alignItems: 'flex-start',
-  },
-  accountCardText: {
-    fontSize: fontSizes.md,
-    fontWeight: '700',
     marginBottom: spacing.sm,
-    color: colors.primary,
-    fontFamily: fonts.press,
   },
-  accountUsername: {
-    fontSize: fontSizes.sm,
-    fontWeight: '600',
-    marginBottom: spacing.md,
-    color: colors.primary,
+  headerBackButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  accountUserNumber: {
-    fontSize: fontSizes.sm,
-    fontWeight: '600',
+  headerTitle: {
+    fontFamily: fonts.bold,
+    fontSize: 22,
     color: colors.primary,
+    marginLeft: 12,
   },
-  accountInformationRigth: {
-    flex: 1,
-    alignItems: 'flex-end',
+
+  // ─── 2. Profile Hero Section ──────────────────────────────────────────
+  profileHero: {
+    alignItems: 'center',
+    paddingVertical: 24,
+  },
+  avatarContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 3,
+    borderColor: colors.cyan,
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: 100,
+    height: 100,
+  },
+  userName: {
+    fontFamily: fonts.bold,
+    fontSize: 20,
+    color: colors.primary,
+    marginTop: 12,
+  },
+  userEmail: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.5)',
+  },
+  levelBadge: {
+    backgroundColor: '#7C3AED',
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 4,
+    marginTop: 8,
+  },
+
+  // ─── 3. Game Card (credit card design) ────────────────────────────────
+  gameCardOuter: {
+    marginBottom: spacing.lg,
+  },
+  gameCard: {
+    borderRadius: 20,
+    padding: 24,
+    backgroundColor: '#2D1B69',
+    minHeight: 180,
     justifyContent: 'space-between',
+    overflow: 'hidden',
   },
-  simiAccountImage: {
-    width: 50,
-    height: 50,
+  gameCardPattern: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0.05,
   },
-  userPoints: {
-    fontSize: fontSizes.sm,
-    fontWeight: '700',
-    backgroundColor: colors.background3,
-    textAlign: 'center',
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    borderRadius: 10,
-    color: colors.secondary,
-    fontFamily: fonts.press,
+  gameCardLabel: {
+    fontSize: 11,
+    letterSpacing: 3,
+    textTransform: 'uppercase',
+    color: 'rgba(255,255,255,0.6)',
+    fontFamily: fonts.bold,
   },
-  containerSettingsOption: {
+  gameCardChip: {
+    width: 40,
+    height: 30,
+    borderRadius: 6,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    marginVertical: 12,
+  },
+  gameCardName: {
+    fontFamily: fonts.bold,
+    fontSize: 18,
+    color: colors.primary,
+  },
+  gameCardBottom: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
+  gameCardNumber: {
+    fontFamily: fonts.inter,
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.7)',
+    letterSpacing: 2,
+  },
+  gameCardScoreContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  coinIcon: {
+    width: 20,
+    height: 20,
+  },
+  gameCardScore: {
+    fontFamily: fonts.bold,
+    fontSize: 16,
+    color: '#FFD700',
+  },
+
+  // ─── 4. Section Cards ─────────────────────────────────────────────────
+  sectionCard: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
     borderWidth: 1,
-    width: '95%',
+    borderColor: 'rgba(255,255,255,0.10)',
+    borderRadius: 20,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontFamily: fonts.bold,
+    fontSize: 16,
+    color: colors.primary,
+  },
+  sectionIcon: {
+    fontSize: 18,
+  },
+
+  // ─── 5. Info Grid (personal info) ─────────────────────────────────────
+  infoGrid: {
+    gap: 14,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  infoItem: {
+    flex: 1,
+  },
+  infoLabel: {
+    fontSize: 11,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    color: 'rgba(255,255,255,0.4)',
+    marginBottom: 4,
+    fontFamily: fonts.bold,
+  },
+  infoValue: {
+    fontSize: 15,
+    color: colors.primary,
+    fontFamily: fonts.inter,
+  },
+  infoInput: {
+    fontSize: 15,
+    color: colors.primary,
+    fontFamily: fonts.inter,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.cyan,
+    paddingVertical: 4,
+  },
+  editButtonsRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  iconButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  // ─── 6. Avatar Grid ───────────────────────────────────────────────────
+  avatarsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    justifyContent: 'center',
+  },
+  avatarOption: {
+    width: '22%',
+    aspectRatio: 1,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255,255,255,0.06)',
+  },
+  avatarOptionSelected: {
+    borderColor: colors.cyan,
+    elevation: 4,
+  },
+  avatarOptionImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 14,
+  },
+  selectedCheck: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    width: 20,
+    height: 20,
     borderRadius: 10,
-    padding: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  containerSettingsOptionTexts: {
-    flexDirection: 'row',
-  },
-  containerAccountCenterButton: {
-    flexDirection: 'row',
+    backgroundColor: colors.cyan,
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  accountCenterButtonIcon: {
+  selectedCheckText: {
+    fontSize: 12,
+    color: colors.primary,
+    fontWeight: 'bold',
+  },
+  saveAvatarButton: {
+    backgroundColor: colors.cyan,
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  saveAvatarButtonText: {
+    fontFamily: fonts.bold,
+    fontSize: 15,
+    color: colors.primary,
+  },
+
+  // ─── 7. Settings List (account section) ───────────────────────────────
+  settingItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.06)',
+  },
+  settingItemLast: {
+    borderBottomWidth: 0,
+  },
+  settingInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
     flex: 1,
-    marginRight: spacing.xs,
+    gap: 12,
   },
-  containerAccountCenterButtonText: {
-    flex: 2,
-  },
-  accountCenterButtonTitle: {
-    fontWeight: '700',
-    color: colors.secondary,
-    textAlign: 'center',
-  },
-  accountCenterButtonSubtite: {
-    color: colors.secondary,
-    textAlign: 'center',
-  },
-  line: {
-    height: 1,
-    backgroundColor: '#ccc',
-    width: '100%',
-    marginTop: spacing.xs,
-    marginBottom: spacing.sm,
-  },
-  otherOptionsContainer: {
-    width: '100%',
+  settingIconBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  settingOptionsIcon: {
+  settingTextContainer: {
     flex: 1,
   },
-  settingOptionsText: {
-    flex: 2,
-    marginLeft: spacing.sm,
-    marginRight: spacing.sm,
-    fontSize: fontSizes.sm,
-    fontWeight: '700',
-    color: colors.secondary,
+  settingName: {
+    fontSize: 15,
+    color: colors.primary,
+    fontFamily: fonts.inter,
   },
-  settingOptionsBackIcon: {
-    flex: 1,
+  settingDesc: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.4)',
+  },
+  verifiedBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#10B981',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  verifiedBadgeText: {
+    fontSize: 13,
+    color: colors.primary,
+    fontWeight: 'bold',
+  },
+
+  // ─── 8. Logout ────────────────────────────────────────────────────────
+  logoutButton: {
+    backgroundColor: 'rgba(239,68,68,0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(239,68,68,0.3)',
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  logoutButtonText: {
+    fontFamily: fonts.bold,
+    fontSize: 15,
+    color: '#EF4444',
   },
 });
 
-export default ProfileStyles;
+export default SettingsStyles;

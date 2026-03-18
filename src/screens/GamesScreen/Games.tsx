@@ -1,5 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { View, TouchableOpacity, ScrollView, Image, Dimensions, PixelRatio, Text } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import {
+  View,
+  TouchableOpacity,
+  FlatList,
+  Image,
+  Dimensions,
+  PixelRatio,
+  Text,
+  StatusBar,
+  useWindowDimensions,
+} from 'react-native';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import GamesStyles from './style/GamesStyles';
@@ -27,6 +37,7 @@ import { getGamesCatalog } from '@services/backend';
 import { calculateScreenSizeInInches } from '../../utils/helpers';
 import Loader from '@components/LoaderComponent/Loader';
 import { TGameCatalogItem } from 'src/types/game';
+import { darkTheme } from '../../theme/colors';
 
 // Local image fallback mapping — used when backend imageUrl is empty
 const LOCAL_IMAGE_MAP: Record<string, any> = {
@@ -63,12 +74,25 @@ function catalogToGame(item: TGameCatalogItem): Game {
   };
 }
 
+const HORIZONTAL_PADDING = 20;
+const CARD_GAP = 10;
+
 const Games = ({ navigation }) => {
   const { uid } = useAuth();
   const { scorePerGame, setUpdateScorePerGame } = useUser();
+  const { width: screenWidth } = useWindowDimensions();
 
   const [listGames, setListGames] = useState<Game[] | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const sizeInInches = calculateScreenSizeInInches(Dimensions, PixelRatio);
+  const isTablet = sizeInInches && Number(sizeInInches) > 9;
+  const numColumns = isTablet ? 4 : 3;
+
+  // Dynamic card width: (screenWidth - padding on both sides - gaps between cards) / numColumns
+  const totalHorizontalPadding = HORIZONTAL_PADDING * 2;
+  const totalGaps = CARD_GAP * (numColumns - 1);
+  const cardWidth = Math.floor((screenWidth - totalHorizontalPadding - totalGaps) / numColumns);
 
   function orderGames(allGames: Game[]): Game[] {
     const forcedGames: GameId[] = ['juego7', 'juego9'];
@@ -137,41 +161,79 @@ const Games = ({ navigation }) => {
     return () => { mounted = false; };
   }, [scorePerGame, setUpdateScorePerGame, uid]);
 
-  const sizeInInches = calculateScreenSizeInInches(Dimensions, PixelRatio);
+  const renderGameCard = useCallback(({ item: game, index }: { item: Game; index: number }) => {
+    // Determine left margin: first item in each row gets 0, others get CARD_GAP
+    const isFirstInRow = index % numColumns === 0;
+
+    return (
+      <TouchableOpacity
+        key={game.id}
+        style={[
+          GamesStyles.gameCard,
+          {
+            width: cardWidth,
+            marginLeft: isFirstInRow ? 0 : CARD_GAP,
+          },
+        ]}
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate('GameDetails', game)}
+      >
+        <Image
+          style={[GamesStyles.coverImage, { width: cardWidth, height: cardWidth }]}
+          source={game.imageUrl}
+          resizeMode="cover"
+        />
+        {game.score != null && game.score > 0 && (
+          <View style={GamesStyles.scoreBadge}>
+            <Text style={GamesStyles.scoreBadgeText}>{Math.round(game.score)} pts</Text>
+          </View>
+        )}
+        {game.score != null && game.score === 0 && (
+          <View style={GamesStyles.scoreBadgeNew}>
+            <Text style={GamesStyles.scoreBadgeNewText}>Nuevo</Text>
+          </View>
+        )}
+        <View style={GamesStyles.cardInfo}>
+          <Text style={GamesStyles.gameTitle} numberOfLines={1}>{game.title}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  }, [cardWidth, numColumns, navigation]);
+
+  const ListHeader = useCallback(() => (
+    <View style={GamesStyles.header}>
+      <TouchableOpacity style={GamesStyles.backButton} onPress={() => navigation.goBack()}>
+        <FontAwesomeIcon icon={faArrowLeft} color={darkTheme.textPrimary} size={18} />
+      </TouchableOpacity>
+      <Text style={GamesStyles.headerTitle}>Juegos</Text>
+    </View>
+  ), [navigation]);
 
   if (loading || !listGames) {
-    return <Loader visible={true} />;
+    return (
+      <View style={[GamesStyles.screen, { justifyContent: 'center', alignItems: 'center' }]}>
+        <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />
+        <Loader visible={true} />
+      </View>
+    );
   }
 
   return (
-    <ScrollView style={GamesStyles.container} contentContainerStyle={GamesStyles.containerMax}>
-      <TouchableOpacity style={GamesStyles.containerGoBack} onPress={() => navigation.goBack()}>
-        <FontAwesomeIcon icon={faArrowLeft} color="white" />
-      </TouchableOpacity>
-      <View style={GamesStyles.containerGames}>
-        {listGames.map((game, index) => {
-          const isTablet = sizeInInches && Number(sizeInInches) > 9;
-          return (
-            <TouchableOpacity
-              key={game.id}
-              style={isTablet ? GamesStyles.gameCard9Inche : GamesStyles.gameCard}
-              onPress={() => navigation.navigate('GameDetails', game)}
-            >
-              <Image
-                style={isTablet ? GamesStyles.coverImage9Inches : GamesStyles.coverImage}
-                source={game.imageUrl}
-              />
-              <Text
-                style={{ color: 'white', textAlign: 'center', fontSize: 11, marginTop: 4 }}
-                numberOfLines={1}
-              >
-                {game.title}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-    </ScrollView>
+    <View style={GamesStyles.screen}>
+      <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />
+      <View style={GamesStyles.glowPurple} />
+      <View style={GamesStyles.glowCyan} />
+      <FlatList
+        data={listGames}
+        renderItem={renderGameCard}
+        keyExtractor={(game) => game.id}
+        numColumns={numColumns}
+        ListHeaderComponent={ListHeader}
+        contentContainerStyle={GamesStyles.scrollContent}
+        columnWrapperStyle={GamesStyles.columnWrapper}
+        showsVerticalScrollIndicator={false}
+      />
+    </View>
   );
 };
 

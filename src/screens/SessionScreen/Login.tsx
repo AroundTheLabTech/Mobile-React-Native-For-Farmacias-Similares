@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, TextInput, ScrollView, Dimensions, Keyboard, KeyboardAvoidingView, Platform, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, ScrollView, Dimensions, Keyboard, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, ActivityIndicator } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../NavigationTypes';
-import loginStyles from './style/loginStyles';
+import authStyles from '../../theme/authStyles';
 import { getUserInformation, loginUserByEmailAndPassword, validateToken } from '../../services/backend';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../AuthContext';
+import { setSecureToken, getSecureToken, clearSecureToken } from '../../utils/secureStorage';
 import { TUserLogin } from 'src/types/user';
-import Loader from '@components/LoaderComponent/Loader';
 import AppMessage from '@components/AppMessage/AppMessage';
 import { ToastState, ToastType } from 'src/types/toast';
 import { DEV_SKIP_LOGIN, MOCK_USER } from '../../config/dev';
@@ -23,7 +23,7 @@ type LoginScreenProps = {
 
 const STORAGE_KEYS = {
   accessToken: 'userAccessToken',
-  expiresAt: 'tokenExpiresAt', // timestamp en ms
+  expiresAt: 'tokenExpiresAt',
   updateScore: 'updateScore',
   updateProfilePicture: 'updateProfilePicture',
   updateProfileInformation: 'updateProfileInformation',
@@ -34,13 +34,21 @@ const secondsToMs = (s: number) => s * 1000;
 
 const isExpired = (expiresAtMs: number, leewayMs = 10_000) => nowMs() >= (expiresAtMs - leewayMs);
 
+async function clearExpiredSession() {
+  await clearSecureToken();
+  await AsyncStorage.multiRemove(['tokenExpiresAt', 'updateScore', 'updateProfilePicture', 'updateProfileInformation']);
+}
+
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState(''); // ✅
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
   const { updateUserInformation, isLogout, setIsLogout } = useAuth();
   const [toast, setToast] = useState<ToastState>(null);
   const showMessage = (type: ToastType, text: string) => setToast({ type, text });
+
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const hasRestoredRef = useRef(false);
   const isNavigatingRef = useRef(false);
@@ -56,27 +64,36 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     try {
       const user = await loginUserByEmailAndPassword(email, password);
 
-      if (!user) {
-        showMessage('error', 'Credenciales inválidas o error de conexión.');
-        setLoading(false);
-        return;
-      }
-
-      // convierte expires_in (segundos) → fecha futura absoluta
       const expiresAtMs = nowMs() + secondsToMs(Number(user.expires_in || 0));
 
-      // TODO: Migrate to react-native-keychain for secure token storage
+      // Store token securely in device keychain
+      await setSecureToken(user.id_token);
       await AsyncStorage.multiSet([
-        [STORAGE_KEYS.accessToken, user.id_token],
         [STORAGE_KEYS.expiresAt, String(expiresAtMs)],
         [STORAGE_KEYS.updateScore, 'false'],
         [STORAGE_KEYS.updateProfilePicture, 'false'],
         [STORAGE_KEYS.updateProfileInformation, 'false'],
       ]);
 
-      // hidrata user en contexto
+      if (__DEV__) console.log('[LOGIN] Validating token...');
       const validateAccessToken = await validateToken(user.id_token);
+      if (__DEV__) console.log('[LOGIN] validateToken result:', JSON.stringify(validateAccessToken));
+
+      if (!validateAccessToken?.uid) {
+        showMessage('error', 'Error validando el token. Intenta de nuevo.');
+        setLoading(false);
+        return;
+      }
+
+      if (__DEV__) console.log('[LOGIN] Getting user info for uid:', validateAccessToken.uid);
       const response = await getUserInformation(validateAccessToken.uid);
+      if (__DEV__) console.log('[LOGIN] getUserInformation result:', JSON.stringify(response));
+
+      if (!response) {
+        showMessage('error', 'Error obteniendo información del usuario.');
+        setLoading(false);
+        return;
+      }
 
       const hydratedUser: TUserLogin = {
         uid: validateAccessToken.uid,
@@ -98,7 +115,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       setLoading(false);
       setIsLogout(false);
 
-      // opcional: pequeño delay para ver el toast
       setTimeout(() => {
         navigation.reset({
           index: 0,
@@ -107,11 +123,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       }, 600);
     } catch (error) {
       setLoading(false);
-      showMessage('error', 'Error de login. Verifica tus credenciales.');
+      const errorMsg = error instanceof Error ? error.message : 'Error inesperado. Intentalo de nuevo.';
+      showMessage('error', errorMsg);
     }
   };
 
-  // ✅ Rehidratación de sesión al montar la pantalla
   useEffect(() => {
     if (hasRestoredRef.current) return;
     hasRestoredRef.current = true;
@@ -126,10 +142,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       try {
         setLoading(true);
 
-        const [[, storedAccessToken], [, storedExpiresAt]] = await AsyncStorage.multiGet([
-          STORAGE_KEYS.accessToken,
-          STORAGE_KEYS.expiresAt,
-        ]);
+        const storedAccessToken = await getSecureToken();
+        const storedExpiresAt = await AsyncStorage.getItem(STORAGE_KEYS.expiresAt);
 
         if (!storedAccessToken || !storedExpiresAt) {
           setLoading(false);
@@ -138,14 +152,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
         const expiresAtMs = Number(storedExpiresAt);
         if (!expiresAtMs || isNaN(expiresAtMs) || isExpired(expiresAtMs)) {
-          await AsyncStorage.multiRemove([STORAGE_KEYS.accessToken, STORAGE_KEYS.expiresAt]);
+          await clearExpiredSession();
           setLoading(false);
           return;
         }
 
         const validateAccessToken = await validateToken(storedAccessToken);
         if (!validateAccessToken?.uid) {
-          await AsyncStorage.multiRemove([STORAGE_KEYS.accessToken, STORAGE_KEYS.expiresAt]);
+          await clearExpiredSession();
           setLoading(false);
           return;
         }
@@ -177,38 +191,26 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           });
         }
       } catch (error) {
-        await AsyncStorage.multiRemove([STORAGE_KEYS.accessToken, STORAGE_KEYS.expiresAt]);
+        await clearExpiredSession();
         setLoading(false);
       }
     };
 
     restoreSession();
-    // 👇 intencionalmente SIN deps para que NO se repita por cambios de contexto/navigation
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // orientación (tu código)
-  const [orientation, setOrientation] = useState('portrait');
-  useEffect(() => {
-    const updateOrientation = () => {
-      const { width, height } = Dimensions.get('window');
-      setOrientation(width > height ? 'landscape' : 'portrait');
-    };
-
-    const subscription = Dimensions.addEventListener('change', updateOrientation);
-    updateOrientation();
-    return () => {
-      subscription?.remove();
-    };
   }, []);
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={loginStyles.keyboardAvoid}>
+      style={authStyles.keyboardAvoid}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{ flex: 1 }}>
-          {/* AppMessage flotante */}
+        <View style={authStyles.screenContainer}>
+          {/* Gradient overlays */}
+          <View style={authStyles.gradientPurple} />
+          <View style={authStyles.gradientCyan} />
+
+          {/* Toast */}
           {toast && (
             <AppMessage
               type={toast.type}
@@ -219,77 +221,114 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           )}
 
           <ScrollView
-            key={orientation}
-            style={loginStyles.container}
-            contentContainerStyle={orientation === 'portrait' ? loginStyles.container : loginStyles.containerMax}
+            contentContainerStyle={authStyles.scrollContent}
+            keyboardShouldPersistTaps="handled"
           >
-            <View style={loginStyles.containerLogin}>
-              <View style={loginStyles.headerContainer}>
-                <Image source={require('../../../img/medallas/medal1.png')} style={loginStyles.headerMedal} />
-                <Image source={require('../../../img/medallas/medal1.png')} style={loginStyles.headerMedal} />
-              </View>
+            <View style={authStyles.glassCard}>
+              {/* Brand */}
+              <Text style={authStyles.brandText}>SimiJuegos</Text>
+              <Text style={authStyles.title}>¡Ganar nunca fue{'\n'}más divertido!</Text>
+              <Text style={authStyles.subtitle}>Inicia sesión para continuar</Text>
 
-              <View style={loginStyles.containerTitle}>
-                <Text style={loginStyles.titleLogin}>¡GANAR NUNCA FUE MÁS DIVERTIDO!</Text>
-
-                <View style={loginStyles.containerForms}>
-                  {/* Correo */}
-                  <View style={loginStyles.containerPlaceHolder}>
-                    <Text style={loginStyles.placeHolder}>Correo Electrónico</Text>
-                  </View>
+              {/* Email */}
+              <View style={authStyles.inputGroup}>
+                <Text style={authStyles.label}>Correo Electrónico</Text>
+                <View style={authStyles.inputWrapper}>
                   <TextInput
-                    style={loginStyles.input}
-                    placeholder="Correo electrónico"
+                    style={[
+                      authStyles.input,
+                      focusedField === 'email' && authStyles.inputFocused,
+                    ]}
+                    placeholder="tu@correo.com"
+                    placeholderTextColor="rgba(255,255,255,0.30)"
                     keyboardType="email-address"
                     autoCapitalize="none"
-                    value={email}
-                    onChangeText={setEmail}
-                    returnKeyType="next"
                     autoCorrect={false}
                     textContentType="emailAddress"
+                    value={email}
+                    onChangeText={setEmail}
+                    onFocus={() => setFocusedField('email')}
+                    onBlur={() => setFocusedField(null)}
+                    returnKeyType="next"
                   />
+                </View>
+              </View>
 
-                  {/* Contraseña */}
-                  <View style={loginStyles.containerPlaceHolder}>
-                    <Text style={loginStyles.placeHolder}>Contraseña</Text>
-                  </View>
+              {/* Password */}
+              <View style={authStyles.inputGroup}>
+                <Text style={authStyles.label}>Contraseña</Text>
+                <View style={authStyles.inputWrapper}>
                   <TextInput
-                    style={loginStyles.input}
-                    placeholder="Contraseña"
-                    keyboardType="default" // ✅
+                    style={[
+                      authStyles.input,
+                      focusedField === 'password' && authStyles.inputFocused,
+                    ]}
+                    placeholder="••••••••"
+                    placeholderTextColor="rgba(255,255,255,0.30)"
                     autoCapitalize="none"
+                    secureTextEntry={!showPassword}
+                    textContentType="password"
                     value={password}
                     onChangeText={setPassword}
-                    secureTextEntry // ✅ oculta caracteres
+                    onFocus={() => setFocusedField('password')}
+                    onBlur={() => setFocusedField(null)}
                     returnKeyType="done"
-                    textContentType="password"
+                    onSubmitEditing={handleLogin}
                   />
-                </View>
-
-                {/* Botones */}
-                <View style={loginStyles.containerLoginButtons}>
-                  <TouchableOpacity style={loginStyles.botonLogin} onPress={handleLogin} disabled={loading}>
-                    {loading ?
-                      <Loader visible={loading} message="" size='small' /> :
-                      <Text style={loginStyles.textoButtons}>Inicio sesión</Text>}
-                  </TouchableOpacity>
-
-                  <TouchableOpacity style={loginStyles.botonLogin} onPress={() => navigation.navigate('Register')} disabled={loading}>
-                    <Text style={loginStyles.textoButtons}>Registro</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={loginStyles.containerButtons}>
-                  <TouchableOpacity style={loginStyles.botonForgot} onPress={() => navigation.navigate('ForgotPassword')} disabled={loading}>
-                    <Text style={loginStyles.textoButtons}>Recuperar contraseña</Text>
+                  <TouchableOpacity
+                    style={authStyles.passwordToggle}
+                    onPress={() => setShowPassword(!showPassword)}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
+                    <Text style={authStyles.passwordToggleText}>
+                      {showPassword ? 'Ocultar' : 'Mostrar'}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>
 
-              <View style={loginStyles.headerContainer}>
-                <Image source={require('../../../img/medallas/medal1.png')} style={loginStyles.headerMedal} />
-                <Image source={require('../../../img/medallas/medal1.png')} style={loginStyles.headerMedal} />
+              {/* Login Button */}
+              <TouchableOpacity
+                style={[authStyles.buttonPrimary, loading && authStyles.buttonPrimaryDisabled]}
+                onPress={handleLogin}
+                disabled={loading}
+                activeOpacity={0.8}
+              >
+                {loading ? (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                    <ActivityIndicator color="#fff" size="small" />
+                    <Text style={[authStyles.buttonPrimaryText, { marginLeft: 8 }]}>Ingresando...</Text>
+                  </View>
+                ) : (
+                  <Text style={authStyles.buttonPrimaryText}>Iniciar Sesión</Text>
+                )}
+              </TouchableOpacity>
+
+              {/* Divider */}
+              <View style={authStyles.dividerContainer}>
+                <View style={authStyles.dividerLine} />
+                <Text style={authStyles.dividerText}>o</Text>
+                <View style={authStyles.dividerLine} />
               </View>
+
+              {/* Register Button */}
+              <TouchableOpacity
+                style={authStyles.buttonOutline}
+                onPress={() => navigation.navigate('Register')}
+                disabled={loading}
+                activeOpacity={0.8}
+              >
+                <Text style={authStyles.buttonOutlineText}>Registrarse</Text>
+              </TouchableOpacity>
+
+              {/* Forgot Password Link */}
+              <TouchableOpacity
+                style={authStyles.buttonLink}
+                onPress={() => navigation.navigate('ForgotPassword')}
+                disabled={loading}
+              >
+                <Text style={authStyles.buttonLinkText}>¿Olvidaste tu contraseña?</Text>
+              </TouchableOpacity>
             </View>
           </ScrollView>
         </View>

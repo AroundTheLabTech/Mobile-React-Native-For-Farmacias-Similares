@@ -37,9 +37,9 @@ export const UserProvider = ({ children }) => {
     if (updateProfilePicture) {
       async function fetchProfilePicture() {
         try {
-          const response = await getUserPicture(uid);  // Obtener imagen de perfil
-          if(response?.url) {
-            setProfilePicture(response?.url);  // Asumimos que `response.url` es la URL de la imagen
+          const response = await getUserPicture(uid);
+          if(response?.profile_picture_url) {
+            setProfilePicture(response.profile_picture_url);
           } else {
             throw new Error('No hay URL');
           }
@@ -58,10 +58,13 @@ export const UserProvider = ({ children }) => {
     if (updateLast3MonthsScores) {
       async function fetchUserScore() {
         try {
+          console.log('[DEBUG UserContext] fetching last3MonthsScores for uid:', uid);
           const response = await getUserLast3MonthsInfo(uid);  // Obtener imagen de perfil
+          console.log('[DEBUG UserContext] last3MonthsScores response:', JSON.stringify(response));
+          console.log('[DEBUG UserContext] last3MonthsScores sessions count:', response?.sessions?.length ?? 'no sessions');
           setLast3MonthsScores(response);  // Asumimos que `response.url` es la URL de la imagen
         } catch (error) {
-          // console.error('Error fetching profile picture', error);
+          console.log('[DEBUG UserContext] last3MonthsScores ERROR:', error);
           return;
         }
       }
@@ -92,10 +95,12 @@ export const UserProvider = ({ children }) => {
     if (updateUserPoints) {
       async function fetchUserPoints() {
         try {
+          console.log('[DEBUG UserContext] fetching userPoints for uid:', uid);
           const response = await getUserPoints(uid);  // Obtener imagen de perfil
+          console.log('[DEBUG UserContext] userPoints response:', JSON.stringify(response));
           setUserPoints(response);  // Asumimos que `response.url` es la URL de la imagen
         } catch (error) {
-          // console.error('Error fetching profile picture', error);
+          console.log('[DEBUG UserContext] userPoints ERROR:', error);
           return;
         }
       }

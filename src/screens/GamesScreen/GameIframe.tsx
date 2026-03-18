@@ -1,14 +1,21 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, TouchableOpacity, ScrollView, StyleSheet, Text, Image, LayoutChangeEvent } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { View, TouchableOpacity, StyleSheet, Text, Animated, StatusBar } from 'react-native';
 import Orientation from 'react-native-orientation-locker';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import { useFocusEffect } from '@react-navigation/native';
-import { colors, fonts, fontSizes, spacing } from '../../../global-class';
 import { getListAvalibleCompetition, postSessionGame, putCompetitionSession } from '@services/backend';
 import { useAuth } from '../../AuthContext';
 import { useUser } from '@services/UserContext';
 import { TGameSession } from 'src/types/game';
 import { TCompetitionSession } from 'src/types/competition';
+import { darkTheme } from '../../theme/colors';
+
+let LinearGradient: any = null;
+try {
+  LinearGradient = require('react-native-linear-gradient').default;
+} catch {
+  // Native module not linked yet
+}
 
 type GameId =
   | 'juego1' | 'juego2' | 'juego3' | 'juego4' | 'juego5' | 'juego6'
@@ -23,7 +30,11 @@ type RouteParams = {
 };
 
 type Props = {
-  navigation: { goBack: () => void; navigate: (screen: string, params?: any) => void };
+  navigation: {
+    goBack: () => void;
+    navigate: (screen: string, params?: any) => void;
+    addListener?: (event: string, callback: (e: any) => void) => () => void;
+  };
   route: { params: RouteParams };
 };
 
@@ -39,27 +50,37 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
 
   const { gameUrl, id, score, title } = route.params;
 
+  // Juegos que se juegan en vertical
+  const VERTICAL_GAMES = ['juego13', 'juego14', 'juego16'];
+  const isVerticalGame = VERTICAL_GAMES.includes(id);
+
   // Estado base de puntaje mostrado
   const [currentScore, setCurrentScore] = useState<number>(Number(score) || 0);
 
   // Estados para replicar reglas de la web (en memoria; NO persisten solos)
   const [scoreHistory, setScoreHistory] = useState<number[]>([]); // máx 2
-  const [previusScore, setPreviusScore] = useState<number>(0);
+  const [previousScore, setPreviousScore] = useState<number>(0);
   const initialScoreDb = useMemo<number>(() => Number(score) || 0, [score]);
 
-  // Control de envío al backend (solo en Guardar y salir)
+  // Control de envío al backend
   const [session, setSession] = useState<TGameSession | undefined>();
   const isPostingRef = useRef<boolean>(false);
+  const lastSavedScoreRef = useRef<number>(Number(score) || 0);
 
   // WebView refs y control de reinyección
   const webviewRef = useRef<WebView | null>(null);
   const [webKey, setWebKey] = useState<number>(0);
 
-  // Orientación landscape mientras está montado
+  // Orientación según el tipo de juego
   useEffect(() => {
-    Orientation.lockToLandscape();
+    if (__DEV__) console.log(`[DEBUG GameIframe] Locking orientation -> id=${id}, isVertical=${isVerticalGame}`);
+    if (isVerticalGame) {
+      Orientation.lockToPortrait();
+    } else {
+      Orientation.lockToLandscape();
+    }
     return () => Orientation.unlockAllOrientations();
-  }, []);
+  }, [id, isVerticalGame]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -102,13 +123,13 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
       if (!window.__SimiBridge) {
         window.__SimiBridge = (function(){
           let scoreHistory = [];
-          let previusScore = 0;
+          let previousScore = 0;
           return {
             pushScore: function(v){ scoreHistory.push(v); if(scoreHistory.length>2) scoreHistory.shift(); return scoreHistory; },
             getHistory: function(){ return scoreHistory.slice(); },
-            setPrevius: function(v){ previusScore = v; },
-            getPrevius: function(){ return previusScore; },
-            reset: function(){ scoreHistory = []; previusScore = 0; },
+            setPrevious: function(v){ previousScore = v; },
+            getPrevious: function(){ return previousScore; },
+            reset: function(){ scoreHistory = []; previousScore = 0; },
           };
         })();
 
@@ -195,8 +216,13 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
       const numberValue = Number(raw?.number);
       const typeValue = raw?.type ? String(raw.type) : undefined;
 
+      if (__DEV__) console.log(`[DEBUG GameIframe] onMessage -> type=${typeValue}, score=${scoreValue}, number=${numberValue}, game=${id}`);
+
       const strategy = SCORING_STRATEGIES[id];
-      if (!strategy) return;
+      if (!strategy) {
+        console.log(`[DEBUG GameIframe] No strategy for ${id}`);
+        return;
+      }
 
       // Check type filter
       if (strategy.requireType && typeValue !== strategy.requireType) return;
@@ -217,11 +243,11 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
         // juego5 special: only count if score increases over previous
         if (scoreValue > 0) {
           setScoreHistory(prev => {
-            if (previusScore !== scoreValue && scoreValue > previusScore) {
+            if (previousScore !== scoreValue && scoreValue > previousScore) {
               const u = pushAndShift(prev, scoreValue);
               const v = u[1];
-              if (v > 0) { delta = v; setPreviusScore(v); }
-              else { delta = 1; setPreviusScore(1); }
+              if (v > 0) { delta = v; setPreviousScore(v); }
+              else { delta = 1; setPreviousScore(1); }
               return u;
             }
             return prev;
@@ -246,122 +272,287 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
 
       // Actualiza puntaje local
       if (delta > 0 && !appliedAbsolute) {
-        setCurrentScore(prev => prev + delta);
+        setCurrentScore(prev => {
+          const next = prev + delta;
+          console.log(`[DEBUG GameIframe] Score updated -> prev=${prev}, delta=${delta}, next=${next}`);
+          return next;
+        });
       }
     } catch (e) {
       // Mensaje no JSON o desconocido
     }
   };
 
-  // Guardar SOLO aquí
-  async function handleUpdateScore() {
+  // Envía delta incremental al backend (no navega)
+  const saveScoreDelta = useCallback(async (navigateBack = false) => {
     try {
-      const deltaTotal = Math.max(0, currentScore - initialScoreDb);
-      const deltaToSend = deltaTotal; // redondea si tu API no acepta decimales: Math.round(deltaTotal)
+      const deltaTotal = Math.max(0, currentScore - lastSavedScoreRef.current);
+      const deltaToSend = Math.round(deltaTotal);
+
+      if (__DEV__) console.log(`[DEBUG GameIframe] saveScoreDelta -> currentScore=${currentScore}, lastSaved=${lastSavedScoreRef.current}, delta=${deltaToSend}, navigateBack=${navigateBack}`);
 
       if (deltaToSend > 0 && !isPostingRef.current) {
         isPostingRef.current = true;
 
         const gameNumber = Number(id.replace('juego', ''));
-        const newGameSession: TGameSession = { uid, score: Number(deltaToSend), numberGame: gameNumber };
+        const newGameSession: TGameSession = { uid, score: deltaToSend, numberGame: gameNumber };
 
+        console.log(`[DEBUG GameIframe] Posting session -> game=${gameNumber}, score=${deltaToSend}`);
         const response = await postSessionGame(newGameSession);
+        console.log(`[DEBUG GameIframe] Session response -> session_id=${response?.session_id}`);
         if (response?.session_id) {
           await addCompetitionSession(response.session_id);
           setSession(newGameSession);
         }
+        // Actualiza referencia para no re-enviar lo ya guardado
+        lastSavedScoreRef.current = currentScore;
+      } else if (deltaToSend === 0) {
+        console.log(`[DEBUG GameIframe] No delta to save, skipping`);
       }
     } catch (e) {
-      // Error al guardar score
+      if (__DEV__) console.log(`[DEBUG GameIframe] Error saving score:`, e);
     } finally {
       isPostingRef.current = false;
-      setUpdateScorePerGame(true);
-      setUpdateLast3MonthsScores(true);
-      setUpdateUserPoints(true);
-      navigation.goBack();
+      if (navigateBack) {
+        console.log(`[DEBUG GameIframe] Navigating back, refreshing data`);
+        setUpdateScorePerGame(true);
+        setUpdateLast3MonthsScores(true);
+        setUpdateUserPoints(true);
+        navigation.goBack();
+      }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentScore, id, uid]);
+
+  // Botón "Guardar y salir"
+  function handleUpdateScore() {
+    saveScoreDelta(true);
   }
 
-  // layout
-  const [dimesions, setDimensions] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
-  function handleLayout(event: LayoutChangeEvent) {
-    const { width, height } = event.nativeEvent.layout;
-    setDimensions({ width, height });
-  }
+  // Auto-guardado cada 15 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      saveScoreDelta(false);
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [saveScoreDelta]);
+
+  // Guardar al presionar botón de retroceso (hardware o gesture)
+  useEffect(() => {
+    const unsubscribe = navigation.addListener?.('beforeRemove', (e: any) => {
+      // Si ya se está guardando, dejar pasar
+      if (isPostingRef.current) {
+        console.log(`[DEBUG GameIframe] beforeRemove -> already posting, allowing navigation`);
+        return;
+      }
+
+      const delta = Math.round(Math.max(0, currentScore - lastSavedScoreRef.current));
+      if (__DEV__) console.log(`[DEBUG GameIframe] beforeRemove -> delta=${delta}, currentScore=${currentScore}, lastSaved=${lastSavedScoreRef.current}`);
+      if (delta > 0) {
+        // Prevenir navegación, guardar, y luego navegar
+        e.preventDefault();
+        console.log(`[DEBUG GameIframe] beforeRemove -> preventing navigation, saving first`);
+        saveScoreDelta(true);
+      } else {
+        // No hay delta pendiente, refrescar datos y dejar pasar
+        console.log(`[DEBUG GameIframe] beforeRemove -> no delta, passing through`);
+        setUpdateScorePerGame(true);
+        setUpdateLast3MonthsScores(true);
+        setUpdateUserPoints(true);
+      }
+    });
+    return unsubscribe;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentScore, saveScoreDelta]);
+
+  // --- Auto-hide overlay ---
+  const [overlayVisible, setOverlayVisible] = useState(true);
+  const overlayOpacity = useRef(new Animated.Value(1)).current;
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const hideOverlay = useCallback(() => {
+    Animated.timing(overlayOpacity, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => setOverlayVisible(false));
+  }, [overlayOpacity]);
+
+  const showOverlay = useCallback(() => {
+    setOverlayVisible(true);
+    overlayOpacity.setValue(1);
+    // Auto-hide after 4s
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(hideOverlay, 4000);
+  }, [overlayOpacity, hideOverlay]);
+
+  // Show on mount, auto-hide after 4s
+  useEffect(() => {
+    hideTimer.current = setTimeout(hideOverlay, 4000);
+    return () => { if (hideTimer.current) clearTimeout(hideTimer.current); };
+  }, [hideOverlay]);
+
+  const toggleOverlay = useCallback(() => {
+    if (overlayVisible) {
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+      hideOverlay();
+    } else {
+      showOverlay();
+    }
+  }, [overlayVisible, hideOverlay, showOverlay]);
+
+  const exitButtonContent = (
+    <Text style={styles.exitButtonText}>Guardar y salir</Text>
+  );
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.container}>
-      <View style={styles.buttonsLeftContainer}>
-        <Text style={styles.buttonsTitle}>Puntos: {currentScore}</Text>
-        <Image source={require('../../../img/medallas/medal1.png')} />
-        <View style={styles.containerGoBack}>
-          <TouchableOpacity style={styles.saveAndExitTextButtonBack} onPress={handleUpdateScore}>
-            <View style={styles.saveAndExitTextButtonFront}>
-              <Text style={styles.saveAndExitText}>Guardar y salir</Text>
+    <View style={styles.container}>
+      <StatusBar hidden />
+
+      {/* Full-bleed game — fills entire screen */}
+      <WebView
+        key={webKey}
+        ref={webviewRef}
+        style={styles.webView}
+        source={{ uri: gameUrl }}
+        injectedJavaScript={injectedJS}
+        injectedJavaScriptBeforeContentLoaded={injectedJS}
+        onLoadStart={() => resetBridge()}
+        onMessage={handleMessage}
+        javaScriptEnabled
+        domStorageEnabled
+        startInLoadingState
+        originWhitelist={['*']}
+      />
+
+      {/* Tap zone to toggle overlay (top edge) */}
+      {!overlayVisible && (
+        <TouchableOpacity
+          style={styles.tapZone}
+          activeOpacity={1}
+          onPress={toggleOverlay}
+        >
+          <View style={styles.tapHint} />
+        </TouchableOpacity>
+      )}
+
+      {/* Floating overlay — auto-hides */}
+      {overlayVisible && (
+        <Animated.View style={[styles.overlay, { opacity: overlayOpacity }]}>
+          <View style={styles.overlayBar}>
+            {/* Score pill */}
+            <View style={styles.scorePill}>
+              <Text style={styles.scoreValue}>{Math.round(currentScore)}</Text>
+              <Text style={styles.scoreLabel}> pts</Text>
             </View>
-          </TouchableOpacity>
-        </View>
-      </View>
 
-      <View style={styles.webViewContainer} onLayout={handleLayout}>
-        <WebView
-          key={webKey}
-          ref={webviewRef}
-          style={{ width: dimesions.width * 0.8 }}
-          source={{ uri: gameUrl }}
-          injectedJavaScript={injectedJS}
-          injectedJavaScriptBeforeContentLoaded={injectedJS}
-          onLoadStart={() => resetBridge()}   // limpia si el juego recarga internamente
-          onMessage={handleMessage}
-          javaScriptEnabled
-          domStorageEnabled
-          startInLoadingState
-          originWhitelist={['*']}
-        />
-      </View>
+            {/* Spacer */}
+            <View style={styles.spacer} />
 
-      <View style={styles.buttonsRigthContainer}>
-        <Text style={styles.buttonsTitle}>{title}</Text>
-        <Image source={require('../../../img/medallas/medal3.png')} />
-        <Image source={require('../../../img/medallas/medal4.png')} />
-      </View>
-    </ScrollView>
+            {/* Exit button */}
+            <TouchableOpacity onPress={handleUpdateScore} activeOpacity={0.85}>
+              {LinearGradient ? (
+                <LinearGradient
+                  colors={['#7C3AED', '#06B6D4']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.exitButton}
+                >
+                  {exitButtonContent}
+                </LinearGradient>
+              ) : (
+                <View style={[styles.exitButton, { backgroundColor: darkTheme.purple }]}>
+                  {exitButtonContent}
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+      )}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, flexDirection: 'row' },
-  buttonsLeftContainer: {
-    borderWidth: 1, borderColor: 'white', position: 'absolute', zIndex: 10, backgroundColor: 'white',
-    padding: spacing.sm, borderRadius: 5, height: '100%', justifyContent: 'space-around', left: 0, width: '10%',
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
   },
-  buttonsTitle: {
-    color: colors.secondary, fontFamily: fonts.press, fontSize: fontSizes.xxxxs,
-    width: '100%', textAlign: 'center',
+  webView: {
+    flex: 1,
+    backgroundColor: '#000',
   },
-  webViewContainer: {
-    flex: 1, overflow: 'hidden', alignSelf: 'center', justifyContent: 'center', alignItems: 'center',
+  // Small bar at top edge — tap to show overlay when hidden
+  tapZone: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    zIndex: 20,
   },
-  buttonsRigthContainer: {
-    borderWidth: 1, borderColor: 'white', position: 'absolute', zIndex: 10, backgroundColor: 'white',
-    padding: spacing.sm, borderRadius: 5, height: '100%', justifyContent: 'space-around', right: 0, width: '10%',
+  tapHint: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    marginBottom: 4,
   },
-  containerGoBack: {
-    width: '100%', padding: 10, zIndex: 1, top: 0, backgroundColor: 'white',
-    height: 50, justifyContent: 'center', alignItems: 'center',
+  // Floating overlay
+  overlay: {
+    position: 'absolute',
+    top: 8,
+    right: 12,
+    zIndex: 30,
   },
-  saveAndExitTextButtonBack: {
-    width: 60, height: 60, borderRadius: 50, borderWidth: 1, justifyContent: 'center',
-    alignItems: 'center', backgroundColor: '#aa2409', borderColor: '#da2e0b',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.6, shadowRadius: 4, elevation: 5,
+  overlayBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(124, 58, 237, 0.25)',
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    gap: 8,
   },
-  saveAndExitTextButtonFront: {
-    width: 45, height: 45, borderRadius: 50, borderWidth: 1, justifyContent: 'center',
-    padding: 5, backgroundColor: '#da2e0b',
+  scorePill: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
   },
-  saveAndExitText: {
-    fontFamily: fonts.press, fontSize: 5, textAlign: 'center', color: colors.primary,
-    textShadowColor: '#000', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 1,
+  scoreValue: {
+    color: '#FFD700',
+    fontFamily: 'Inter-Bold',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  scoreLabel: {
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontFamily: 'Inter-VariableFont_opsz,wght',
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  spacer: {
+    width: 1,
+    height: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  exitButton: {
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  exitButtonText: {
+    color: '#FFFFFF',
+    fontFamily: 'Inter-VariableFont_opsz,wght',
+    fontSize: 11,
+    fontWeight: '700',
   },
 });
 

@@ -105,10 +105,19 @@ const BadgesStyle = StyleSheet.create({
   },
   containerImage: {
     width: '30%',
+    alignItems: 'center',
   },
   medalStyle: {
     resizeMode: 'contain',
     width: '100%',
+  },
+  badgeName: {
+    textAlign: 'center',
+    fontSize: fontSizes.sm,
+    fontWeight: '600',
+    color: colors.primary,
+    marginTop: 4,
+    fontFamily: fonts.inter,
   },
 
   //Estadisticas
@@ -166,7 +175,7 @@ const BadgesStyle = StyleSheet.create({
     textAlign: 'center',
     fontFamily: fonts.inter,
     fontWeight: '700',
-    color: colors.secondary,
+    color: colors.primary,
   },
 });
 

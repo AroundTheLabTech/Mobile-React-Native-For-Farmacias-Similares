@@ -76,7 +76,7 @@ const ReportProblem = ({ navigation }) => {
         showMessage('info', 'Ocurrió un error al enviar el reporte.');
       }
     } catch (error) {
-      console.error(error);
+      if (__DEV__) console.error(error);
       showMessage('error', 'No se pudo enviar el reporte. Inténtalo más tarde');
     }
   }

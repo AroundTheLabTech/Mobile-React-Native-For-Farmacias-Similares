@@ -97,7 +97,15 @@ export type TUpdateUserInformation = {
 }
 
 export type TUserPicture = {
-  url: string,
+  profile_picture_url: string,
+}
+
+export type TDashboardSummary = {
+  score_total: number,
+  global_ranking: number,
+  best_score: number,
+  total_games: number,
+  monthly_score: number,
 }
 
 export type TUserProfilePicture = {
