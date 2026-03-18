@@ -1,309 +1,296 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, ScrollView, Image, Animated, TouchableWithoutFeedback, StatusBar, RefreshControl } from 'react-native';
+import { faStar, faFire, faTrophy, faGamepad } from '@fortawesome/free-solid-svg-icons';
 
-// Styles
-import HomeStyles from './style/HomeStyle';
-
-import { useAuth } from '../../AuthContext'; // Importa el hook useAuth
-import { useUser } from '../../services/UserContext';
-// import CompetitionModal from '../../components/CompetitionComponent/CompetitionModal';
-import Loader from '@components/LoaderComponent/Loader';
-import Virus1 from '@img/personajes/virus-1.svg';
-import Game1 from '@img/games/portada/game-1.png';
-import { getMaxScorePerMonth, groupSessionsByMonth } from '../../utils/helpers';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faGamepad } from '@fortawesome/free-solid-svg-icons';
-import { SvgUri } from 'react-native-svg';
-import { imageSize, responsiveHeight } from '../../../global-class';
-
-type Last3MonthHomeData = {
-  label: string,
-  value: number,
+let LinearGradient: any = null;
+try {
+  LinearGradient = require('react-native-linear-gradient').default;
+} catch {
+  // Native module not linked yet
 }
 
-const HomeScreen = ({ navigation }) => {
-  // Obtener la variable del usuario
+import { useAuth } from '../../AuthContext';
+import { useUser } from '../../services/UserContext';
+import { getTopTwenty, getUserBadges, getDashboardSummary } from '@services/backend';
+import Loader from '@components/LoaderComponent/Loader';
+import LevelRing from '@components/LevelRing/LevelRing';
+import StatCard from '@components/StatCard/StatCard';
+import MiniLeaderboard from '@components/MiniLeaderboard/MiniLeaderboard';
+import TipBanner from '@components/TipBanner/TipBanner';
+import TrophyGrid from '@components/TrophyGrid/TrophyGrid';
+import dashboardStyles from '../../theme/dashboardStyles';
+import { darkTheme } from '../../theme/colors';
+import { TTopTwenty } from '../../types/user';
+import { getAvatarSource } from '../../utils/avatars';
+import { useFadeInUp, usePressScale } from '../../utils/animations';
+
+const HomeScreen = ({ navigation }: { navigation: any }) => {
   const { uid } = useAuth();
   const {
     profilePicture,
     setUpdateProfilePicture,
-    last3MonthsScores,
-    updateLast3MonthsScores,
-    setUpdateLast3MonthsScores,
-    scorePerGame,
-    setUpdateScorePerGame,
+    userPoints,
+    setUpdateUserPoints,
     userInformation,
     setUpdateUserInformation,
+    last3MonthsScores,
+    setUpdateLast3MonthsScores,
   } = useUser();
-  // const [profilePicture, setProfilePicture] = useState<string>();
 
-  const [gameInformation, setGameInformation] = useState(
-    {
-      'imageUrl': Game1 ? Game1 : 'https://icon-library.com/images/xbox-controller-icon/xbox-controller-icon-26.jpg',
-      'id': 'juego1',
-      'score': 0,
-      'score_given_per_game': 20,
-      'title': 'Dr. Simi Invide',
-      'description': '¡No dejes caer ninguna Rosca de Reyes! Corta todos los objetos y evita encender la mecha . Acumula puntos por cada Rosca de Reyes que logres cortar.',
-      'gameUrl': 'https://simijuegos-game2.web.app/',
-    }
-  );
+  // Dashboard summary data
+  const [ranking, setRanking] = useState<number | null>(null);
+  const [streak, setStreak] = useState(0);
+  const [bestScore, setBestScore] = useState(0);
+  const [totalGames, setTotalGames] = useState(0);
+  const [totalScore, setTotalScore] = useState(0);
+  const [badges, setBadges] = useState<string[]>([]);
+  const [topUsers, setTopUsers] = useState<TTopTwenty[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [animReady, setAnimReady] = useState(false);
 
+  // Trigger animations only after data has loaded and content is visible
   useEffect(() => {
-    async function fetchData() {
-
-      if (scorePerGame && scorePerGame?.score_per_game[gameInformation.id]) {
-        const score = scorePerGame.score_per_game[gameInformation.id];
-        gameInformation.score = score;
-
-        setGameInformation(gameInformation);
-      }
+    if (!loading) {
+      // Small delay so the layout is painted before animations start
+      const t = setTimeout(() => setAnimReady(true), 50);
+      return () => clearTimeout(t);
     }
+  }, [loading]);
 
-    if (!gameInformation.score || gameInformation.score <= 0) {
-      fetchData();
-    }
+  // Animations — enabled only after loading completes
+  const heroAnim = useFadeInUp(0, animReady);
+  const statsAnim = useFadeInUp(150, animReady);
+  const ctaAnim = useFadeInUp(300, animReady);
+  const leaderboardAnim = useFadeInUp(450, animReady);
+  const trophyAnim = useFadeInUp(600, animReady);
+  const tipAnim = useFadeInUp(750, animReady);
+  const ctaPress = usePressScale();
 
-    if (!scorePerGame) {
-      fetchData();
-      setUpdateScorePerGame(true);
-    } else {
-      setUpdateScorePerGame(false);
-    }
-
-    fetchData();
-
-  }, [gameInformation, scorePerGame, setUpdateScorePerGame, uid]);
-
-  const [scoresLats3Months, setScoresLast3Months] = useState<Last3MonthHomeData[]>();
-
+  // Trigger context data fetching
   useEffect(() => {
-    function fetchData() {
-      if (last3MonthsScores && last3MonthsScores?.sessions) {
-        const resultGroupByMonth = groupSessionsByMonth(last3MonthsScores.sessions);
-        const lastThreeMonthsScores = getMaxScorePerMonth(resultGroupByMonth);
-        const keys = Object.keys(lastThreeMonthsScores);
+    if (!profilePicture) setUpdateProfilePicture(true);
+    if (!userPoints) setUpdateUserPoints(true);
+    if (!userInformation) setUpdateUserInformation(true);
+    if (!last3MonthsScores) setUpdateLast3MonthsScores(true);
+  }, [
+    profilePicture, setUpdateProfilePicture,
+    userPoints, setUpdateUserPoints,
+    userInformation, setUpdateUserInformation,
+    last3MonthsScores, setUpdateLast3MonthsScores,
+  ]);
 
-        const month1 = keys[keys.length - 1];
-        const month2 = keys[keys.length - 2];
-        const month3 = keys[keys.length - 3];
+  // Dashboard data fetcher
+  const fetchDashboardData = useCallback(async () => {
+    if (__DEV__) console.log('[DEBUG Home] fetchDashboardData called, uid:', uid);
+    try {
+      const [summaryResult, topResult, badgesResult] = await Promise.all([
+        getDashboardSummary(uid).catch((e) => { console.log('[DEBUG Home] getDashboardSummary catch:', e); return null; }),
+        getTopTwenty().catch((e) => { console.log('[DEBUG Home] getTopTwenty catch:', e); return null; }),
+        getUserBadges(uid).catch((e) => { console.log('[DEBUG Home] getUserBadges catch:', e); return null; }),
+      ]);
 
-        let month1Value = 0;
-        if (resultGroupByMonth[month1] && resultGroupByMonth[month1].length > 0) {
-          resultGroupByMonth[month1].forEach(element => {
-            month1Value += element;
-          });
-        }
+      if (__DEV__) console.log('[DEBUG Home] summaryResult:', JSON.stringify(summaryResult));
+      if (__DEV__) console.log('[DEBUG Home] topResult count:', topResult ? topResult.length : 'null');
+      if (__DEV__) console.log('[DEBUG Home] badgesResult:', JSON.stringify(badgesResult));
 
-        let month2Value = 0;
-        if (resultGroupByMonth[month2] && resultGroupByMonth[month2].length > 0) {
-          resultGroupByMonth[month2].forEach(element => {
-            month2Value += element;
-          });
-        }
-
-        let month3Value = 0;
-        if (resultGroupByMonth[month3] && resultGroupByMonth[month3].length > 0) {
-          resultGroupByMonth[month3].forEach(element => {
-            month3Value += element;
-          });
-        }
-
-        setScoresLast3Months([
-          {
-            label: month1,
-            value: month1Value,
-          },
-          {
-            label: month2,
-            value: month2Value,
-          },
-          {
-            label: month3,
-            value: month3Value,
-          },
-        ]);
+      if (summaryResult) {
+        setRanking(summaryResult.global_ranking);
+        setTotalScore(summaryResult.score_total);
+        setBestScore(summaryResult.best_score);
+        setTotalGames(summaryResult.total_games);
+      } else if (userPoints?.score_total) {
+        // Fallback to context data
+        setTotalScore(userPoints.score_total);
       }
+
+      if (topResult) setTopUsers(topResult);
+      if (badgesResult) {
+        setStreak(badgesResult.scoring_streak ?? 0);
+        setBadges(badgesResult.badges ?? []);
+      }
+    } catch (e) {
+      if (__DEV__) console.log('[DEBUG Home] fetchDashboardData ERROR:', e);
     }
+  }, [uid, userPoints]);
 
-    if ((!last3MonthsScores || !scoresLats3Months) || updateLast3MonthsScores) {
-      setUpdateLast3MonthsScores(true);
-      fetchData();
-    } else {
-      setUpdateLast3MonthsScores(false);
-    }
-
-    //fetchData();
-  }, [last3MonthsScores, scoresLats3Months, setUpdateLast3MonthsScores, uid, updateLast3MonthsScores]);
-
+  // Fetch on mount
   useEffect(() => {
-    function fetchData() {
-      if (!profilePicture) {
-        setUpdateProfilePicture(true);
-      } else {
-        setUpdateProfilePicture(false);
-      }
+    let mounted = true;
+    async function loadInitialData() {
+      await fetchDashboardData();
+      if (mounted) setLoading(false);
     }
+    if (uid) loadInitialData();
+    else setLoading(false);
+    return () => { mounted = false; };
+  }, [uid, fetchDashboardData]);
 
-    fetchData();
-  }, [profilePicture, setUpdateProfilePicture, uid]);
+  // Pull-to-refresh
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    setUpdateProfilePicture(true);
+    setUpdateUserPoints(true);
+    setUpdateUserInformation(true);
+    setUpdateLast3MonthsScores(true);
+    await fetchDashboardData();
+    setRefreshing(false);
+  }, [fetchDashboardData, setUpdateProfilePicture, setUpdateUserPoints, setUpdateUserInformation, setUpdateLast3MonthsScores]);
 
-  useEffect(() => {
-    function fetchData() {
-      if (!userInformation) {
-        setUpdateUserInformation(true);
-      } else {
-        setUpdateUserInformation(false);
-      }
-    }
+  const handleNavigateGames = useCallback(() => {
+    navigation.navigate('Games');
+  }, [navigation]);
 
-    fetchData();
-  }, [userInformation, setUpdateUserInformation, uid]);
+  const handleNavigateLeaderboard = useCallback(() => {
+    navigation.navigate('MainTab', { screen: 'Leaderboard' });
+  }, [navigation]);
 
-  if ((!userInformation && !userInformation?.name) || (scoresLats3Months && scoresLats3Months.length < 3)) {
-    return <Loader visible={true} />;
+  // Resolve avatar
+  const avatarSource = getAvatarSource(profilePicture);
+
+  if (loading && !userInformation) {
+    return (
+      <View style={[dashboardStyles.screen, { justifyContent: 'center', alignItems: 'center' }]}>
+        <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />
+        <Loader visible={true} />
+      </View>
+    );
   }
 
   return (
+    <View style={dashboardStyles.screen}>
+      <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />
 
-    <ScrollView style={HomeStyles.containerScroll}>
-      <View style={HomeStyles.container}>
-        {/* Header Profile */}
-        <View style={HomeStyles.containerHeaderProfile}>
-          <View style={HomeStyles.containerInfo}>
-            <Text style={HomeStyles.textSaludo}>¡Hola!</Text>
-            <Text style={HomeStyles.textUsuario}>{userInformation.name || 'Usuario'}</Text>
+      {/* Decorative Glows */}
+      <View style={dashboardStyles.glowPurple} />
+      <View style={dashboardStyles.glowCyan} />
+
+      <ScrollView
+        contentContainerStyle={dashboardStyles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#7C3AED"
+            colors={['#7C3AED']}
+          />
+        }
+      >
+        {/* Header */}
+        <View style={dashboardStyles.header}>
+          <View>
+            <Text style={dashboardStyles.greeting}>Hola!</Text>
+            <Text style={dashboardStyles.username}>
+              {userInformation?.name || 'Jugador'}
+            </Text>
           </View>
-          <View style={HomeStyles.containerImage}>
-            {
-              profilePicture &&
-              (
-                profilePicture.includes('.png') ?
-                  <Image
-                    style={HomeStyles.PerfilImage}
-                    resizeMode="contain"
-                    source={{ uri: profilePicture }}
-                    width={imageSize.sxxl}
-                  />
-                  :
-                  <View style={HomeStyles.containerImage} >
-                    <SvgUri uri={profilePicture} width={imageSize.sxxl} height={imageSize.sxxl} />
-                  </View>
-              )
-            }
+          <View style={dashboardStyles.avatarContainer}>
+            <Image
+              source={avatarSource}
+              style={dashboardStyles.avatar}
+              resizeMode="cover"
+            />
           </View>
         </View>
 
-        {/* Juego Reciente */}
+        {/* Hero — Level Ring */}
+        <Animated.View style={[dashboardStyles.heroCard, { opacity: heroAnim.opacity, transform: heroAnim.transform }]}>
+          <LevelRing score={totalScore} />
+        </Animated.View>
 
-        <TouchableOpacity onPress={() => {
-          navigation.navigate('Games', {
-            screen: 'GameDetails',
-            params: gameInformation,
-          });
-        }} >
-          <View style={HomeStyles.recienteContainer}>
-            {/* Left Column */}
-            <View style={HomeStyles.columnLeft}>
-              <Text style={HomeStyles.nuevoJuego}>Nuevo juego disponible</Text>
-              <View style={HomeStyles.containerTitleGameNew}>
-                <Virus1 width={responsiveHeight(30)} height={responsiveHeight(30)} />
-                <Text style={HomeStyles.titleJuego}>
-                  {gameInformation.title.toUpperCase()}
-                </Text>
+        {/* Quick Stats */}
+        <Animated.View style={[dashboardStyles.statsGrid, { opacity: statsAnim.opacity, transform: statsAnim.transform }]}>
+          <StatCard
+            icon={faStar}
+            value={ranking != null && ranking > 0 ? `#${ranking}` : '--'}
+            label="Ranking"
+            accentColor="#FFD700"
+            delay={0}
+          />
+          <StatCard
+            icon={faFire}
+            value={String(streak)}
+            label="Racha"
+            accentColor="#EF4444"
+            delay={80}
+          />
+          <StatCard
+            icon={faTrophy}
+            value={bestScore > 0 ? bestScore.toLocaleString() : '--'}
+            label="Mejor"
+            accentColor="#8B5CF6"
+            delay={160}
+          />
+          <StatCard
+            icon={faGamepad}
+            value={String(totalGames)}
+            label="Partidas"
+            accentColor="#3B82F6"
+            delay={240}
+          />
+        </Animated.View>
+
+        {/* CTA Button */}
+        <Animated.View style={{ opacity: ctaAnim.opacity, transform: [{ translateY: ctaAnim.transform[0].translateY }, { scale: ctaPress.scale }] }}>
+          <TouchableWithoutFeedback
+            onPress={handleNavigateGames}
+            onPressIn={ctaPress.onPressIn}
+            onPressOut={ctaPress.onPressOut}
+          >
+            {LinearGradient ? (
+              <LinearGradient
+                colors={['#7C3AED', '#06B6D4']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={dashboardStyles.ctaButton}
+              >
+                <Text style={{ fontSize: 20 }}>{'\u25B6\uFE0F'}</Text>
+                <Text style={dashboardStyles.ctaText}>Jugar Ahora</Text>
+              </LinearGradient>
+            ) : (
+              <View style={[dashboardStyles.ctaButton, { backgroundColor: darkTheme.purple }]}>
+                <Text style={{ fontSize: 20 }}>{'\u25B6\uFE0F'}</Text>
+                <Text style={dashboardStyles.ctaText}>Jugar Ahora</Text>
               </View>
-            </View>
+            )}
+          </TouchableWithoutFeedback>
+        </Animated.View>
 
-            <View style={HomeStyles.columnRight}>
-              <Image
-                source={require('../../../img/iconos/play.png')}
-              />
-            </View>
-          </View>
-        </TouchableOpacity>
-
-        <View style={HomeStyles.containerReferidos}>
-          <View style={HomeStyles.containerTitleReferidos}>
-            {/*
-            <Text style={HomeStyles.titleReferidos}>
-              REFERIDOS
+        {/* Mini Leaderboard */}
+        {topUsers.length > 0 && (
+          <Animated.View style={[dashboardStyles.glassCard, { opacity: leaderboardAnim.opacity, transform: leaderboardAnim.transform }]}>
+            <Text style={dashboardStyles.sectionTitle}>
+              {'\uD83C\uDFC6'} Ranking Top 5
             </Text>
-            */}
-            <Text style={HomeStyles.subtitleReferidos}>
-              ¡Disfruta de nuestros increibles juegos!
-            </Text>
-            {/**
-            <TouchableOpacity style={HomeStyles.botonInvitar}>
-              <Image
-                source={require('../../../img/personajes/doctor-simi-invade.png')}
-              />
-              <Text style={HomeStyles.textoBoton}>Invitar</Text>
-            </TouchableOpacity>
-            */}
-          </View>
-        </View>
+            <MiniLeaderboard
+              users={topUsers}
+              currentUid={uid}
+              onViewMore={handleNavigateLeaderboard}
+            />
+          </Animated.View>
+        )}
 
-        {/* Referidos */}
-            {/* 
-        <View style={HomeStyles.containerReferidos}>
-          <View style={HomeStyles.containerTitleReferidos}>
-            {/*
-            <Text style={HomeStyles.titleReferidos}>
-              REFERIDOS
-            </Text>
-            * /}
-            <CompetitionModal navigation={navigation} />
-            <Text style={HomeStyles.subtitleReferidos}>
-              ¡Compite con tus amigos para lograr mayor puntaje!
-            </Text>
-            {/**
-            <TouchableOpacity style={HomeStyles.botonInvitar}>
-              <Image
-                source={require('../../../img/personajes/doctor-simi-invade.png')}
-              />
-              <Text style={HomeStyles.textoBoton}>Invitar</Text>
-            </TouchableOpacity>
-            * /}
-          </View>
-        </View>
-        */}
+        {/* Trophies */}
+        <Animated.View style={[dashboardStyles.glassCard, { opacity: trophyAnim.opacity, transform: trophyAnim.transform }]}>
+          <TrophyGrid
+            badges={badges}
+            totalGames={totalGames}
+            ranking={ranking}
+            streak={streak}
+          />
+        </Animated.View>
 
+        {/* Tip Banner */}
+        <Animated.View style={{ opacity: tipAnim.opacity, transform: tipAnim.transform }}>
+          <TipBanner onAction={handleNavigateGames} />
+        </Animated.View>
 
-          </View>
-
-          {/* Points and games */}
-          <View style={HomeStyles.containerGamesSection}>
-            <View style={HomeStyles.containerTitleGames}>
-              <Text style={HomeStyles.titleSectionGames}>
-                ¡Esta es tu puntuacion de los ultimos 3 meses!
-              </Text>
-            </View>
-            {
-              scoresLats3Months && scoresLats3Months.map((score, index) => {
-                if (score.label && score.value) {
-                  return (
-                    <View key={index} style={HomeStyles.containerScores}>
-                      <View style={HomeStyles.scoresPerMonth}>
-                        <Text style={HomeStyles.monthLabel}>{score.label}:</Text>
-                        <Text style={HomeStyles.monthValue}>{score.value}</Text>
-                      </View>
-                    </View>
-                  );
-                } else {
-                  return null;
-                }
-              })
-            }
-            {/* Boton para los juegos */}
-            <View style={HomeStyles.containerGameButton}>
-              <Text style={HomeStyles.gameButton}>Visita todos los juegos aquí:</Text>
-              <TouchableOpacity style={HomeStyles.playIconContainer} onPress={() => navigation.navigate('Games')} >
-                <FontAwesomeIcon size={imageSize.xl} icon={faGamepad} />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </ScrollView>
-        );
+        {/* Bottom spacing for tab bar */}
+        <View style={{ height: 20 }} />
+      </ScrollView>
+    </View>
+  );
 };
 
-        export default HomeScreen;
+export default HomeScreen;

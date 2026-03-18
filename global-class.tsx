@@ -30,6 +30,12 @@ export const colors = {
   background5: '#FFB380',
   background6: '#FF9B57',
   background7: '#EFEEFC',
+  darkPurpleBg: '#1a1040',
+  cardBg: 'rgba(255,255,255,0.06)',
+  cardBorder: 'rgba(255,255,255,0.10)',
+  cyan: '#06B6D4',
+  gold: '#FFD700',
+  danger: '#EF4444',
 };
 
 // Tamaños de fuente basados en la altura de la pantalla
@@ -94,4 +100,12 @@ export const fonts = {
   inter: 'Inter-VariableFont_opsz,wght',
   press: 'PressStart2P-Regular',
   rubik: 'Rubik-Light',
+};
+
+export const glassmorphicCard = {
+  backgroundColor: 'rgba(255,255,255,0.06)' as string,
+  borderWidth: 1,
+  borderColor: 'rgba(255,255,255,0.10)' as string,
+  borderRadius: 16,
+  padding: spacing.lg,
 };

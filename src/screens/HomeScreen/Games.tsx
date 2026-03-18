@@ -1,10 +1,15 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, StyleSheet } from 'react-native';
+import Loader from '@components/LoaderComponent/Loader';
 
-const GamesScreen = () => {
+const GamesScreen = ({ navigation }) => {
+  useEffect(() => {
+    navigation.navigate('Games', { screen: 'GamesMain' });
+  }, [navigation]);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Hola Mundo</Text>
+      <Loader visible={true} />
     </View>
   );
 };
@@ -14,10 +19,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
   },
 });
 

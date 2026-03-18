@@ -17,9 +17,10 @@ interface IOptionSelect {
   options: IOption[];
   label?: string;
   defaultValue?: IOption;
+  onSelect?: (value: string) => void;
 }
 
-const OptionSelect: React.FC<IOptionSelect> = ({ options, defaultValue = undefined, label = undefined }) => {
+const OptionSelect: React.FC<IOptionSelect> = ({ options, defaultValue = undefined, label = undefined, onSelect }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState<IOption>(defaultValue ? defaultValue : options[0]);
 
@@ -27,9 +28,10 @@ const OptionSelect: React.FC<IOptionSelect> = ({ options, defaultValue = undefin
     setIsOpen(!isOpen);
   };
 
-  const selectOption = (option) => {
+  const selectOption = (option: IOption) => {
     setSelectedOption(option);
     setIsOpen(false);
+    onSelect?.(option.value);
   };
 
   return (

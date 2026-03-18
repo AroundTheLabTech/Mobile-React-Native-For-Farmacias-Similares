@@ -3,6 +3,13 @@ import React, { useState } from 'react';
 import { View } from 'react-native';
 import Svg, { Rect, Polygon, Text, Image as SvgImage } from 'react-native-svg';
 import { TLeaderBoard } from '../../types/user';
+import { darkTheme } from '../../theme/colors';
+
+const PODIUM_COLORS = {
+  first:  { bar: '#FFD700', top: 'rgba(255,215,0,0.6)', badge: '#FFD700' },
+  second: { bar: '#A0A0B0', top: 'rgba(160,160,176,0.6)', badge: '#C0C0C0' },
+  third:  { bar: '#CD7F32', top: 'rgba(205,127,50,0.6)', badge: '#CD7F32' },
+};
 
 interface PodiumSvgProps {
   top3Data: TLeaderBoard[]
@@ -108,7 +115,7 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
               width={podium1DimensionsInformation.width * 0.4}
               height={(podium1DimensionsInformation.height * 0.25) * 0.8}
               rx={podium1DimensionsInformation.height * 0.05}
-              fill={'#9087E5'}
+              fill={PODIUM_COLORS.second.badge}
             />
             <Text
               x="45%"
@@ -125,7 +132,7 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
         <View style={{ borderWidth: 0, borderColor: '#000', width: podiumDimensions.width, height: '100%', flex: 1.8 }} onLayout={handleLayoutRect2} >
           <Svg width={podium2DimensionsInformation.width} height={podium2DimensionsReact.height} >
             {/* Segundo Lugar */}
-            <Rect x={0} y={podium2DimensionsReact.height * 0.05} width={podium2DimensionsInformation.width} height={podium2DimensionsReact.height} fill="#9087E5" />
+            <Rect x={0} y={podium2DimensionsReact.height * 0.05} width={podium2DimensionsInformation.width} height={podium2DimensionsReact.height} fill={PODIUM_COLORS.second.bar} />
             <Polygon
               points={`
                 ${0},${podium2DimensionsReact.height * 0.05}
@@ -133,7 +140,7 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
                 ${podium2DimensionsInformation.width},${0}
                 ${podium2DimensionsInformation.width * 0.05},${0}
               `}
-              fill="#AEA7EC"
+              fill={PODIUM_COLORS.second.top}
             />
 
             <Text
@@ -199,7 +206,7 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
               width={podium1DimensionsInformation.width * 0.4}
               height={(podium1DimensionsInformation.height * 0.25) * 0.8}
               rx={podium1DimensionsInformation.height * 0.05}
-              fill={'#9087E5'}
+              fill={PODIUM_COLORS.first.badge}
             />
             <Text
               x="45%"
@@ -216,7 +223,7 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
         <View style={{ borderWidth: 0, borderColor: '#000', width: podiumDimensions.width, height: '100%', flex: 2 }} onLayout={handleLayoutRect1} >
           <Svg width={podium1DimensionsInformation.width} height={podium1DimensionsReact.height} >
             {/* Pimer Lugar */}
-            <Rect x={0} y={podium1DimensionsReact.height * 0.05} width={podium2DimensionsInformation.width} height={podium1DimensionsReact.height} fill="#9087E5" />
+            <Rect x={0} y={podium1DimensionsReact.height * 0.05} width={podium2DimensionsInformation.width} height={podium1DimensionsReact.height} fill={PODIUM_COLORS.first.bar} />
             <Polygon
               points={`
                 ${0},${podium1DimensionsReact.height * 0.05}
@@ -224,7 +231,7 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
                 ${podium2DimensionsInformation.width * 0.95},${0}
                 ${podium2DimensionsInformation.width * 0.05},${0}
               `}
-              fill="#AEA7EC"
+              fill={PODIUM_COLORS.first.top}
             />
 
             <Text
@@ -260,7 +267,7 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
             <View style={{ width: 30, height: 20, top: '138%', left: '48%', overflow: 'visible', display: 'flex', position: 'absolute', zIndex: 10 }} >
               <Svg>
                 <SvgImage
-                  href={{ uri: top3Data[1].flag_url }}
+                  href={{ uri: top3Data[2].flag_url }}
                   x={'0%'}
                   y={'0%'}
                   width={30}
@@ -289,7 +296,7 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
               width={podium1DimensionsInformation.width * 0.4}
               height={(podium1DimensionsInformation.height * 0.25) * 0.8}
               rx={podium1DimensionsInformation.height * 0.05}
-              fill={'#9087E5'}
+              fill={PODIUM_COLORS.third.badge}
             />
             <Text
               x="40%"
@@ -306,7 +313,7 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
         <View style={{ borderWidth: 0, borderColor: '#000', width: podiumDimensions.width, height: '100%', flex: 1.6 }} onLayout={handleLayoutRect3} >
           <Svg width={podium3DimensionsInformation.width} height={podium3DimensionsReact.height} >
             {/* Tercer Lugar */}
-            <Rect x={0} y={podium3DimensionsReact.height * 0.05} width={podium3DimensionsInformation.width} height={podium3DimensionsReact.height} fill="#9087E5" />
+            <Rect x={0} y={podium3DimensionsReact.height * 0.05} width={podium3DimensionsInformation.width} height={podium3DimensionsReact.height} fill={PODIUM_COLORS.third.bar} />
             <Polygon
               points={`
                 ${0},${podium1DimensionsReact.height * 0.05}
@@ -314,7 +321,7 @@ const PodiumSvg: React.FC<PodiumSvgProps> = ({ top3Data }) => {
                 ${podium2DimensionsInformation.width * 0.95},${0}
                 ${0},${0}
               `}
-              fill="#AEA7EC"
+              fill={PODIUM_COLORS.third.top}
             />
 
             <Text

@@ -1,5 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { View, TouchableOpacity, ScrollView, Image, Dimensions, PixelRatio } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import {
+  View,
+  TouchableOpacity,
+  FlatList,
+  Image,
+  Dimensions,
+  PixelRatio,
+  Text,
+  StatusBar,
+  useWindowDimensions,
+} from 'react-native';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import GamesStyles from './style/GamesStyles';
@@ -23,7 +33,20 @@ import Game17 from '../../../img/games/portada/game-17.png';
 import Game18 from '../../../img/games/portada/game-18.png';
 import { useAuth } from '../../AuthContext';
 import { useUser } from '@services/UserContext';
+import { getGamesCatalog } from '@services/backend';
 import { calculateScreenSizeInInches } from '../../utils/helpers';
+import Loader from '@components/LoaderComponent/Loader';
+import { TGameCatalogItem } from 'src/types/game';
+import { darkTheme } from '../../theme/colors';
+
+// Local image fallback mapping — used when backend imageUrl is empty
+const LOCAL_IMAGE_MAP: Record<string, any> = {
+  juego1: Game1, juego2: Game2, juego3: Game3, juego4: Game4,
+  juego5: Game5, juego6: Game6, juego7: Game7, juego8: Game8,
+  juego9: Game9, juego10: Game10, juego11: Game11, juego12: Game12,
+  juego13: Game13, juego14: Game14, juego15: Game15, juego16: Game16,
+  juego17: Game17, juego18: Game18,
+};
 
 type GameId =
   | 'juego1' | 'juego2' | 'juego3' | 'juego4' | 'juego5' | 'juego6'
@@ -40,22 +63,44 @@ type Game = {
   score?: number;
 };
 
-const Games = ({ navigation }) => {
+function catalogToGame(item: TGameCatalogItem): Game {
+  return {
+    id: item.id as GameId,
+    title: item.title,
+    imageUrl: LOCAL_IMAGE_MAP[item.id] || null,
+    gameUrl: item.gameUrl,
+    score_given_per_game: item.scorePerGame,
+    description: item.description,
+  };
+}
 
+const HORIZONTAL_PADDING = 20;
+const CARD_GAP = 10;
+
+const Games = ({ navigation }) => {
   const { uid } = useAuth();
   const { scorePerGame, setUpdateScorePerGame } = useUser();
+  const { width: screenWidth } = useWindowDimensions();
 
-  const [listGames, setListGames] = useState(null);
+  const [listGames, setListGames] = useState<Game[] | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const sizeInInches = calculateScreenSizeInInches(Dimensions, PixelRatio);
+  const isTablet = sizeInInches && Number(sizeInInches) > 9;
+  const numColumns = isTablet ? 4 : 3;
+
+  // Dynamic card width: (screenWidth - padding on both sides - gaps between cards) / numColumns
+  const totalHorizontalPadding = HORIZONTAL_PADDING * 2;
+  const totalGaps = CARD_GAP * (numColumns - 1);
+  const cardWidth = Math.floor((screenWidth - totalHorizontalPadding - totalGaps) / numColumns);
 
   function orderGames(allGames: Game[]): Game[] {
     const forcedGames: GameId[] = ['juego7', 'juego9'];
 
-    // 1) Orden base por id descendente, considerando números (juego10 > juego2)
     const ordered = [...allGames].sort((a, b) =>
       b.id.localeCompare(a.id, undefined, { numeric: true })
     );
 
-    // 2) Forzar juego7 y juego9 a posiciones 4 y 5 (0-based)
     forcedGames.forEach((gameKey, i) => {
       const idx = ordered.findIndex(g => g.id === gameKey);
       if (idx !== -1) {
@@ -68,218 +113,127 @@ const Games = ({ navigation }) => {
   }
 
   useEffect(() => {
-    async function fetchData() {
+    let mounted = true;
 
-      const allGames: Game[] = [
-        {
-          imageUrl: Game1,
-          id: 'juego1',
-          title: 'Doctor Simi Invade',
-          score_given_per_game: 20,
-          description:
-            '¡Defiende el Centro como un pro! Mejora ataque, defensa y velocidad mientras enfrentas olas brutales. ¿Listo para salvarlo?',
-          gameUrl: 'https://simijuegos.com.mx/source-game/game-1/public-game/index.html',
-        },
-        {
-          imageUrl: Game2,
-          id: 'juego2',
-          title: 'Doctor Simi Run',
-          score_given_per_game: 30,
-          description:
-            '¡Acompaña a Simi, recolecta monedas, esquiva obstáculos y desbloquea niveles! Demuestra tus habilidades en este épico desafío.',
-          gameUrl: 'https://simijuegos.com.mx/source-game/game-2/public/index.html',
-        },
-        {
-          imageUrl: Game3,
-          id: 'juego3',
-          title: 'Simi Slash',
-          score_given_per_game: 10,
-          description:
-            '¡No dejes caer ni un implemento médico! Corta todo, evita la mecha del Simi y rompe récords con cada jugada épica.',
-          gameUrl: 'https://simijuegos.com.mx/source-game/game-3/release/index.html',
-        },
-        {
-          imageUrl: Game4,
-          id: 'juego4',
-          title: 'Simi Life',
-          score_given_per_game: 10,
-          description:
-            '¡Pilota el avión del SimiFest, lanza Bombas de Vida y siembra esperanza! Conviértete en un héroe ecológico ahora.',
-          gameUrl: 'https://simijuegos.com.mx/source-game/game-4/index.html',
-        },
-        {
-          imageUrl: Game5,
-          id: 'juego5',
-          title: 'Simi Globo',
-          score_given_per_game: 10,
-          description:
-            'Usa el joystick en pantalla para moverte por el cielo y esquivar cada peligro. ¡Pon a prueba tus reflejos y mantén tu globo intacto!',
-          gameUrl: 'https://simijuegos.com.mx/source-game/game-5/index.html',
-        },
-        {
-          imageUrl: Game6,
-          id: 'juego6',
-          title: 'Tower Defense',
-          score_given_per_game: 10,
-          description:
-            'Usa el clic o el tap y coloca defensas estratégicas para proteger el hospital de invasores virales. ¡Construye y mejora torres médicas para salvar a los enfermos!',
-          gameUrl: 'https://simijuegos.com.mx/source-game/game-6/index.html',
-        },
-        {
-          imageUrl: Game7,
-          id: 'juego7',
-          title: 'Simi Gomitas',
-          score_given_per_game: 10,
-          description:
-            'Usa el clic o el tap y desliza para conectar tres o más gomas y crear combinaciones explosivas. ¡Completa la meta con el menor número de movimientos!',
-          gameUrl: 'https://simijuegos.com.mx/source-game/game-7/index.html',
-        },
-        {
-          imageUrl: Game8,
-          id: 'juego8',
-          title: 'Simi Health Blocks',
-          score_given_per_game: 10,
-          description:
-            'Puzzle clásico: ordena las fichas de medicamentos que caen. Acomódalas estratégicamente para completar filas y mantener la farmacia en orden.',
-          gameUrl: 'https://simijuegos.com.mx/source-game/game-8/index.html',
-        },
-        {
-          imageUrl: Game9,
-          id: 'juego9',
-          title: 'Simirama',
-          score_given_per_game: 10,
-          description:
-            'Usa el clic o el tap para girar las cartas y encontrar su pareja. ¡Pon a prueba tu memoria y completa todos los pares!',
-          gameUrl: 'https://simijuegos.com.mx/source-game/game-9/index.html',
-        },
-        {
-          imageUrl: Game10,
-          id: 'juego10',
-          title: 'SimiShip',
-          score_given_per_game: 10,
-          description:
-            'Usa los botones en pantalla o el teclado para moverte y saltar. Recoge monedas, evita caer al vacío y lleva al Simi al planeta saltando entre satélites.',
-          gameUrl: 'https://simijuegos.com.mx/source-game/game-10/index.html',
-        },
-        {
-          imageUrl: Game11,
-          id: 'juego11',
-          title: 'SimiPlaneta',
-          score_given_per_game: 10,
-          description:
-            '¡Atrapa erizos y evita los peces! Muévete con flechas o controles en pantalla. ¡No dejes que los peces te toquen o perderás vidas!',
-          gameUrl: 'https://simijuegos.com.mx/source-game/game-11/index.html',
-        },
-        {
-          imageUrl: Game12,
-          id: 'juego12',
-          title: 'Simi Brigada Verde',
-          score_given_per_game: 10,
-          description:
-            'Mueve al Simi y apaga las llamas con la manguera. ¡Salva a los animales y recolecta las semillas que dejan al ser rescatados!',
-          gameUrl: 'https://simijuegos.com.mx/source-game/game-12/index.html',
-        },
-        {
-          imageUrl: Game13,
-          id: 'juego13',
-          title: 'Simi Desastres Naturales',
-          score_given_per_game: 10,
-          description:
-            'Mueve al Simi para esquivar desastres naturales y recoge suministros. ¡Gana puntos por cada suministro y sobrevive lo más posible!',
-          gameUrl: 'https://simijuegos.com.mx/source-game/game-13/index.html',
-        },
-        {
-          imageUrl: Game14,
-          id: 'juego14',
-          title: 'Simi Cross',
-          score_given_per_game: 10,
-          description:
-            'Esquiva los autos y recoge monedas mientras avanzas. ¡Suma puntos por el progreso en el recorrido y sobrevive!',
-          gameUrl: 'https://simijuegos.com.mx/source-game/game-14/index.html',
-        },
-        {
-          imageUrl: Game15,
-          id: 'juego15',
-          title: 'Simi Jump',
-          score_given_per_game: 10,
-          description:
-            'Muévete para sortear obstáculos y recoger orbes. ¡Anota por cada orbe y evita los choques!',
-          gameUrl: 'https://simijuegos.com.mx/source-game/game-15/index.html',
-        },
-        {
-          imageUrl: Game16,
-          id: 'juego16',
-          title: 'Simi Flyv',
-          score_given_per_game: 10,
-          description:
-            'Toca o haz clic para mover al Simi y esquivar obstáculos. ¡Suma puntos por cada obstáculo superado!',
-          gameUrl: 'https://simijuegos.com.mx/source-game/game-16/index.html',
-        },
-        {
-          imageUrl: Game17,
-          id: 'juego17',
-          title: 'Simi Comando Lunar',
-          score_given_per_game: 10,
-          description:
-            'Toca o haz clic para moverte, esquivar y destruir obstáculos. ¡Gana puntos por cada objetivo destruido!',
-          gameUrl: 'https://simijuegos.com.mx/source-game/game-17/index.html',
-        },
-        {
-          imageUrl: Game18,
-          id: 'juego18',
-          title: 'Simi Pet',
-          score_given_per_game: 10,
-          description:
-            'Muévete por el mapa, entra a los servicios y completa desafíos. ¡Gana puntos por cada servicio completado!',
-          gameUrl: 'https://simijuegos.com.mx/source-game/game-18/index.html',
-        },
-      ];
+    async function fetchGames() {
+      setLoading(true);
 
-      const gamesWithScore  = allGames.map(game => {
-        return {
+      // Fetch catalog from backend
+      const catalog = await getGamesCatalog();
+      let games: Game[];
+
+      if (catalog && catalog.games && catalog.games.length > 0) {
+        games = catalog.games.map(catalogToGame);
+      } else {
+        // Fallback: use local image map keys to build a minimal list
+        games = Object.keys(LOCAL_IMAGE_MAP).map(key => ({
+          id: key as GameId,
+          title: key,
+          imageUrl: LOCAL_IMAGE_MAP[key],
+          gameUrl: '',
+          score_given_per_game: 10,
+          description: '',
+        }));
+      }
+
+      // Attach user scores
+      if (scorePerGame?.score_per_game) {
+        games = games.map(game => ({
           ...game,
-          'score': scorePerGame.score_per_game[game.id],
-        };
-      });
+          score: scorePerGame.score_per_game[game.id] || 0,
+        }));
+      }
 
-      const ordered = orderGames(gamesWithScore);
-      setListGames(ordered);
+      if (mounted) {
+        setListGames(orderGames(games));
+        setLoading(false);
+      }
     }
 
     if (!scorePerGame) {
       setUpdateScorePerGame(true);
-      fetchData();
     } else {
       setUpdateScorePerGame(false);
     }
 
-    fetchData();
+    fetchGames();
+
+    return () => { mounted = false; };
   }, [scorePerGame, setUpdateScorePerGame, uid]);
 
-  const sizeInInches = calculateScreenSizeInInches(Dimensions, PixelRatio);
+  const renderGameCard = useCallback(({ item: game, index }: { item: Game; index: number }) => {
+    // Determine left margin: first item in each row gets 0, others get CARD_GAP
+    const isFirstInRow = index % numColumns === 0;
+
+    return (
+      <TouchableOpacity
+        key={game.id}
+        style={[
+          GamesStyles.gameCard,
+          {
+            width: cardWidth,
+            marginLeft: isFirstInRow ? 0 : CARD_GAP,
+          },
+        ]}
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate('GameDetails', game)}
+      >
+        <Image
+          style={[GamesStyles.coverImage, { width: cardWidth, height: cardWidth }]}
+          source={game.imageUrl}
+          resizeMode="cover"
+        />
+        {game.score != null && game.score > 0 && (
+          <View style={GamesStyles.scoreBadge}>
+            <Text style={GamesStyles.scoreBadgeText}>{Math.round(game.score)} pts</Text>
+          </View>
+        )}
+        {game.score != null && game.score === 0 && (
+          <View style={GamesStyles.scoreBadgeNew}>
+            <Text style={GamesStyles.scoreBadgeNewText}>Nuevo</Text>
+          </View>
+        )}
+        <View style={GamesStyles.cardInfo}>
+          <Text style={GamesStyles.gameTitle} numberOfLines={1}>{game.title}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  }, [cardWidth, numColumns, navigation]);
+
+  const ListHeader = useCallback(() => (
+    <View style={GamesStyles.header}>
+      <TouchableOpacity style={GamesStyles.backButton} onPress={() => navigation.goBack()}>
+        <FontAwesomeIcon icon={faArrowLeft} color={darkTheme.textPrimary} size={18} />
+      </TouchableOpacity>
+      <Text style={GamesStyles.headerTitle}>Juegos</Text>
+    </View>
+  ), [navigation]);
+
+  if (loading || !listGames) {
+    return (
+      <View style={[GamesStyles.screen, { justifyContent: 'center', alignItems: 'center' }]}>
+        <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />
+        <Loader visible={true} />
+      </View>
+    );
+  }
 
   return (
-    <ScrollView style={GamesStyles.container} contentContainerStyle={GamesStyles.containerMax} >
-      <TouchableOpacity style={GamesStyles.containerGoBack} onPress={() => navigation.goBack()} >
-        <FontAwesomeIcon icon={faArrowLeft} color="white" />
-      </TouchableOpacity>
-      <View style={GamesStyles.containerGames} >
-        {listGames && listGames.map((game, index) => {
-          if (sizeInInches && Number(sizeInInches) > 9) {
-            return (
-              <TouchableOpacity key={index} style={GamesStyles.gameCard9Inche} onPress={() => navigation.navigate('GameDetails', game)} >
-                <Image style={GamesStyles.coverImage9Inches} source={game.imageUrl} />
-              </TouchableOpacity>
-            );
-          }
-          return (
-            <TouchableOpacity key={index} style={GamesStyles.gameCard} onPress={() => navigation.navigate('GameDetails', game)} >
-              <Image style={GamesStyles.coverImage} source={game.imageUrl} />
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-    </ScrollView>
+    <View style={GamesStyles.screen}>
+      <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />
+      <View style={GamesStyles.glowPurple} />
+      <View style={GamesStyles.glowCyan} />
+      <FlatList
+        data={listGames}
+        renderItem={renderGameCard}
+        keyExtractor={(game) => game.id}
+        numColumns={numColumns}
+        ListHeaderComponent={ListHeader}
+        contentContainerStyle={GamesStyles.scrollContent}
+        columnWrapperStyle={GamesStyles.columnWrapper}
+        showsVerticalScrollIndicator={false}
+      />
+    </View>
   );
 };
 

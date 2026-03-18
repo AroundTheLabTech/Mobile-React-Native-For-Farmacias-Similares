@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faHome, faUser, faChartBar, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { colors } from '../../../global-class';
+import { darkTheme } from '../../theme/colors';
 
 import HomeScreen from '../../screens/HomeScreen/HomeStack';
 import ProfileStack from '../../screens/ProfileScreen/ProfileStack';
@@ -42,8 +43,8 @@ const TabNavigation = () => {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: (options) => tabBarIconOptions(route, options),
-        tabBarActiveTintColor: colors.third,
-        tabBarInactiveTintColor: colors.secondary,
+        tabBarActiveTintColor: darkTheme.purple,
+        tabBarInactiveTintColor: darkTheme.textMuted,
         tabBarStyle: styles.tabBar,
         tabBarShowLabel: false,
         headerShown: false,
@@ -71,8 +72,9 @@ const TabNavigation = () => {
 
 const styles = StyleSheet.create({
   tabBar: {
-    // backgroundColor: 'transparent',
+    backgroundColor: darkTheme.bg,
     borderTopWidth: 1,
+    borderTopColor: darkTheme.border,
     elevation: 0,
     shadowOpacity: 0,
     position: 'absolute',

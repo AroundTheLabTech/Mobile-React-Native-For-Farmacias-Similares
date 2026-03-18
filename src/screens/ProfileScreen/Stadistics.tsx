@@ -1,24 +1,40 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Image, Dimensions, PixelRatio } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, Image, Dimensions, PixelRatio, Animated } from 'react-native';
 
 // Styles
 import StadiscticsStyle from './style/StadiscticsStyle';
-
 
 import RingChart from '../../components/RingChartComponent/RingChart';
 
 import { calculatePercentage, calculateScreenSizeInInches, getMaxScore, getMaxScorePerMonth, getMonthWithHighestScore, groupSessionsByMonth } from '../../utils/helpers';
 
-
 import MedalIcon from '../../../img/iconos/medal.svg';
 import StadisticsIcon from '../../../img/iconos/stadistics.svg';
 import BarChart from '../../components/BarChartComponent/BarChart';
+import OptionSelect from '../../components/OptionSelectComponent/OptionSelect';
 import { TUserCurrentMonthSession, TUserLast3MonthInfo } from 'src/types/user';
 import { getUserCurrentMonthSession, getUserLast3MonthsInfo } from '../../services/backend';
 import { useAuth } from '../../AuthContext';
-import Loader from '@components/LoaderComponent/Loader';
 import RingChart9Inches from '@components/RingChartComponent/RingChart9Inches';
 import BarChart9Inches from '@components/BarChartComponent/BarChart9Inches';
+
+/** Skeleton placeholder block with pulse animation */
+const SkeletonBlock = ({ width, height, style }: { width: number | string; height: number; style?: any }) => {
+  const pulse = useRef(new Animated.Value(0.3)).current;
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 0.7, duration: 800, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0.3, duration: 800, useNativeDriver: true }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [pulse]);
+  return (
+    <Animated.View style={[{ width, height, borderRadius: 10, backgroundColor: 'rgba(106,90,224,0.15)', opacity: pulse }, style]} />
+  );
+};
 
 
 interface IProgress {
@@ -138,18 +154,12 @@ const StadisticsScreen: React.FC = () => {
     }
   }, [last3MonthsInfo, uid]);
 
-  /*
-  const options = [
-    {
-      label: 'Monthly',
-      value: 'monthly',
-    },
-    {
-      label: 'Weekly',
-      value: 'weekly',
-    },
+  const [selectedFilter, setSelectedFilter] = useState<'monthly' | 'general'>('monthly');
+
+  const filterOptions = [
+    { label: 'Mensual', value: 'monthly' },
+    { label: 'General', value: 'general' },
   ];
-  */
 
   const listOfColors = ['#FFD6DD', '#C4D0FB', '#A9ADF3'];
 
@@ -173,7 +183,19 @@ const StadisticsScreen: React.FC = () => {
   }, [orientation, screenWidth]);
 
   if (loading) {
-    return <Loader visible={true} />;
+    return (
+      <View style={StadiscticsStyle.container}>
+        <View style={{ padding: 16, gap: 12, width: '100%' }}>
+          <SkeletonBlock width="60%" height={20} />
+          <SkeletonBlock width="100%" height={160} style={{ marginTop: 8 }} />
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
+            <SkeletonBlock width="48%" height={80} />
+            <SkeletonBlock width="48%" height={80} />
+          </View>
+          <SkeletonBlock width="100%" height={140} style={{ marginTop: 12 }} />
+        </View>
+      </View>
+    );
   }
 
   if (!bestGame || (!last3MonthsInfo && last3MonthsInfo?.length < 3)) {
@@ -189,18 +211,19 @@ const StadisticsScreen: React.FC = () => {
   return (
     <View style={StadiscticsStyle.container}  >
       <View style={StadiscticsStyle.containerEstadistics}>
-        {/**
-        <OptionSelect options={options} />
-        */}
+        <OptionSelect
+          options={filterOptions}
+          onSelect={(value) => setSelectedFilter(value as 'monthly' | 'general')}
+        />
         <Text style={StadiscticsStyle.titleTotalGames}>
-          META MENSUAL DE PARTIDAS
+          {selectedFilter === 'monthly' ? 'META MENSUAL DE PARTIDAS' : 'ESTADÍSTICAS GENERALES'}
         </Text>
 
-        {
+        {selectedFilter === 'monthly' && (
           sizeInInches && Number(sizeInInches) > 9 ?
             <View style={[StadiscticsStyle.ringChartContainer, StadiscticsStyle.ringChartContainer9Inches]} >
               <RingChart9Inches
-                progress={progress.progressPercent} // Asegúrate de pasar el porcentaje aquí
+                progress={progress.progressPercent}
                 color="#6A5AE0"
               >
                 <View style={StadiscticsStyle.ringChartView} >
@@ -211,7 +234,7 @@ const StadisticsScreen: React.FC = () => {
             </View> :
             <View style={StadiscticsStyle.ringChartContainer} >
               <RingChart
-                progress={progress.progressPercent} // Asegúrate de pasar el porcentaje aquí
+                progress={progress.progressPercent}
                 color="#6A5AE0"
               >
                 <View style={StadiscticsStyle.ringChartView} >
@@ -220,13 +243,13 @@ const StadisticsScreen: React.FC = () => {
                 </View>
               </RingChart>
             </View>
-        }
+        )}
         <View style={StadiscticsStyle.rowStadistics}>
           {/* Box */}
           <View style={StadiscticsStyle.containerBestPlay}>
             <View style={StadiscticsStyle.containerUpNumber}>
               <Text style={StadiscticsStyle.titleNumber}>
-                5
+                {bestGame}
               </Text>
               <Image
                 source={require('../../../img/iconos/pastilla.png')} resizeMode="contain"
@@ -257,7 +280,9 @@ const StadisticsScreen: React.FC = () => {
       </View>
       <View style={StadiscticsStyle.containerChartStadistics}>
         <View style={StadiscticsStyle.titleContainer} >
-          <Text style={StadiscticsStyle.titleStadisticsChart} >Estadisticas Mensuales</Text>
+          <Text style={StadiscticsStyle.titleStadisticsChart} >
+            {selectedFilter === 'monthly' ? 'Estadísticas Mensuales' : 'Estadísticas Generales'}
+          </Text>
           <View style={StadiscticsStyle.stadisticsIconContainer} >
             <StadisticsIcon width={24} />
           </View>
