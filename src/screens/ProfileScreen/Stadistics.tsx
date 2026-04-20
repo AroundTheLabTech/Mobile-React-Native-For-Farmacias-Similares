@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Image, Dimensions, PixelRatio, Animated } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, Dimensions, PixelRatio } from 'react-native';
+import StatsSkeleton from '@components/Skeleton/StatsSkeleton';
 
 // Styles
 import StadiscticsStyle from './style/StadiscticsStyle';
@@ -17,25 +18,6 @@ import { getUserCurrentMonthSession, getUserLast3MonthsInfo } from '../../servic
 import { useAuth } from '../../AuthContext';
 import RingChart9Inches from '@components/RingChartComponent/RingChart9Inches';
 import BarChart9Inches from '@components/BarChartComponent/BarChart9Inches';
-
-/** Skeleton placeholder block with pulse animation */
-const SkeletonBlock = ({ width, height, style }: { width: number | string; height: number; style?: any }) => {
-  const pulse = useRef(new Animated.Value(0.3)).current;
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, { toValue: 0.7, duration: 800, useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 0.3, duration: 800, useNativeDriver: true }),
-      ]),
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [pulse]);
-  return (
-    <Animated.View style={[{ width, height, borderRadius: 10, backgroundColor: 'rgba(106,90,224,0.15)', opacity: pulse }, style]} />
-  );
-};
-
 
 interface IProgress {
   total: number;
@@ -183,19 +165,7 @@ const StadisticsScreen: React.FC = () => {
   }, [orientation, screenWidth]);
 
   if (loading) {
-    return (
-      <View style={StadiscticsStyle.container}>
-        <View style={{ padding: 16, gap: 12, width: '100%' }}>
-          <SkeletonBlock width="60%" height={20} />
-          <SkeletonBlock width="100%" height={160} style={{ marginTop: 8 }} />
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
-            <SkeletonBlock width="48%" height={80} />
-            <SkeletonBlock width="48%" height={80} />
-          </View>
-          <SkeletonBlock width="100%" height={140} style={{ marginTop: 12 }} />
-        </View>
-      </View>
-    );
+    return <StatsSkeleton />;
   }
 
   if (!bestGame || (!last3MonthsInfo && last3MonthsInfo?.length < 3)) {

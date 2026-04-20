@@ -6,7 +6,7 @@ import { faGlobe, faCalendarDays, faGear } from '@fortawesome/free-solid-svg-ico
 import { useAuth } from '../../AuthContext';
 import StadisticsScreen from './Stadistics';
 import Badges from './Badges';
-import Loader from '@components/LoaderComponent/Loader';
+import ProfileSkeleton from '@components/Skeleton/ProfileSkeleton';
 import { useUser } from '@services/UserContext';
 import { getTopGlobalByUser, getTopMonthlyByUser } from '../../services/backend';
 import LevelRing from '../../components/LevelRing/LevelRing';
@@ -86,12 +86,7 @@ const ProfileScreen = ({ navigation }) => {
   };
 
   if (loading && !userInformation) {
-    return (
-      <View style={[profileStyles.screen, { justifyContent: 'center', alignItems: 'center' }]}>
-        <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />
-        <Loader visible={true} />
-      </View>
-    );
+    return <ProfileSkeleton />;
   }
 
   return (

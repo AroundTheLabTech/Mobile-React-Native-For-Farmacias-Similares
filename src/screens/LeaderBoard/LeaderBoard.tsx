@@ -6,7 +6,7 @@ import PodiumSvg from '@components/PodiumChartComponent/PodiumSvg';
 import { getTopTwentyMonthly } from '@services/backend';
 import { TLeaderBoard } from 'src/types/user';
 import { calculatePercent, calculateScreenSizeInInches, splitTopTwenty } from '../../utils/helpers';
-import Loader from '@components/LoaderComponent/Loader';
+import LeaderboardSkeleton from '@components/Skeleton/LeaderboardSkeleton';
 import { useAuth } from '../../AuthContext';
 import PodiumSvg9Inches from '@components/PodiumChartComponent/PodiumSvg9Inches';
 import { darkTheme } from '../../theme/colors';
@@ -96,12 +96,7 @@ const LeaderBoard: React.FC = () => {
   const listAnim = useFadeInUp(300, animReady);
 
   if (loading) {
-    return (
-      <View style={[LeaderBoardStyles.screen, { justifyContent: 'center', alignItems: 'center' }]}>
-        <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />
-        <Loader visible />
-      </View>
-    );
+    return <LeaderboardSkeleton />;
   }
 
   const sizeInInches = calculateScreenSizeInInches(Dimensions, PixelRatio);

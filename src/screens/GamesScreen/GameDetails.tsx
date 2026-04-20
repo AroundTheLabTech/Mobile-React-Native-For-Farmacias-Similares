@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, ScrollView, Text, Image, StatusBar, ActivityIndicator } from 'react-native';
+import { View, TouchableOpacity, ScrollView, Text, Image, StatusBar } from 'react-native';
 import { faArrowLeft, faMobileScreenButton, faRotate } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import Orientation from 'react-native-orientation-locker';
 import GameDetailsStyles from './style/GameDetailsStyles';
 import { useUser } from '@services/UserContext';
 import { darkTheme } from '../../theme/colors';
+import GameDetailsSkeleton from '@components/Skeleton/GameDetailsSkeleton';
 
 
 const GameDetails = ({ navigation, route }) => {
@@ -25,6 +26,10 @@ const GameDetails = ({ navigation, route }) => {
     }
   }, [id, scorePerGame]);
 
+
+  if (scoreLoading) {
+    return <GameDetailsSkeleton />;
+  }
 
   // Juegos que se juegan en vertical (portrait)
   const VERTICAL_GAMES = ['juego13', 'juego14', 'juego16'];
@@ -56,11 +61,7 @@ const GameDetails = ({ navigation, route }) => {
             <View style={GameDetailsStyles.statPillsRow}>
               <View style={GameDetailsStyles.statPill}>
                 <Text style={GameDetailsStyles.statPillLabel}>Tu puntaje</Text>
-                {scoreLoading ? (
-                  <ActivityIndicator size="small" color="#06B6D4" style={{ marginTop: 4 }} />
-                ) : (
-                  <Text style={[GameDetailsStyles.statPillValue, { color: '#06B6D4' }]}>{Math.round(gameScore || 0)}</Text>
-                )}
+                <Text style={[GameDetailsStyles.statPillValue, { color: '#06B6D4' }]}>{Math.round(gameScore || 0)}</Text>
               </View>
               <View style={GameDetailsStyles.statPill}>
                 <Text style={GameDetailsStyles.statPillLabel}>Puntos por ronda</Text>

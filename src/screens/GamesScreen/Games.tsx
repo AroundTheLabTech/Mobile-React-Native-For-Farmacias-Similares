@@ -35,7 +35,7 @@ import { useAuth } from '../../AuthContext';
 import { useUser } from '@services/UserContext';
 import { getGamesCatalog } from '@services/backend';
 import { calculateScreenSizeInInches } from '../../utils/helpers';
-import Loader from '@components/LoaderComponent/Loader';
+import GamesListSkeleton from '@components/Skeleton/GamesListSkeleton';
 import { TGameCatalogItem } from 'src/types/game';
 import { darkTheme } from '../../theme/colors';
 
@@ -210,12 +210,7 @@ const Games = ({ navigation }) => {
   ), [navigation]);
 
   if (loading || !listGames) {
-    return (
-      <View style={[GamesStyles.screen, { justifyContent: 'center', alignItems: 'center' }]}>
-        <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />
-        <Loader visible={true} />
-      </View>
-    );
+    return <GamesListSkeleton />;
   }
 
   return (
