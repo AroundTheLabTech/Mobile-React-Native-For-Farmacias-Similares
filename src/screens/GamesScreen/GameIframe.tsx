@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View, TouchableOpacity, StyleSheet, Text, Animated, StatusBar } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Text, StatusBar } from 'react-native';
 import Orientation from 'react-native-orientation-locker';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import { useFocusEffect } from '@react-navigation/native';
@@ -9,6 +9,7 @@ import { useUser } from '@services/UserContext';
 import { TGameSession } from 'src/types/game';
 import { TCompetitionSession } from 'src/types/competition';
 import { darkTheme } from '../../theme/colors';
+import ExitGameModal from '@components/ExitGameModal/ExitGameModal';
 
 let LinearGradient: any = null;
 try {
@@ -71,6 +72,10 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
   const webviewRef = useRef<WebView | null>(null);
   const [webKey, setWebKey] = useState<number>(0);
 
+  // Modal state
+  const [exitModalVisible, setExitModalVisible] = useState(false);
+  const pendingPoints = Math.max(0, Math.round(currentScore - lastSavedScoreRef.current));
+
   // Orientación según el tipo de juego
   useEffect(() => {
     if (__DEV__) console.log(`[DEBUG GameIframe] Locking orientation -> id=${id}, isVertical=${isVerticalGame}`);
@@ -79,7 +84,7 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
     } else {
       Orientation.lockToLandscape();
     }
-    return () => Orientation.unlockAllOrientations();
+    return () => Orientation.lockToPortrait();
   }, [id, isVerticalGame]);
 
   useFocusEffect(
@@ -301,7 +306,11 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
         const response = await postSessionGame(newGameSession);
         console.log(`[DEBUG GameIframe] Session response -> session_id=${response?.session_id}`);
         if (response?.session_id) {
-          await addCompetitionSession(response.session_id);
+          try {
+            await addCompetitionSession(response.session_id);
+          } catch (err) {
+            if (__DEV__) console.log('[DEBUG GameIframe] competition session failed:', err);
+          }
           setSession(newGameSession);
         }
         // Actualiza referencia para no re-enviar lo ya guardado
@@ -324,10 +333,25 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentScore, id, uid]);
 
-  // Botón "Guardar y salir"
-  function handleUpdateScore() {
+  // Exit handlers
+  const handleExitPress = () => {
+    if (pendingPoints > 0) {
+      setExitModalVisible(true);
+    } else {
+      navigation.goBack();
+    }
+  };
+
+  const handleSaveAndExit = () => {
+    setExitModalVisible(false);
     saveScoreDelta(true);
-  }
+  };
+
+  const handleExitWithoutSaving = () => {
+    setExitModalVisible(false);
+    lastSavedScoreRef.current = currentScore;
+    navigation.goBack();
+  };
 
   // Auto-guardado cada 15 segundos
   useEffect(() => {
@@ -349,10 +373,8 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
       const delta = Math.round(Math.max(0, currentScore - lastSavedScoreRef.current));
       if (__DEV__) console.log(`[DEBUG GameIframe] beforeRemove -> delta=${delta}, currentScore=${currentScore}, lastSaved=${lastSavedScoreRef.current}`);
       if (delta > 0) {
-        // Prevenir navegación, guardar, y luego navegar
         e.preventDefault();
-        console.log(`[DEBUG GameIframe] beforeRemove -> preventing navigation, saving first`);
-        saveScoreDelta(true);
+        setExitModalVisible(true);
       } else {
         // No hay delta pendiente, refrescar datos y dejar pasar
         console.log(`[DEBUG GameIframe] beforeRemove -> no delta, passing through`);
@@ -365,45 +387,7 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentScore, saveScoreDelta]);
 
-  // --- Auto-hide overlay ---
-  const [overlayVisible, setOverlayVisible] = useState(true);
-  const overlayOpacity = useRef(new Animated.Value(1)).current;
-  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const hideOverlay = useCallback(() => {
-    Animated.timing(overlayOpacity, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => setOverlayVisible(false));
-  }, [overlayOpacity]);
-
-  const showOverlay = useCallback(() => {
-    setOverlayVisible(true);
-    overlayOpacity.setValue(1);
-    // Auto-hide after 4s
-    if (hideTimer.current) clearTimeout(hideTimer.current);
-    hideTimer.current = setTimeout(hideOverlay, 4000);
-  }, [overlayOpacity, hideOverlay]);
-
-  // Show on mount, auto-hide after 4s
-  useEffect(() => {
-    hideTimer.current = setTimeout(hideOverlay, 4000);
-    return () => { if (hideTimer.current) clearTimeout(hideTimer.current); };
-  }, [hideOverlay]);
-
-  const toggleOverlay = useCallback(() => {
-    if (overlayVisible) {
-      if (hideTimer.current) clearTimeout(hideTimer.current);
-      hideOverlay();
-    } else {
-      showOverlay();
-    }
-  }, [overlayVisible, hideOverlay, showOverlay]);
-
-  const exitButtonContent = (
-    <Text style={styles.exitButtonText}>Guardar y salir</Text>
-  );
+  const exitButtonContent = <Text style={styles.exitButtonText}>Salir</Text>;
 
   return (
     <View style={styles.container}>
@@ -425,50 +409,45 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
         originWhitelist={['*']}
       />
 
-      {/* Tap zone to toggle overlay (top edge) */}
-      {!overlayVisible && (
-        <TouchableOpacity
-          style={styles.tapZone}
-          activeOpacity={1}
-          onPress={toggleOverlay}
-        >
-          <View style={styles.tapHint} />
-        </TouchableOpacity>
-      )}
-
-      {/* Floating overlay — auto-hides */}
-      {overlayVisible && (
-        <Animated.View style={[styles.overlay, { opacity: overlayOpacity }]}>
-          <View style={styles.overlayBar}>
-            {/* Score pill */}
-            <View style={styles.scorePill}>
-              <Text style={styles.scoreValue}>{Math.round(currentScore)}</Text>
-              <Text style={styles.scoreLabel}> pts</Text>
-            </View>
-
-            {/* Spacer */}
-            <View style={styles.spacer} />
-
-            {/* Exit button */}
-            <TouchableOpacity onPress={handleUpdateScore} activeOpacity={0.85}>
-              {LinearGradient ? (
-                <LinearGradient
-                  colors={['#7C3AED', '#06B6D4']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.exitButton}
-                >
-                  {exitButtonContent}
-                </LinearGradient>
-              ) : (
-                <View style={[styles.exitButton, { backgroundColor: darkTheme.purple }]}>
-                  {exitButtonContent}
-                </View>
-              )}
-            </TouchableOpacity>
+      {/* Floating overlay — always visible */}
+      <View style={styles.overlay}>
+        <View style={styles.overlayBar}>
+          {/* Score pill */}
+          <View style={styles.scorePill}>
+            <Text style={styles.scoreValue}>{Math.round(currentScore)}</Text>
+            <Text style={styles.scoreLabel}> pts</Text>
           </View>
-        </Animated.View>
-      )}
+
+          {/* Spacer */}
+          <View style={styles.spacer} />
+
+          {/* Exit button */}
+          <TouchableOpacity onPress={handleExitPress} activeOpacity={0.85}>
+            {LinearGradient ? (
+              <LinearGradient
+                colors={['#7C3AED', '#06B6D4']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.exitButton}
+              >
+                {exitButtonContent}
+              </LinearGradient>
+            ) : (
+              <View style={[styles.exitButton, { backgroundColor: darkTheme.purple }]}>
+                {exitButtonContent}
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <ExitGameModal
+        visible={exitModalVisible}
+        pendingPoints={pendingPoints}
+        onSaveAndExit={handleSaveAndExit}
+        onExitWithoutSaving={handleExitWithoutSaving}
+        onDismiss={() => setExitModalVisible(false)}
+      />
     </View>
   );
 };
@@ -482,24 +461,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
   },
-  // Small bar at top edge — tap to show overlay when hidden
-  tapZone: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 24,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    zIndex: 20,
-  },
-  tapHint: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    marginBottom: 4,
-  },
   // Floating overlay
   overlay: {
     position: 'absolute',
@@ -510,7 +471,7 @@ const styles = StyleSheet.create({
   overlayBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
     borderRadius: 16,
     borderWidth: 1,
     borderColor: 'rgba(124, 58, 237, 0.25)',
