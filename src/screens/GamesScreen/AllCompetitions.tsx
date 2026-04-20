@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ScrollView, View, TouchableOpacity, Text } from 'react-native';
 
 // Styles
-import AllCompetitionStyles from '../HomeScreen/style/AllCompetitionStyle';
+import AllCompetitionStyles from './style/AllCompetitionStyle';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { TCompetition } from '../../types/competition';
