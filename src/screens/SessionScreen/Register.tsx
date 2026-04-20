@@ -4,7 +4,7 @@ import { RootStackParamList } from '../../NavigationTypes';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { TUserRegister } from 'src/types/user';
 import { postUserRegister } from '@services/backend';
-import Loader from '@components/LoaderComponent/Loader';
+import SimiLoader from '@components/SimiLoader/SimiLoader';
 import AppMessage from '@components/AppMessage/AppMessage';
 import { ToastState, ToastType } from 'src/types/toast';
 import authStyles from '../../theme/authStyles';
@@ -356,7 +356,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
                 activeOpacity={0.8}
               >
                 {loading ? (
-                  <Loader visible={loading} message="" size="small" />
+                  <SimiLoader visible={loading} />
                 ) : (
                   <Text style={authStyles.buttonPrimaryText}>Registrarse</Text>
                 )}

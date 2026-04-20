@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform
 import { RootStackParamList } from '../../NavigationTypes';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { putResetPassword } from '@services/backend';
-import Loader from '@components/LoaderComponent/Loader';
+import SimiLoader from '@components/SimiLoader/SimiLoader';
 import AppMessage from '@components/AppMessage/AppMessage';
 import authStyles from '../../theme/authStyles';
 
@@ -127,7 +127,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
                     activeOpacity={0.8}
                   >
                     {loading ? (
-                      <Loader visible={loading} message="" size="small" />
+                      <SimiLoader visible={loading} />
                     ) : (
                       <Text style={authStyles.buttonPrimaryText}>Enviar enlace</Text>
                     )}
@@ -153,7 +153,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
                     activeOpacity={0.8}
                   >
                     {loading ? (
-                      <Loader visible={loading} message="" size="small" />
+                      <SimiLoader visible={loading} />
                     ) : (
                       <Text style={authStyles.buttonOutlineText}>
                         {countdown > 0 ? `Reenviar en ${countdown}s` : 'Reenviar correo'}
