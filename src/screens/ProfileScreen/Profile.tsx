@@ -2,27 +2,38 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, Image, TouchableOpacity, TouchableWithoutFeedback, StatusBar, Animated, RefreshControl } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faGlobe, faCalendarDays, faGear } from '@fortawesome/free-solid-svg-icons';
+import { faGlobe, faCalendarDays, faGear, faStar, faFire, faTrophy, faGamepad } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../../AuthContext';
 import StadisticsScreen from './Stadistics';
-import Badges from './Badges';
 import ProfileSkeleton from '@components/Skeleton/ProfileSkeleton';
+import StatCard from '@components/StatCard/StatCard';
+import MiniLeaderboard from '@components/MiniLeaderboard/MiniLeaderboard';
+import TrophyGrid from '@components/TrophyGrid/TrophyGrid';
 import { useUser } from '@services/UserContext';
-import { getTopGlobalByUser, getTopMonthlyByUser } from '../../services/backend';
+import { getTopGlobalByUser, getTopMonthlyByUser, getDashboardSummary, getTopTwenty, getUserBadges } from '../../services/backend';
 import LevelRing from '../../components/LevelRing/LevelRing';
 import { darkTheme } from '../../theme/colors';
 import { getAvatarSource } from '../../utils/avatars';
 import { useFadeInUp, usePressScale } from '../../utils/animations';
 import profileStyles from './style/ProfileStyle';
+import { TTopTwenty } from '../../types/user';
 
 const ProfileScreen = ({ navigation }) => {
   const { uid } = useAuth();
-  const [selectedTab, setSelectedTab] = useState('stadistics');
   const [topGlobal, setTopGlobal] = useState<number | null>(null);
   const [topMonthly, setTopMonthly] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [animReady, setAnimReady] = useState(false);
+
+  // Dashboard summary data
+  const [ranking, setRanking] = useState<number | null>(null);
+  const [streak, setStreak] = useState(0);
+  const [bestScore, setBestScore] = useState(0);
+  const [totalGames, setTotalGames] = useState(0);
+  const [totalScore, setTotalScore] = useState(0);
+  const [badges, setBadges] = useState<string[]>([]);
+  const [topUsers, setTopUsers] = useState<TTopTwenty[]>([]);
 
   const { profilePicture, setUpdateProfilePicture, userPoints, setUpdateUserPoints, userInformation } = useUser();
 
@@ -36,12 +47,26 @@ const ProfileScreen = ({ navigation }) => {
 
   const fetchRankings = useCallback(async () => {
     try {
-      const [globalRes, monthlyRes] = await Promise.all([
+      const [globalRes, monthlyRes, summaryResult, topResult, badgesResult] = await Promise.all([
         getTopGlobalByUser(uid).catch(() => null),
         getTopMonthlyByUser(uid).catch(() => null),
+        getDashboardSummary(uid).catch(() => null),
+        getTopTwenty().catch(() => null),
+        getUserBadges(uid).catch(() => null),
       ]);
       setTopGlobal(globalRes && globalRes > 0 ? globalRes : 0);
       setTopMonthly(monthlyRes && monthlyRes > 0 ? monthlyRes : 0);
+      if (summaryResult) {
+        setRanking(summaryResult.global_ranking);
+        setTotalScore(summaryResult.score_total);
+        setBestScore(summaryResult.best_score);
+        setTotalGames(summaryResult.total_games);
+      }
+      if (topResult) setTopUsers(topResult);
+      if (badgesResult) {
+        setStreak(badgesResult.scoring_streak ?? 0);
+        setBadges(badgesResult.badges ?? []);
+      }
     } catch {
       setTopGlobal(0);
       setTopMonthly(0);
@@ -73,11 +98,14 @@ const ProfileScreen = ({ navigation }) => {
   const avatarAnim = useFadeInUp(0, animReady);
   const levelAnim = useFadeInUp(150, animReady);
   const statsAnim = useFadeInUp(300, animReady);
-  const tabsAnim = useFadeInUp(400, animReady);
+  const dashGridAnim = useFadeInUp(380, animReady);
+  const leaderboardAnim = useFadeInUp(460, animReady);
+  const trophyAnim = useFadeInUp(540, animReady);
+  const tabsAnim = useFadeInUp(620, animReady);
   const settingsPress = usePressScale();
 
   const avatarSource = getAvatarSource(profilePicture);
-  const score = userPoints?.score_total || 0;
+  const score = totalScore || userPoints?.score_total || 0;
 
   const formatRank = (val: number | null) => {
     if (val === null) return '...';
@@ -159,22 +187,38 @@ const ProfileScreen = ({ navigation }) => {
           </View>
         </Animated.View>
 
-        {/* Tabs */}
+        {/* 4-stat grid */}
+        <Animated.View style={[profileStyles.statsGrid, { opacity: dashGridAnim.opacity, transform: dashGridAnim.transform }]}>
+          <StatCard icon={faStar} value={ranking != null && ranking > 0 ? `#${ranking}` : '--'} label="Ranking" accentColor="#FFD700" delay={0} />
+          <StatCard icon={faFire} value={String(streak)} label="Racha" accentColor="#EF4444" delay={80} />
+          <StatCard icon={faTrophy} value={bestScore > 0 ? bestScore.toLocaleString() : '--'} label="Mejor" accentColor="#8B5CF6" delay={160} />
+          <StatCard icon={faGamepad} value={String(totalGames)} label="Partidas" accentColor="#3B82F6" delay={240} />
+        </Animated.View>
+
+        {/* Mini Leaderboard */}
+        {topUsers.length > 0 && (
+          <Animated.View style={[profileStyles.glassCard, { opacity: leaderboardAnim.opacity, transform: leaderboardAnim.transform }]}>
+            <Text style={profileStyles.sectionTitle}>{'\uD83C\uDFC6'} Ranking Top 5</Text>
+            <MiniLeaderboard
+              users={topUsers}
+              currentUid={uid}
+              onViewMore={() => navigation.navigate('MainTab', { screen: 'Leaderboard' })}
+            />
+          </Animated.View>
+        )}
+
+        {/* Trophy Grid */}
+        <Animated.View style={[profileStyles.glassCard, { opacity: trophyAnim.opacity, transform: trophyAnim.transform }]}>
+          <TrophyGrid badges={badges} totalGames={totalGames} ranking={ranking} streak={streak} />
+        </Animated.View>
+
+        {/* Tabs — Statistics only */}
         <Animated.View style={[profileStyles.tabContainer, { opacity: tabsAnim.opacity, transform: tabsAnim.transform }]}>
           <View style={profileStyles.tabRow}>
             <TouchableOpacity
-              style={[profileStyles.tabButton, selectedTab === 'badges' && profileStyles.tabButtonActive]}
-              onPress={() => setSelectedTab('badges')}
+              style={[profileStyles.tabButton, profileStyles.tabButtonActive]}
             >
-              <Text style={[profileStyles.tabText, selectedTab === 'badges' && profileStyles.tabTextActive]}>
-                Insignias
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[profileStyles.tabButton, selectedTab === 'stadistics' && profileStyles.tabButtonActive]}
-              onPress={() => setSelectedTab('stadistics')}
-            >
-              <Text style={[profileStyles.tabText, selectedTab === 'stadistics' && profileStyles.tabTextActive]}>
+              <Text style={[profileStyles.tabText, profileStyles.tabTextActive]}>
                 Estad{'\u00ed'}sticas
               </Text>
             </TouchableOpacity>
@@ -183,7 +227,7 @@ const ProfileScreen = ({ navigation }) => {
 
         {/* Tab Content */}
         <View style={profileStyles.contentContainer}>
-          {selectedTab === 'badges' ? <Badges /> : <StadisticsScreen />}
+          <StadisticsScreen />
         </View>
 
         <View style={{ height: 30 }} />

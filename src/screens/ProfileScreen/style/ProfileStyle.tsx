@@ -183,6 +183,35 @@ const profileStyles = StyleSheet.create({
   contentContainer: {
     marginHorizontal: 20,
   },
+
+  // Stats Grid (4-up)
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 14,
+    marginHorizontal: 20,
+    marginTop: 20,
+  },
+
+  // Glass Card
+  glassCard: {
+    backgroundColor: darkTheme.bgCard,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: darkTheme.border,
+    padding: 24,
+    marginHorizontal: 20,
+    marginTop: 20,
+  },
+
+  // Section title
+  sectionTitle: {
+    fontFamily: FONT_INTER,
+    fontSize: 16,
+    fontWeight: '600',
+    color: darkTheme.textPrimary,
+    marginBottom: 14,
+  },
 });
 
 export default profileStyles;
