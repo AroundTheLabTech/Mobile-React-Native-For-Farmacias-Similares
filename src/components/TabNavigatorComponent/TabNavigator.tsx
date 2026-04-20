@@ -1,41 +1,27 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faHome, faUser, faChartBar, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
+import { faGamepad, faUser, faChartBar } from '@fortawesome/free-solid-svg-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { colors } from '../../../global-class';
 import { darkTheme } from '../../theme/colors';
 
-import HomeScreen from '../../screens/HomeScreen/HomeStack';
+import GamesStack from '../../screens/GamesScreen/GamesStack';
 import ProfileStack from '../../screens/ProfileScreen/ProfileStack';
 import LeaderBoard from '../../screens/LeaderBoard/LeaderBoard';
 
 import { ParamListBase, RouteProp } from '@react-navigation/native';
-// import NotchBackground from './NotchBackground';
-// import _404Page from '../../screens/404Screen/404';
 
 const Tab = createBottomTabNavigator();
 
-/*
-const TabBarBackground = () => {
-  return <NotchBackground />;
-};
-*/
-
 const TabNavigation = () => {
-
-  const tabBarIconOptions = (route: RouteProp<ParamListBase, string>, { color, size }) => {
-    let iconName = faHome;
-    if (route.name === 'Home') {
-      iconName = faHome;
-    } else if (route.name === 'Profile') {
-      iconName = faUser;
-    } else if (route.name === 'Leaderboard') {
-      iconName = faChartBar;
-    } else if (route.name === 'Search') {
-      iconName = faMagnifyingGlass;
-    }
-
+  const tabBarIconOptions = (
+    route: RouteProp<ParamListBase, string>,
+    { color, size }: { color: string; size: number },
+  ) => {
+    let iconName = faGamepad;
+    if (route.name === 'Games') iconName = faGamepad;
+    else if (route.name === 'Leaderboard') iconName = faChartBar;
+    else if (route.name === 'Profile') iconName = faUser;
     return <FontAwesomeIcon icon={iconName} size={size} color={color} />;
   };
 
@@ -48,24 +34,11 @@ const TabNavigation = () => {
         tabBarStyle: styles.tabBar,
         tabBarShowLabel: false,
         headerShown: false,
-        // tabBarBackground: TabBarBackground,
       })}
     >
-      <Tab.Screen
-        name="Home"
-        component={HomeScreen}
-      />
-      {/**
-      <Tab.Screen name="Search"
-        component={HomeScreen}
-      />
-      */}
-      <Tab.Screen name="Leaderboard"
-        component={LeaderBoard}
-      />
-      <Tab.Screen name="Profile"
-        component={ProfileStack}
-      />
+      <Tab.Screen name="Games" component={GamesStack} />
+      <Tab.Screen name="Leaderboard" component={LeaderBoard} />
+      <Tab.Screen name="Profile" component={ProfileStack} />
     </Tab.Navigator>
   );
 };
@@ -78,9 +51,6 @@ const styles = StyleSheet.create({
     elevation: 0,
     shadowOpacity: 0,
     position: 'absolute',
-  },
-  tabBarBackground: {
-    backgroundColor: 'transparent',
   },
 });
 

@@ -10,8 +10,6 @@ import RegisterScreen from './src/screens/SessionScreen/Register';
 import ForgotPasswordScreen from './src/screens/SessionScreen/ForgotPassword';
 import TabNavigator from './src/components/TabNavigatorComponent/TabNavigator';
 import SettingsStack from './src/screens/SettingsScreen/SettingsStack';
-import GamesStack from './src/screens/GamesScreen/GamesStack';
-
 //Contexto AuthContext
 import { AuthProvider } from './src/AuthContext';
 
@@ -54,11 +52,7 @@ export default function App() {
                   component={SettingsStack}
                   options={{ headerShown: false }}
                 />
-                <Stack.Screen
-                  name="Games"
-                  component={GamesStack}
-                  options={{ headerShown: false }}
-                />
+
               </Stack.Navigator>
             </UserProvider>
           </AuthProvider>

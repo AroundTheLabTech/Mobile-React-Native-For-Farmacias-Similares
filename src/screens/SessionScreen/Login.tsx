@@ -120,7 +120,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       setTimeout(() => {
         navigation.reset({
           index: 0,
-          routes: [{ name: 'MainTab', params: { screen: 'Home' } }],
+          routes: [{ name: 'MainTab', params: { screen: 'Games' } }],
         });
       }, 600);
     } catch (error) {
@@ -137,7 +137,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     const restoreSession = async () => {
       if (DEV_SKIP_LOGIN) {
         updateUserInformation(MOCK_USER);
-        navigation.reset({ index: 0, routes: [{ name: 'MainTab', params: { screen: 'Home' } }] });
+        navigation.reset({ index: 0, routes: [{ name: 'MainTab', params: { screen: 'Games' } }] });
         return;
       }
 
@@ -192,7 +192,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           isNavigatingRef.current = true;
           navigation.reset({
             index: 0,
-            routes: [{ name: 'MainTab', params: { screen: 'Home' } }],
+            routes: [{ name: 'MainTab', params: { screen: 'Games' } }],
           });
         }
       } catch (error) {
