@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SafeAreaView, StyleSheet } from 'react-native';
+import BootSplash from 'react-native-bootsplash';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -19,6 +20,10 @@ import { UserProvider } from './src/services/UserContext';
 const Stack = createStackNavigator();
 
 export default function App() {
+
+  useEffect(() => {
+    BootSplash.hide({ fade: true });
+  }, []);
 
   return (
     <GestureHandlerRootView style={styles.container}>
