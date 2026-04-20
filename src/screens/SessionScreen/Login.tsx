@@ -9,6 +9,7 @@ import { useAuth } from '../../AuthContext';
 import { setSecureToken, getSecureToken, clearSecureToken } from '../../utils/secureStorage';
 import { TUserLogin } from 'src/types/user';
 import AppMessage from '@components/AppMessage/AppMessage';
+import SimiLoader from '@components/SimiLoader/SimiLoader';
 import { ToastState, ToastType } from 'src/types/toast';
 import { DEV_SKIP_LOGIN, MOCK_USER } from '../../config/dev';
 
@@ -44,6 +45,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [restoring, setRestoring] = useState<boolean>(true);
   const { updateUserInformation, isLogout, setIsLogout } = useAuth();
   const [toast, setToast] = useState<ToastState>(null);
   const showMessage = (type: ToastType, text: string) => setToast({ type, text });
@@ -147,6 +149,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
         if (!storedAccessToken || !storedExpiresAt) {
           setLoading(false);
+          setRestoring(false);
           return;
         }
 
@@ -154,6 +157,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         if (!expiresAtMs || isNaN(expiresAtMs) || isExpired(expiresAtMs)) {
           await clearExpiredSession();
           setLoading(false);
+          setRestoring(false);
           return;
         }
 
@@ -161,6 +165,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         if (!validateAccessToken?.uid) {
           await clearExpiredSession();
           setLoading(false);
+          setRestoring(false);
           return;
         }
 
@@ -193,6 +198,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       } catch (error) {
         await clearExpiredSession();
         setLoading(false);
+        setRestoring(false);
       }
     };
 
@@ -201,9 +207,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   }, []);
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={authStyles.keyboardAvoid}>
+    <>
+      {restoring && <SimiLoader visible={restoring} fullScreen />}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={authStyles.keyboardAvoid}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={authStyles.screenContainer}>
           {/* Gradient overlays */}
@@ -333,7 +341,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           </ScrollView>
         </View>
       </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </>
   );
 };
 
