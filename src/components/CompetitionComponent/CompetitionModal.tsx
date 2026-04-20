@@ -6,7 +6,7 @@ import { getCompetitiveStatus, getListAvalibleCompetition, getListCompetitionNot
 import { TCompetition, TCreateCompetition } from 'src/types/competition';
 import { useAuth } from '../../AuthContext';
 import CompetitionCard from '@components/CompetitionCard/CompetitionCard';
-import Loader from '@components/LoaderComponent/Loader';
+import SimiLoader from '@components/SimiLoader/SimiLoader';
 
 const CompetitionModal = ({ navigation }) => {
 
@@ -156,7 +156,7 @@ const CompetitionModal = ({ navigation }) => {
   }, [currentPoints, setUpdateUserPoints, uid, userPoints]);
 
   if (!userPoints) {
-    return <Loader visible />;
+    return <SimiLoader visible />;
   }
 
   if (!userPoints || userPoints.score_total < 100) {

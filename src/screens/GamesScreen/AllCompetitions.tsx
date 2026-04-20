@@ -9,7 +9,7 @@ import { TCompetition } from '../../types/competition';
 import { useAuth } from '../../AuthContext';
 import { getAllCompetition } from '@services/backend';
 import CompetitionCard from '@components/CompetitionCard/CompetitionCard';
-import Loader from '@components/LoaderComponent/Loader';
+import SimiLoader from '@components/SimiLoader/SimiLoader';
 
 const AllCompetitions = ({ navigation }) => {
 
@@ -30,7 +30,7 @@ const AllCompetitions = ({ navigation }) => {
   }, [competitions, uid]);
 
   if (!competitions) {
-    return <Loader visible />;
+    return <SimiLoader visible />;
   }
 
   return (

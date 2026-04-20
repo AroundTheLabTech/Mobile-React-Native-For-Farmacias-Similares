@@ -9,7 +9,7 @@ import { useAuth } from '../../AuthContext';
 import { formarGameCardNumber, formatNumber } from '../../utils/helpers';
 import { useUser } from '@services/UserContext';
 import { AVATARS, getAvatarSource } from '../../utils/avatars';
-import Loader from '@components/LoaderComponent/Loader';
+import SimiLoader from '@components/SimiLoader/SimiLoader';
 import { darkTheme } from '../../theme/colors';
 import { useFadeInUp, usePressScale } from '../../utils/animations';
 
@@ -167,7 +167,7 @@ const Settings = ({ navigation }) => {
   }
 
   if (loading) {
-    return <Loader visible={true} />;
+    return <SimiLoader visible={true} />;
   }
 
   return (
