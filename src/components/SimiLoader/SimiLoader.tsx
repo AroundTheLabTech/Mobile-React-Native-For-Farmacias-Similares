@@ -92,7 +92,6 @@ const SimiLoader: React.FC<SimiLoaderProps> = ({
         fullScreen ? styles.fullScreen : styles.inline,
         style,
       ]}
-      pointerEvents="none"
     >
       {fullScreen && (
         <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
