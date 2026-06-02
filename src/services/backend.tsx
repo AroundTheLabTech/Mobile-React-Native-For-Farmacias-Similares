@@ -1024,16 +1024,16 @@ export const getGamesCatalog = async (): Promise<TGameCatalogResponse | null> =>
 
     const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/games/catalog`, requestOptions);
 
-    if (__DEV__) console.log('[DEBUG backend] getGamesCatalog URL:', `${BACKEND_BASE_URL}/games/catalog`);
-    if (__DEV__) console.log('[DEBUG backend] getGamesCatalog status:', response.status);
-    if (__DEV__) console.log('[DEBUG backend] getGamesCatalog response:', response);
+    // if (__DEV__) console.log('[DEBUG backend] getGamesCatalog URL:', `${BACKEND_BASE_URL}/games/catalog`);
+    // if (__DEV__) console.log('[DEBUG backend] getGamesCatalog status:', response.status);
+    // if (__DEV__) console.log('[DEBUG backend] getGamesCatalog response:', response);
     if (!response.ok) {
       if (__DEV__) console.log('[DEBUG backend] getGamesCatalog ERROR:', `Error en la solicitud: ${response.status}`);
       throw new Error(`Error en la solicitud: ${response.status}`);
     }
 
     const result = await response.json();
-    if (__DEV__) console.log('[DEBUG backend] getGamesCatalog result:', JSON.stringify(result));
+    // if (__DEV__) console.log('[DEBUG backend] getGamesCatalog result:', JSON.stringify(result));
     return result as TGameCatalogResponse;
   } catch (error) {
     return null;

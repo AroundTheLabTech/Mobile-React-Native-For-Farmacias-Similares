@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View, TouchableOpacity, StyleSheet, Text, Animated, StatusBar } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Text, Animated, StatusBar, ActivityIndicator } from 'react-native';
 import Orientation from 'react-native-orientation-locker';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import { useFocusEffect } from '@react-navigation/native';
@@ -53,15 +53,18 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
   const [currentScore, setCurrentScore] = useState<number>(Number(score) || 0);
 
   // Usamos refs para el historial y puntajes previos para garantizar actualizaciones síncronas e instantáneas
+  const currentScoreRef = useRef<number>(Number(score) || 0);
   const scoreHistoryRef = useRef<number[]>([]);
   const previousScoreRef = useRef<number>(0);
   const initialScoreDb = useMemo<number>(() => Number(score) || 0, [score]);
 
   // Control de envío al backend
   const [session, setSession] = useState<TGameSession | undefined>();
+  const [isSaving, setIsSaving] = useState<boolean>(false);
   const isPostingRef = useRef<boolean>(false);
   const isNavigatingBackRef = useRef<boolean>(false);
   const lastSavedScoreRef = useRef<number>(Number(score) || 0);
+  const activePostPromiseRef = useRef<Promise<void> | null>(null);
 
   // WebView refs y control de reinyección
   const webviewRef = useRef<WebView | null>(null);
@@ -172,6 +175,9 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
     // Resetea referencias locales
     scoreHistoryRef.current = [];
     previousScoreRef.current = 0;
+    currentScoreRef.current = Number(score) || 0;
+    lastSavedScoreRef.current = Number(score) || 0;
+    setCurrentScore(Number(score) || 0);
     // 2) fallback fuerte: si ves que algún juego queda cacheado, descomenta:
     // setWebKey(k => k + 1);
   }
@@ -242,21 +248,15 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
         }
       } else if (strategy.mode === 'absolute') {
         const normalized = scoreValue > 100 ? (scoreValue - 10) / (strategy.divisor || 1) : 1;
-        setCurrentScore(initialScoreDb + normalized);
+        const next = initialScoreDb + normalized;
+        currentScoreRef.current = next;
+        setCurrentScore(next);
         appliedAbsolute = true;
       } else if (strategy.mode === 'history-progressive') {
         if (scoreValue > 0) {
-          if (previousScoreRef.current !== scoreValue && scoreValue > previousScoreRef.current) {
-            const u = pushAndShift(scoreHistoryRef.current, scoreValue);
-            scoreHistoryRef.current = u;
-            const v = u[1];
-            if (v > 0) {
-              delta = v - previousScoreRef.current;
-              previousScoreRef.current = v;
-            } else {
-              delta = 1;
-              previousScoreRef.current = 1;
-            }
+          if (scoreValue > previousScoreRef.current) {
+            delta = scoreValue - previousScoreRef.current;
+            previousScoreRef.current = scoreValue;
           }
         }
       } else if (strategy.mode === 'history') {
@@ -271,23 +271,30 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
         if (!(strategy.dedup && scoreHistoryRef.current.indexOf(v) !== -1)) {
           const u = pushAndShift(scoreHistoryRef.current, v);
           scoreHistoryRef.current = u;
-          const lastVal = u[0] || 0;
-          const newVal = u[1] || 0;
+
+          let newVal = 0;
+          let lastVal = 0;
+
+          if (u.length === 1) {
+            newVal = u[0];
+            lastVal = 0;
+          } else {
+            newVal = u[1];
+            lastVal = u[0];
+          }
+
           if (newVal > lastVal) {
             delta = newVal - lastVal;
-          } else if (u.length === 1 && newVal > 0) {
-            delta = newVal;
           }
         }
       }
 
       // Actualiza puntaje local
       if (delta > 0 && !appliedAbsolute) {
-        setCurrentScore(prev => {
-          const next = prev + delta;
-          console.log(`[DEBUG GameIframe] Score updated -> prev=${prev}, delta=${delta}, next=${next}`);
-          return next;
-        });
+        const next = currentScoreRef.current + delta;
+        currentScoreRef.current = next;
+        setCurrentScore(next);
+        console.log(`[DEBUG GameIframe] Score updated -> delta=${delta}, next=${next}`);
       }
     } catch (e) {
       // Mensaje no JSON o desconocido
@@ -296,45 +303,82 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
 
   // Envía delta incremental al backend (no navega)
   const saveScoreDelta = useCallback(async (navigateBack = false) => {
+    if (navigateBack) {
+      setIsSaving(true);
+    }
     try {
-      const deltaTotal = Math.max(0, currentScore - lastSavedScoreRef.current);
+      // Si hay un guardado en curso, esperamos a que termine antes de continuar
+      if (activePostPromiseRef.current) {
+        try {
+          await activePostPromiseRef.current;
+        } catch (e) {
+          // Ignoramos error del post anterior, reintentaremos con el nuevo delta
+        }
+      }
+
+      const latestScore = currentScoreRef.current;
+      const deltaTotal = Math.max(0, latestScore - lastSavedScoreRef.current);
       const deltaToSend = Math.round(deltaTotal);
 
-      if (__DEV__) console.log(`[DEBUG GameIframe] saveScoreDelta -> currentScore=${currentScore}, lastSaved=${lastSavedScoreRef.current}, delta=${deltaToSend}, navigateBack=${navigateBack}`);
+      if (__DEV__) console.log(`[DEBUG GameIframe] saveScoreDelta -> latestScore=${latestScore}, lastSaved=${lastSavedScoreRef.current}, delta=${deltaToSend}, navigateBack=${navigateBack}`);
 
-      if (deltaToSend > 0 && !isPostingRef.current) {
-        isPostingRef.current = true;
+      if (deltaToSend > 0) {
+        // Creamos la promesa de envío
+        const postPromise = (async () => {
+          isPostingRef.current = true;
+          try {
+            const gameNumber = Number(id.replace('juego', ''));
+            const newGameSession: TGameSession = { uid, score: deltaToSend, numberGame: gameNumber };
 
-        const gameNumber = Number(id.replace('juego', ''));
-        const newGameSession: TGameSession = { uid, score: deltaToSend, numberGame: gameNumber };
+            console.log(`[DEBUG GameIframe] Posting session -> game=${gameNumber}, score=${deltaToSend}`);
+            const response = await postSessionGame(newGameSession);
+            console.log(`[DEBUG GameIframe] Session response -> session_id=${response?.session_id}`);
 
-        console.log(`[DEBUG GameIframe] Posting session -> game=${gameNumber}, score=${deltaToSend}`);
-        const response = await postSessionGame(newGameSession);
-        console.log(`[DEBUG GameIframe] Session response -> session_id=${response?.session_id}`);
-        if (response?.session_id) {
-          await addCompetitionSession(response.session_id);
-          setSession(newGameSession);
+            if (response?.session_id) {
+              try {
+                await addCompetitionSession(response.session_id);
+              } catch (compErr) {
+                console.log(`[DEBUG GameIframe] Error adding competition session:`, compErr);
+              }
+              setSession(newGameSession);
+            }
+            // Solo actualizamos la referencia de guardado si la llamada HTTP no arrojó error
+            lastSavedScoreRef.current = latestScore;
+          } catch (err) {
+            if (__DEV__) console.log(`[DEBUG GameIframe] Error in postPromise:`, err);
+            throw err;
+          } finally {
+            isPostingRef.current = false;
+            activePostPromiseRef.current = null;
+          }
+        })();
+
+        activePostPromiseRef.current = postPromise;
+
+        try {
+          await postPromise;
+        } catch (e) {
+          // Falló el guardado, no se actualiza lastSavedScoreRef.current
         }
-        // Actualiza referencia para no re-enviar lo ya guardado
-        lastSavedScoreRef.current = currentScore;
-      } else if (deltaToSend === 0) {
-        console.log(`[DEBUG GameIframe] No delta to save, skipping`);
+      } else {
+        console.log(`[DEBUG GameIframe] No delta to save (deltaToSend=${deltaToSend})`);
       }
-    } catch (e) {
-      if (__DEV__) console.log(`[DEBUG GameIframe] Error saving score:`, e);
     } finally {
-      isPostingRef.current = false;
-      if (navigateBack) {
-        console.log(`[DEBUG GameIframe] Navigating back, refreshing data`);
-        setUpdateScorePerGame(true);
-        setUpdateLast3MonthsScores(true);
-        setUpdateUserPoints(true);
-        isNavigatingBackRef.current = true;
-        navigation.goBack();
-      }
+      setIsSaving(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentScore, id, uid]);
+
+    if (navigateBack) {
+      console.log(`[DEBUG GameIframe] Navigating back, refreshing data, optimisticScore=${currentScoreRef.current}`);
+      setUpdateLast3MonthsScores(true);
+      setUpdateUserPoints(true);
+      isNavigatingBackRef.current = true;
+
+      navigation.navigate('GameDetails', {
+        ...route.params,
+        optimisticScore: currentScoreRef.current,
+      });
+    }
+  }, [id, uid, navigation, route, setUpdateLast3MonthsScores, setUpdateUserPoints]);
 
   // Botón "Guardar y salir"
   function handleUpdateScore() {
@@ -363,8 +407,8 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
         return;
       }
 
-      const delta = Math.round(Math.max(0, currentScore - lastSavedScoreRef.current));
-      if (__DEV__) console.log(`[DEBUG GameIframe] beforeRemove -> delta=${delta}, currentScore=${currentScore}, lastSaved=${lastSavedScoreRef.current}`);
+      const delta = Math.round(Math.max(0, currentScoreRef.current - lastSavedScoreRef.current));
+      if (__DEV__) console.log(`[DEBUG GameIframe] beforeRemove -> delta=${delta}, currentScore=${currentScoreRef.current}, lastSaved=${lastSavedScoreRef.current}`);
       if (delta > 0) {
         // Prevenir navegación, guardar, y luego navegar
         e.preventDefault();
@@ -380,7 +424,7 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
     });
     return unsubscribe;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentScore, saveScoreDelta]);
+  }, [saveScoreDelta]);
 
   // --- Auto-hide overlay ---
   const [overlayVisible, setOverlayVisible] = useState(true);
@@ -477,6 +521,17 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
           </View>
         </Animated.View>
       )}
+
+      {/* 
+        Loader de guardado al salir
+        (Comenta todo este bloque si deseas desactivar el bloqueo de pantalla al guardar y salir)
+      */}
+      {/* {isSaving && (
+        <View style={styles.loaderOverlay}>
+          <ActivityIndicator size="large" color="#06B6D4" />
+          <Text style={styles.loaderText}>Guardando puntuación...</Text>
+        </View>
+      )} */}
     </View>
   );
 };
@@ -560,6 +615,21 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontFamily: 'Inter-VariableFont_opsz,wght',
     fontSize: 11,
+    fontWeight: '700',
+  },
+  // Loader overlay styles
+  loaderOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 9999,
+  },
+  loaderText: {
+    color: '#FFFFFF',
+    marginTop: 14,
+    fontSize: 15,
+    fontFamily: 'Inter-Bold',
     fontWeight: '700',
   },
 });
