@@ -52,14 +52,15 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
   // Estado base de puntaje mostrado
   const [currentScore, setCurrentScore] = useState<number>(Number(score) || 0);
 
-  // Estados para replicar reglas de la web (en memoria; NO persisten solos)
-  const [scoreHistory, setScoreHistory] = useState<number[]>([]); // máx 2
-  const [previousScore, setPreviousScore] = useState<number>(0);
+  // Usamos refs para el historial y puntajes previos para garantizar actualizaciones síncronas e instantáneas
+  const scoreHistoryRef = useRef<number[]>([]);
+  const previousScoreRef = useRef<number>(0);
   const initialScoreDb = useMemo<number>(() => Number(score) || 0, [score]);
 
   // Control de envío al backend
   const [session, setSession] = useState<TGameSession | undefined>();
   const isPostingRef = useRef<boolean>(false);
+  const isNavigatingBackRef = useRef<boolean>(false);
   const lastSavedScoreRef = useRef<number>(Number(score) || 0);
 
   // WebView refs y control de reinyección
@@ -168,6 +169,9 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
       })();
       true;
     `);
+    // Resetea referencias locales
+    scoreHistoryRef.current = [];
+    previousScoreRef.current = 0;
     // 2) fallback fuerte: si ves que algún juego queda cacheado, descomenta:
     // setWebKey(k => k + 1);
   }
@@ -211,8 +215,6 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
       const numberValue = Number(raw?.number);
       const typeValue = raw?.type ? String(raw.type) : undefined;
 
-      if (__DEV__) console.log(`[DEBUG GameIframe] rawMessage -> ${raw?.number}`);
-
       if (__DEV__) console.log(`[DEBUG GameIframe] onMessage -> type=${typeValue}, score=${scoreValue}, number=${numberValue}, game=${id}`);
 
       const strategy = SCORING_STRATEGIES[id];
@@ -231,24 +233,31 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
       if (Number.isNaN(inputValue)) return;
 
       if (strategy.mode === 'direct') {
-        if (inputValue > 0) delta = inputValue;
+        if (inputValue > 0) {
+          const diff = inputValue - previousScoreRef.current;
+          if (diff > 0) {
+            delta = diff;
+            previousScoreRef.current = inputValue;
+          }
+        }
       } else if (strategy.mode === 'absolute') {
         const normalized = scoreValue > 100 ? (scoreValue - 10) / (strategy.divisor || 1) : 1;
         setCurrentScore(initialScoreDb + normalized);
         appliedAbsolute = true;
       } else if (strategy.mode === 'history-progressive') {
-        // juego5 special: only count if score increases over previous
         if (scoreValue > 0) {
-          setScoreHistory(prev => {
-            if (previousScore !== scoreValue && scoreValue > previousScore) {
-              const u = pushAndShift(prev, scoreValue);
-              const v = u[1];
-              if (v > 0) { delta = v; setPreviousScore(v); }
-              else { delta = 1; setPreviousScore(1); }
-              return u;
+          if (previousScoreRef.current !== scoreValue && scoreValue > previousScoreRef.current) {
+            const u = pushAndShift(scoreHistoryRef.current, scoreValue);
+            scoreHistoryRef.current = u;
+            const v = u[1];
+            if (v > 0) {
+              delta = v - previousScoreRef.current;
+              previousScoreRef.current = v;
+            } else {
+              delta = 1;
+              previousScoreRef.current = 1;
             }
-            return prev;
-          });
+          }
         }
       } else if (strategy.mode === 'history') {
         if (scoreValue <= 0 && !strategy.dedup) return;
@@ -259,12 +268,17 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
           if (strategy.normalizeMin != null) v = v > strategy.normalizeMin ? v : strategy.normalizeMin;
         }
 
-        setScoreHistory(prev => {
-          if (strategy.dedup && prev.indexOf(v) !== -1) return prev;
-          const u = pushAndShift(prev, v);
-          delta = u[1] || 0;
-          return u;
-        });
+        if (!(strategy.dedup && scoreHistoryRef.current.indexOf(v) !== -1)) {
+          const u = pushAndShift(scoreHistoryRef.current, v);
+          scoreHistoryRef.current = u;
+          const lastVal = u[0] || 0;
+          const newVal = u[1] || 0;
+          if (newVal > lastVal) {
+            delta = newVal - lastVal;
+          } else if (u.length === 1 && newVal > 0) {
+            delta = newVal;
+          }
+        }
       }
 
       // Actualiza puntaje local
@@ -315,6 +329,7 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
         setUpdateScorePerGame(true);
         setUpdateLast3MonthsScores(true);
         setUpdateUserPoints(true);
+        isNavigatingBackRef.current = true;
         navigation.goBack();
       }
     }
@@ -337,6 +352,11 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
   // Guardar al presionar botón de retroceso (hardware o gesture)
   useEffect(() => {
     const unsubscribe = navigation.addListener?.('beforeRemove', (e: any) => {
+      if (isNavigatingBackRef.current) {
+        console.log(`[DEBUG GameIframe] beforeRemove -> already navigating back via saveScoreDelta, allowing navigation`);
+        return;
+      }
+
       // Si ya se está guardando, dejar pasar
       if (isPostingRef.current) {
         console.log(`[DEBUG GameIframe] beforeRemove -> already posting, allowing navigation`);
