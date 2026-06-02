@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableWithoutFeedback, Animated, StyleSheet } from 'react-native';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
 import { darkTheme } from '../../theme/colors';
 import { usePressScale } from '../../utils/animations';
 
@@ -21,7 +23,7 @@ const TipBanner: React.FC<TipBannerProps> = ({ onAction }) => {
 
   return (
     <View style={styles.banner}>
-      <Text style={styles.icon}>{'💡'}</Text>
+      <FontAwesomeIcon icon={faLightbulb} color="#EAB308" size={22} />
       <View style={styles.content}>
         <Text style={styles.text}>
           <Text style={styles.bold}>Consejo: </Text>

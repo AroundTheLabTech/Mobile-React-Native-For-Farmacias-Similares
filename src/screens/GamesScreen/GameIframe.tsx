@@ -10,12 +10,7 @@ import { TGameSession } from 'src/types/game';
 import { TCompetitionSession } from 'src/types/competition';
 import { darkTheme } from '../../theme/colors';
 
-let LinearGradient: any = null;
-try {
-  LinearGradient = require('react-native-linear-gradient').default;
-} catch {
-  // Native module not linked yet
-}
+
 
 type GameId =
   | 'juego1' | 'juego2' | 'juego3' | 'juego4' | 'juego5' | 'juego6'
@@ -188,15 +183,15 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const SCORING_STRATEGIES: Record<string, ScoringStrategy> = {
-    juego1:  { mode: 'history' },
-    juego2:  { mode: 'history', divisor: 100, dedup: true, normalizeMin: 1 },
-    juego3:  { mode: 'direct', useNumberField: true },
-    juego4:  { mode: 'absolute', divisor: 100 },
-    juego5:  { mode: 'history-progressive', requireType: 'scoreUpdate' },
-    juego6:  { mode: 'history', requireType: 'scoreUpdate' },
-    juego7:  { mode: 'direct', requireType: 'scoreUpdate' },
-    juego8:  { mode: 'history', requireType: 'scoreUpdate' },
-    juego9:  { mode: 'history', requireType: 'scoreUpdate' },
+    juego1: { mode: 'history' },
+    juego2: { mode: 'history', divisor: 100, dedup: true, normalizeMin: 1 },
+    juego3: { mode: 'direct', useNumberField: true },
+    juego4: { mode: 'absolute', divisor: 100 },
+    juego5: { mode: 'history-progressive', requireType: 'scoreUpdate' },
+    juego6: { mode: 'history', requireType: 'scoreUpdate' },
+    juego7: { mode: 'direct', requireType: 'scoreUpdate' },
+    juego8: { mode: 'history', requireType: 'scoreUpdate' },
+    juego9: { mode: 'history', requireType: 'scoreUpdate' },
     juego10: { mode: 'history', requireType: 'scoreUpdate' },
     juego11: { mode: 'history', requireType: 'scoreUpdate' },
     juego12: { mode: 'history', requireType: 'scoreUpdate' },
@@ -215,6 +210,8 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
       const scoreValue = Number(raw?.score);
       const numberValue = Number(raw?.number);
       const typeValue = raw?.type ? String(raw.type) : undefined;
+
+      if (__DEV__) console.log(`[DEBUG GameIframe] rawMessage -> ${raw?.number}`);
 
       if (__DEV__) console.log(`[DEBUG GameIframe] onMessage -> type=${typeValue}, score=${scoreValue}, number=${numberValue}, game=${id}`);
 
@@ -321,7 +318,7 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
         navigation.goBack();
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentScore, id, uid]);
 
   // Botón "Guardar y salir"
@@ -362,7 +359,7 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
       }
     });
     return unsubscribe;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentScore, saveScoreDelta]);
 
   // --- Auto-hide overlay ---
@@ -404,6 +401,8 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
   const exitButtonContent = (
     <Text style={styles.exitButtonText}>Guardar y salir</Text>
   );
+
+  if (__DEV__) console.log(`[DEBUG GameIframe] gameUrl=${gameUrl}`);
 
   return (
     <View style={styles.container}>
@@ -451,20 +450,9 @@ const GameIframe: React.FC<Props> = ({ navigation, route }) => {
 
             {/* Exit button */}
             <TouchableOpacity onPress={handleUpdateScore} activeOpacity={0.85}>
-              {LinearGradient ? (
-                <LinearGradient
-                  colors={['#7C3AED', '#06B6D4']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.exitButton}
-                >
-                  {exitButtonContent}
-                </LinearGradient>
-              ) : (
-                <View style={[styles.exitButton, { backgroundColor: darkTheme.purple }]}>
-                  {exitButtonContent}
-                </View>
-              )}
+              <View style={[styles.exitButton, { backgroundColor: darkTheme.purple }]}>
+                {exitButtonContent}
+              </View>
             </TouchableOpacity>
           </View>
         </Animated.View>

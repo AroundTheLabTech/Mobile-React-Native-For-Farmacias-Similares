@@ -4,7 +4,9 @@ import { TCompetition, TCompetitionSession, TCompetitiveStatus, TCreateCompetiti
 import { TGameSession, TGameCatalogResponse } from '../types/game';
 import { validateObjectValues } from '../utils/helpers';
 import { ProblemReport } from '../types/report';
-import { getSecureToken } from '../utils/secureStorage';
+import { getSecureToken, getSecureRefreshToken, setSecureToken } from '../utils/secureStorage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 
@@ -17,20 +19,86 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
   };
 }
 
+async function refreshAccessToken(): Promise<string | null> {
+  try {
+    const refreshToken = await getSecureRefreshToken();
+    if (!refreshToken) return null;
+
+    const response = await fetch(`${BACKEND_BASE_URL}/users/refresh_token`, {
+      method: 'POST',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
+
+    if (!response.ok) return null;
+
+    const data = (await response.json()) as {
+      id_token?: string;
+      expires_in?: number;
+      refresh_token?: string;
+    };
+
+    if (!data.id_token) return null;
+
+    await setSecureToken(data.id_token);
+    if (data.expires_in) {
+      const expiresAtMs = Date.now() + data.expires_in * 1000;
+      await AsyncStorage.setItem('tokenExpiresAt', String(expiresAtMs));
+    }
+    if (data.refresh_token) {
+      const { setSecureRefreshToken } = await import('../utils/secureStorage');
+      await setSecureRefreshToken(data.refresh_token);
+    }
+
+    return data.id_token;
+  } catch {
+    return null;
+  }
+}
+
+let _onSessionExpired: (() => void) | null = null;
+export function setOnSessionExpiredCallback(cb: () => void) {
+  _onSessionExpired = cb;
+}
+
 async function fetchWithTimeout(
   url: string,
   options: RequestInit = {},
   timeoutMs: number = DEFAULT_TIMEOUT_MS,
 ): Promise<Response> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const response = await fetch(url, { ...options, signal: controller.signal });
-    return response;
-  } finally {
-    clearTimeout(timeout);
+  const doFetch = async (opts: RequestInit): Promise<Response> => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      return await fetch(url, { ...opts, signal: controller.signal });
+    } finally {
+      clearTimeout(timeout);
+    }
+  };
+
+  const response = await doFetch(options);
+
+  if (response.status === 401) {
+    if (__DEV__) console.log('[fetchWithTimeout] 401 detected, attempting token refresh...');
+    const newToken = await refreshAccessToken();
+
+    if (newToken) {
+      const currentHeaders = (options.headers as Record<string, string>) ?? {};
+      const updatedOptions: RequestInit = {
+        ...options,
+        headers: { ...currentHeaders, Authorization: `Bearer ${newToken}` },
+      };
+      if (__DEV__) console.log('[fetchWithTimeout] Token refreshed, retrying request...');
+      return doFetch(updatedOptions);
+    }
+
+    if (__DEV__) console.log('[fetchWithTimeout] Refresh failed, session expired');
+    _onSessionExpired?.();
   }
+
+  return response;
 }
+
 
 export const loginUserByEmailAndPassword = async (email: string, password: string): Promise<TUserLogin> => {
   if (!email) {
@@ -956,11 +1024,16 @@ export const getGamesCatalog = async (): Promise<TGameCatalogResponse | null> =>
 
     const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/games/catalog`, requestOptions);
 
+    if (__DEV__) console.log('[DEBUG backend] getGamesCatalog URL:', `${BACKEND_BASE_URL}/games/catalog`);
+    if (__DEV__) console.log('[DEBUG backend] getGamesCatalog status:', response.status);
+    if (__DEV__) console.log('[DEBUG backend] getGamesCatalog response:', response);
     if (!response.ok) {
+      if (__DEV__) console.log('[DEBUG backend] getGamesCatalog ERROR:', `Error en la solicitud: ${response.status}`);
       throw new Error(`Error en la solicitud: ${response.status}`);
     }
 
     const result = await response.json();
+    if (__DEV__) console.log('[DEBUG backend] getGamesCatalog result:', JSON.stringify(result));
     return result as TGameCatalogResponse;
   } catch (error) {
     return null;

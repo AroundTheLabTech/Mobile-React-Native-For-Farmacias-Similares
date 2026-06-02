@@ -123,6 +123,7 @@ const Games = ({ navigation }) => {
       let games: Game[];
 
       if (catalog && catalog.games && catalog.games.length > 0) {
+        if (__DEV__) console.log(`DEBUG catalogToGame --->`, catalog.games);
         games = catalog.games.map(catalogToGame);
       } else {
         // Fallback: use local image map keys to build a minimal list

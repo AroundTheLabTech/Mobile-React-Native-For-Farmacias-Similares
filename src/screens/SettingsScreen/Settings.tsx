@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { View, Text, TouchableOpacity, TouchableWithoutFeedback, ScrollView, Image, TextInput, Alert, StatusBar, Animated } from 'react-native';
 import SettingsStyles from './style/SettingsStyles';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faArrowLeft, faPen, faCheck, faXmark, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faPen, faCheck, faXmark, faChevronRight, faClipboardList } from '@fortawesome/free-solid-svg-icons';
 import { TGameCard, TUpdateUserInformation } from '../../types/user';
 import { getGameCard, updateUserProfilePicture, putUserInformation } from '../../services/backend';
 import { useAuth } from '../../AuthContext';
@@ -340,7 +340,7 @@ const Settings = ({ navigation }) => {
                     <Image source={avatar.source} style={SettingsStyles.avatarOptionImage} />
                     {isSelected && (
                       <View style={SettingsStyles.selectedCheck}>
-                        <Text style={SettingsStyles.selectedCheckText}>✓</Text>
+                        <FontAwesomeIcon icon={faCheck} size={10} color="#fff" />
                       </View>
                     )}
                   </Animated.View>
@@ -395,7 +395,7 @@ const Settings = ({ navigation }) => {
           <TouchableOpacity style={SettingsStyles.settingItem} onPress={() => navigation.navigate('ReportProblem')}>
             <View style={SettingsStyles.settingInfo}>
               <View style={SettingsStyles.settingIconBox}>
-                <Text style={SettingsStyles.sectionIcon}>📝</Text>
+                <FontAwesomeIcon icon={faClipboardList} size={18} color={darkTheme.purple} />
               </View>
               <View style={SettingsStyles.settingTextContainer}>
                 <Text style={SettingsStyles.settingName}>Reportar un problema</Text>
