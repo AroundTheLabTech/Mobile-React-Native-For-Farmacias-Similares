@@ -94,11 +94,7 @@ const SettingsStyles = StyleSheet.create({
     color: 'rgba(255,255,255,0.6)',
     fontFamily: fonts.bold,
   },
-  gameCardChip: {
-    width: 40,
-    height: 30,
-    borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+  gameCardChipContainer: {
     marginVertical: 12,
   },
   gameCardName: {

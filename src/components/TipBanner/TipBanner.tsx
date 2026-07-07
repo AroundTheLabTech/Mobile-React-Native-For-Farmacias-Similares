@@ -1,24 +1,32 @@
 import React from 'react';
-import { View, Text, TouchableWithoutFeedback, Animated, StyleSheet } from 'react-native';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
-import { darkTheme } from '../../theme/colors';
-import { usePressScale } from '../../utils/animations';
+import {
+  View,
+  Text,
+  TouchableWithoutFeedback,
+  Animated,
+  StyleSheet,
+} from 'react-native';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {faLightbulb} from '@fortawesome/free-solid-svg-icons';
+import {darkTheme} from '../../theme/colors';
+import {usePressScale} from '../../utils/animations';
+import {TIPS} from '../../utils/tips';
 
 type TipBannerProps = {
   onAction: () => void;
 };
 
-const TIPS = [
-  'Juega todos los dias para mantener tu racha y ganar bonificaciones extra.',
-  'Compite con tus amigos para subir en el ranking mundial.',
-  'Cada nivel desbloquea nuevos logros. Sigue jugando!',
-  'Intenta todos los juegos para maximizar tu puntaje total.',
-];
+// const TIPS = [
+//   'Juega todos los dias para mantener tu racha y ganar bonificaciones extra.',
+//   'Compite con tus amigos para subir en el ranking mundial.',
+//   'Cada nivel desbloquea nuevos logros. Sigue jugando!',
+//   'Intenta todos los juegos para maximizar tu puntaje total.',
+// ];
 
-const TipBanner: React.FC<TipBannerProps> = ({ onAction }) => {
-  const today = new Date().getDate();
-  const tip = TIPS[today % TIPS.length];
+const TipBanner: React.FC<TipBannerProps> = ({onAction}) => {
+  // const today = new Date().getDate();
+  // const tip = TIPS[today % TIPS.length];
+  const tip = TIPS[Math.floor(Math.random() * TIPS.length)].value;
   const btnPress = usePressScale();
 
   return (
@@ -33,9 +41,9 @@ const TipBanner: React.FC<TipBannerProps> = ({ onAction }) => {
       <TouchableWithoutFeedback
         onPress={onAction}
         onPressIn={btnPress.onPressIn}
-        onPressOut={btnPress.onPressOut}
-      >
-        <Animated.View style={[styles.action, { transform: [{ scale: btnPress.scale }] }]}>
+        onPressOut={btnPress.onPressOut}>
+        <Animated.View
+          style={[styles.action, {transform: [{scale: btnPress.scale}]}]}>
           <Text style={styles.actionText}>Vamos!</Text>
         </Animated.View>
       </TouchableWithoutFeedback>

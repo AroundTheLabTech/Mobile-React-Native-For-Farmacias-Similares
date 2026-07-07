@@ -1,5 +1,5 @@
 // src/context/ProfileContext.js
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { getScorePerGames, getUserInformation, getUserLast3MonthsInfo, getUserPicture, getUserPoints } from '@services/backend';  // Función que obtiene la imagen de perfil
 import { useAuth } from '../AuthContext';
 import { TScorePerGame, TUserInformation, TUserLast3MonthInfo, TUserPoints } from '../types/user';
@@ -110,20 +110,39 @@ export const UserProvider = ({ children }) => {
     }
   }, [uid, updateUserPoints]);
 
+  const patchUserInformation = useCallback((patch: Partial<TUserInformation>) => {
+    setUserInformation(prev => (prev ? { ...prev, ...patch } : prev));
+  }, []);
+
+  const refreshUserInformation = useCallback(async (): Promise<TUserInformation | null> => {
+    if (!uid) {
+      return null;
+    }
+    try {
+      const response = await getUserInformation(uid);
+      if (response) {
+        setUserInformation(response);
+      }
+      return response;
+    } catch {
+      return null;
+    }
+  }, [uid]);
+
   useEffect(() => {
     if (updateUserInformation) {
       async function fetchUserInformation() {
         try {
-          const response = await getUserInformation(uid);  // Obtener imagen de perfil
-          setUserInformation(response);  // Asumimos que `response.url` es la URL de la imagen
-        } catch (error) {
-          // console.error('Error fetching profile picture', error);
-          return;
+          const response = await getUserInformation(uid);
+          if (response) {
+            setUserInformation(response);
+          }
+        } finally {
+          setUpdateUserInformation(false);
         }
       }
 
       fetchUserInformation();
-      setUpdateUserInformation(false);  // Resetear el estado de actualización después de la carga
     }
   }, [uid, updateUserInformation]);
 
@@ -162,6 +181,8 @@ export const UserProvider = ({ children }) => {
           setUpdateUserPoints,
           userInformation,
           setUpdateUserInformation,
+          patchUserInformation,
+          refreshUserInformation,
         }
       }>
       {children}

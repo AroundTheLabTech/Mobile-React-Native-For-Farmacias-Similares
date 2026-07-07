@@ -290,27 +290,32 @@ export const getUserInformation = async (uid: string): Promise<TUserInformation 
   }
 };
 
-export const putUserInformation = async (uid: string, userInformation: TUpdateUserInformation): Promise<Record<string, string> | null> => {
-  try {
-    if (!uid) {
-      throw new Error('UID inválido');
-    }
-    const authHeaders = await getAuthHeaders();
-    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/user_information/${uid}`, {
-      method: 'PUT',
-      headers: { ...authHeaders, 'Accept': 'application/json' },
-      body: JSON.stringify(userInformation),
-    });
-
-    if (!response.ok) {
-      throw new Error('Error al actualizar la informacion del usuario');
-    }
-
-    const result = await response.json();
-    return result;
-  } catch (error) {
-    return null;
+export const putUserInformation = async (
+  uid: string,
+  userInformation: TUpdateUserInformation,
+): Promise<TBackResponse> => {
+  if (!uid) {
+    throw new Error('UID inválido');
   }
+
+  const authHeaders = await getAuthHeaders();
+  const response = await fetchWithTimeout(
+    `${BACKEND_BASE_URL}/users/user_information/${uid}`,
+    {
+      method: 'PUT',
+      headers: authHeaders,
+      body: JSON.stringify(userInformation),
+    },
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Error ${response.status} al actualizar la informacion del usuario${errorText ? `: ${errorText}` : ''}`,
+    );
+  }
+
+  return (await response.json()) as TBackResponse;
 };
 
 export const getUserPicture = async (uid: string): Promise<TUserPicture | null> => {
