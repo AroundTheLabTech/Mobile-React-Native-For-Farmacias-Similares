@@ -1,13 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, ScrollView, Image, Animated, TouchableWithoutFeedback, StatusBar, RefreshControl } from 'react-native';
-import { faStar, faFire, faTrophy, faGamepad } from '@fortawesome/free-solid-svg-icons';
+import { faStar, faFire, faTrophy, faGamepad, faPlay } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
-let LinearGradient: any = null;
-try {
-  LinearGradient = require('react-native-linear-gradient').default;
-} catch {
-  // Native module not linked yet
-}
 
 import { useAuth } from '../../AuthContext';
 import { useUser } from '../../services/UserContext';
@@ -238,22 +233,10 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
             onPressIn={ctaPress.onPressIn}
             onPressOut={ctaPress.onPressOut}
           >
-            {LinearGradient ? (
-              <LinearGradient
-                colors={['#7C3AED', '#06B6D4']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={dashboardStyles.ctaButton}
-              >
-                <Text style={{ fontSize: 20 }}>{'\u25B6\uFE0F'}</Text>
-                <Text style={dashboardStyles.ctaText}>Jugar Ahora</Text>
-              </LinearGradient>
-            ) : (
-              <View style={[dashboardStyles.ctaButton, { backgroundColor: darkTheme.purple }]}>
-                <Text style={{ fontSize: 20 }}>{'\u25B6\uFE0F'}</Text>
-                <Text style={dashboardStyles.ctaText}>Jugar Ahora</Text>
-              </View>
-            )}
+            <View style={[dashboardStyles.ctaButton, { backgroundColor: darkTheme.purple }]}>
+              <FontAwesomeIcon icon={faPlay} color="#FFFFFF" size={18} style={{ marginRight: 10 }} />
+              <Text style={dashboardStyles.ctaText}>Jugar Ahora</Text>
+            </View>
           </TouchableWithoutFeedback>
         </Animated.View>
 
@@ -261,7 +244,7 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
         {topUsers.length > 0 && (
           <Animated.View style={[dashboardStyles.glassCard, { opacity: leaderboardAnim.opacity, transform: leaderboardAnim.transform }]}>
             <Text style={dashboardStyles.sectionTitle}>
-              {'\uD83C\uDFC6'} Ranking Top 5
+              <FontAwesomeIcon icon={faTrophy} color="#FFD700" size={16} style={{ marginRight: 8 }} /> Ranking Top 5
             </Text>
             <MiniLeaderboard
               users={topUsers}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SafeAreaView, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -13,20 +13,35 @@ import SettingsStack from './src/screens/SettingsScreen/SettingsStack';
 import GamesStack from './src/screens/GamesScreen/GamesStack';
 
 //Contexto AuthContext
-import { AuthProvider } from './src/AuthContext';
+import { AuthProvider, useAuth } from './src/AuthContext';
 
 import { UserProvider } from './src/services/UserContext';
+import { setOnSessionExpiredCallback } from './src/services/backend';
 
 // Crea los navegadores
 const Stack = createStackNavigator();
 
-export default function App() {
+/** Registra el callback de sesión expirada.
+ *  Debe vivir DENTRO del AuthProvider para poder usar useAuth(). */
+function SessionExpiredHandler() {
+  const { logout } = useAuth();
 
+  useEffect(() => {
+    setOnSessionExpiredCallback(() => {
+      logout();
+    });
+  }, [logout]);
+
+  return null;
+}
+
+export default function App() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <NavigationContainer>
           <AuthProvider>
+            <SessionExpiredHandler />
             <UserProvider>
               <Stack.Navigator initialRouteName="Login">
                 <Stack.Screen

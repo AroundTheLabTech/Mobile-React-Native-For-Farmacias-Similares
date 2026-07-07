@@ -1,20 +1,49 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { View, Text, TouchableOpacity, TouchableWithoutFeedback, ScrollView, Image, TextInput, Alert, StatusBar, Animated } from 'react-native';
+import React, {useEffect, useState, useCallback, useRef} from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  ScrollView,
+  Image,
+  TextInput,
+  Alert,
+  StatusBar,
+  Animated,
+} from 'react-native';
 import SettingsStyles from './style/SettingsStyles';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faArrowLeft, faPen, faCheck, faXmark, faChevronRight } from '@fortawesome/free-solid-svg-icons';
-import { TGameCard, TUpdateUserInformation } from '../../types/user';
-import { getGameCard, updateUserProfilePicture, putUserInformation } from '../../services/backend';
-import { useAuth } from '../../AuthContext';
-import { formarGameCardNumber, formatNumber } from '../../utils/helpers';
-import { useUser } from '@services/UserContext';
-import { AVATARS, getAvatarSource } from '../../utils/avatars';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {
+  faArrowLeft,
+  faPen,
+  faCheck,
+  faXmark,
+  faChevronRight,
+  faClipboardList,
+} from '@fortawesome/free-solid-svg-icons';
+import {TGameCard} from '../../types/user';
+import {
+  getGameCard,
+  updateUserProfilePicture,
+  putUserInformation,
+} from '../../services/backend';
+import {useAuth} from '../../AuthContext';
+import {formarGameCardNumber, formatNumber} from '../../utils/helpers';
+import {
+  toEditForm,
+  toUpdatePayload,
+  payloadToUserPatch,
+} from '../../utils/userInformationMappers';
+import {useUser} from '@services/UserContext';
+import {AVATARS, getAvatarSource} from '../../utils/avatars';
 import Loader from '@components/LoaderComponent/Loader';
-import { darkTheme } from '../../theme/colors';
-import { useFadeInUp, usePressScale } from '../../utils/animations';
+import GameCardChip from '@components/GameCardChip/GameCardChip';
+import {darkTheme} from '../../theme/colors';
+import {useFadeInUp, usePressScale} from '../../utils/animations';
+import {getUserLevel} from '../../utils/levels';
 
-const Settings = ({ navigation }) => {
-  const { uid, logout } = useAuth();
+const Settings = ({navigation}) => {
+  const {uid, logout} = useAuth();
   const {
     profilePicture,
     setUpdateProfilePicture,
@@ -22,6 +51,8 @@ const Settings = ({ navigation }) => {
     setUpdateUserPoints,
     userInformation,
     setUpdateUserInformation,
+    patchUserInformation,
+    refreshUserInformation,
   } = useUser();
 
   const [loading, setLoading] = useState(true);
@@ -34,6 +65,7 @@ const Settings = ({ navigation }) => {
   const [avatarSaved, setAvatarSaved] = useState(false);
   const [savingAvatar, setSavingAvatar] = useState(false);
   const [infoSaved, setInfoSaved] = useState(false);
+  const [savingInfo, setSavingInfo] = useState(false);
   const toastOpacity = useRef(new Animated.Value(0)).current;
   const infoToastOpacity = useRef(new Animated.Value(0)).current;
 
@@ -73,7 +105,9 @@ const Settings = ({ navigation }) => {
         const cardRes = await getGameCard(uid);
         setGameCard(cardRes);
       } catch (error) {
-        if (__DEV__) console.error('Error fetching game card:', error);
+        if (__DEV__) {
+          console.error('Error fetching game card:', error);
+        }
       } finally {
         setLoading(false);
       }
@@ -88,43 +122,105 @@ const Settings = ({ navigation }) => {
     }
   }, [profilePicture]);
 
-  // Sync edit fields from userInformation
-  useEffect(() => {
-    if (userInformation) {
-      setEditName(userInformation.name || '');
-      setEditLocation(userInformation.state || '');
-      setEditAge(userInformation.age?.toString() || '');
-    }
+  const applyEditFormFromUser = useCallback(() => {
+    const form = toEditForm(userInformation);
+    setEditName(form.name);
+    setEditLocation(form.location);
+    setEditAge(form.age);
   }, [userInformation]);
 
+  const showInfoSavedToast = useCallback(() => {
+    setInfoSaved(true);
+    Animated.sequence([
+      Animated.timing(infoToastOpacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.delay(2000),
+      Animated.timing(infoToastOpacity, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start(() => setInfoSaved(false));
+  }, [infoToastOpacity]);
+
+  const startEdit = useCallback(() => {
+    applyEditFormFromUser();
+    setEditMode(true);
+  }, [applyEditFormFromUser]);
+
+  const cancelEdit = useCallback(() => {
+    applyEditFormFromUser();
+    setEditMode(false);
+  }, [applyEditFormFromUser]);
+
+  // Sync edit fields from userInformation when not editing
+  useEffect(() => {
+    if (userInformation && !editMode) {
+      applyEditFormFromUser();
+    }
+  }, [userInformation, editMode, applyEditFormFromUser]);
+
   const handleSaveInfo = useCallback(async () => {
-    if (!editName.trim() || !editLocation.trim() || !editAge.trim() || Number(editAge) <= 0) {
+    if (!editName.trim() || !editLocation.trim() || !editAge.trim()) {
+      Alert.alert('Campos incompletos', 'Completa nombre, ubicacion y edad.');
       return;
     }
-    const data: TUpdateUserInformation = {
-      name: editName,
-      ubication: editLocation,
-      age: Number(editAge),
-    };
-    try {
-      const response = await putUserInformation(uid, data);
-      if (response?.message) {
-        setUpdateUserInformation(true);
-        setInfoSaved(true);
-        Animated.sequence([
-          Animated.timing(infoToastOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
-          Animated.delay(2000),
-          Animated.timing(infoToastOpacity, { toValue: 0, duration: 300, useNativeDriver: true }),
-        ]).start(() => setInfoSaved(false));
-      }
-    } catch (error) {
-      if (__DEV__) console.error('Error saving user info:', error);
+
+    const age = Number(editAge);
+    if (isNaN(age) || age <= 0 || age > 120) {
+      Alert.alert('Edad invalida', 'Ingresa una edad valida entre 1 y 120.');
+      return;
     }
-    setEditMode(false);
-  }, [editName, editLocation, editAge, uid, setUpdateUserInformation]);
+
+    if (!uid) {
+      Alert.alert('Error', 'No se pudo identificar al usuario.');
+      return;
+    }
+
+    const data = toUpdatePayload(editName, editLocation, editAge);
+
+    setSavingInfo(true);
+    try {
+      await putUserInformation(uid, data);
+      const patch = payloadToUserPatch(data);
+      patchUserInformation(patch);
+      const fresh = await refreshUserInformation();
+
+      if (
+        fresh?.name !== patch.name ||
+        fresh?.state !== patch.state ||
+        fresh?.age !== patch.age
+      ) {
+        patchUserInformation(patch);
+      }
+
+      setEditMode(false);
+      showInfoSavedToast();
+    } catch (error) {
+      Alert.alert(
+        'Error al guardar',
+        error instanceof Error ? error.message : 'Intenta de nuevo.',
+      );
+    } finally {
+      setSavingInfo(false);
+    }
+  }, [
+    editName,
+    editLocation,
+    editAge,
+    uid,
+    patchUserInformation,
+    refreshUserInformation,
+    showInfoSavedToast,
+  ]);
 
   async function handleSaveAvatar() {
-    if (!selectedAvatar || savingAvatar) return;
+    if (!selectedAvatar || savingAvatar) {
+      return;
+    }
     setSavingAvatar(true);
     try {
       const response = await updateUserProfilePicture(uid, selectedAvatar);
@@ -133,37 +229,43 @@ const Settings = ({ navigation }) => {
         // Show success toast with animation
         setAvatarSaved(true);
         Animated.sequence([
-          Animated.timing(toastOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+          Animated.timing(toastOpacity, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          }),
           Animated.delay(2000),
-          Animated.timing(toastOpacity, { toValue: 0, duration: 300, useNativeDriver: true }),
+          Animated.timing(toastOpacity, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }),
         ]).start(() => setAvatarSaved(false));
       }
     } catch (error) {
-      if (__DEV__) console.error('Error updating avatar:', error);
+      if (__DEV__) {
+        console.error('Error updating avatar:', error);
+      }
     } finally {
       setSavingAvatar(false);
     }
   }
 
   function handleLogout() {
-    Alert.alert(
-      'Cerrar Sesion',
-      '¿Estas seguro que quieres cerrar sesion?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Cerrar Sesion',
-          style: 'destructive',
-          onPress: async () => {
-            await logout();
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'Login' }],
-            });
-          },
+    Alert.alert('Cerrar Sesion', '¿Estas seguro que quieres cerrar sesion?', [
+      {text: 'Cancelar', style: 'cancel'},
+      {
+        text: 'Cerrar Sesion',
+        style: 'destructive',
+        onPress: async () => {
+          await logout();
+          navigation.reset({
+            index: 0,
+            routes: [{name: 'Login'}],
+          });
         },
-      ],
-    );
+      },
+    ]);
   }
 
   if (loading) {
@@ -177,40 +279,69 @@ const Settings = ({ navigation }) => {
       <ScrollView contentContainerStyle={SettingsStyles.scrollContent}>
         {/* ── Header ── */}
         <View style={SettingsStyles.header}>
-          <TouchableOpacity style={SettingsStyles.headerBackButton} onPress={() => navigation.goBack()}>
+          <TouchableOpacity
+            style={SettingsStyles.headerBackButton}
+            onPress={() => navigation.goBack()}>
             <FontAwesomeIcon icon={faArrowLeft} size={18} color="#fff" />
           </TouchableOpacity>
           <Text style={SettingsStyles.headerTitle}>Configuracion</Text>
         </View>
 
         {/* ── Profile Hero ── */}
-        <Animated.View style={[SettingsStyles.profileHero, { opacity: profileAnim.opacity, transform: profileAnim.transform }]}>
+        <Animated.View
+          style={[
+            SettingsStyles.profileHero,
+            {opacity: profileAnim.opacity, transform: profileAnim.transform},
+          ]}>
           <View style={SettingsStyles.avatarContainer}>
-            <Image source={getAvatarSource(profilePicture)} style={SettingsStyles.avatarImage} />
+            <Image
+              source={getAvatarSource(profilePicture)}
+              style={SettingsStyles.avatarImage}
+            />
           </View>
-          <Text style={SettingsStyles.userName}>{userInformation?.name || 'Jugador'}</Text>
-          <Text style={SettingsStyles.userEmail}>{userInformation?.email || ''}</Text>
+          <Text style={SettingsStyles.userName}>
+            {userInformation?.name || 'Jugador'}
+          </Text>
+          <Text style={SettingsStyles.userEmail}>
+            {userInformation?.email || ''}
+          </Text>
           <View style={SettingsStyles.levelBadge}>
-            <Text style={{ color: '#fff', fontSize: 12, fontWeight: '600' }}>Nivel 1</Text>
+            <Text style={{color: '#fff', fontSize: 12, fontWeight: '600'}}>
+              Nivel {getUserLevel(userPoints?.score_total || 0).level}
+            </Text>
           </View>
         </Animated.View>
 
         {/* ── Game Card ── */}
-        <Animated.View style={[SettingsStyles.gameCardOuter, { opacity: cardAnim.opacity, transform: cardAnim.transform }]}>
+        <Animated.View
+          style={[
+            SettingsStyles.gameCardOuter,
+            {opacity: cardAnim.opacity, transform: cardAnim.transform},
+          ]}>
           <View style={SettingsStyles.gameCard}>
             <View>
               <Text style={SettingsStyles.gameCardLabel}>GAME CARD</Text>
-              <View style={SettingsStyles.gameCardChip} />
+              <View style={SettingsStyles.gameCardChipContainer}>
+                <GameCardChip />
+              </View>
             </View>
-            <Text style={SettingsStyles.gameCardName}>{gameCard?.name || userInformation?.name || 'Jugador'}</Text>
+            <Text style={SettingsStyles.gameCardName}>
+              {userInformation?.name || 'Jugador'}
+            </Text>
             <View style={SettingsStyles.gameCardBottom}>
               <Text style={SettingsStyles.gameCardNumber}>
-                {formarGameCardNumber(gameCard?.card_number) || '0000-0000-0000'}
+                {formarGameCardNumber(gameCard?.card_number) ||
+                  '0000-0000-0000'}
               </Text>
               <View style={SettingsStyles.gameCardScoreContainer}>
-                <Image source={require('../../../img/iconos/moneda.png')} style={SettingsStyles.coinIcon} />
+                <Image
+                  source={require('../../../img/iconos/moneda.png')}
+                  style={SettingsStyles.coinIcon}
+                />
                 <Text style={SettingsStyles.gameCardScore}>
-                  {userPoints?.score_total ? formatNumber(userPoints.score_total) : '0'}
+                  {userPoints?.score_total
+                    ? formatNumber(userPoints.score_total)
+                    : '0'}
                 </Text>
               </View>
             </View>
@@ -218,19 +349,40 @@ const Settings = ({ navigation }) => {
         </Animated.View>
 
         {/* ── Informacion Personal ── */}
-        <Animated.View style={[SettingsStyles.sectionCard, { opacity: infoAnim.opacity, transform: infoAnim.transform }]}>
+        <Animated.View
+          style={[
+            SettingsStyles.sectionCard,
+            {opacity: infoAnim.opacity, transform: infoAnim.transform},
+          ]}>
           <View style={SettingsStyles.sectionHeader}>
-            <Text style={SettingsStyles.sectionTitle}>Informacion Personal</Text>
+            <Text style={SettingsStyles.sectionTitle}>
+              Informacion Personal
+            </Text>
             {!editMode ? (
-              <TouchableOpacity style={SettingsStyles.iconButton} onPress={() => setEditMode(true)}>
-                <FontAwesomeIcon icon={faPen} size={14} color="rgba(255,255,255,0.7)" />
+              <TouchableOpacity
+                style={SettingsStyles.iconButton}
+                onPress={startEdit}>
+                <FontAwesomeIcon
+                  icon={faPen}
+                  size={14}
+                  color="rgba(255,255,255,0.7)"
+                />
               </TouchableOpacity>
             ) : (
               <View style={SettingsStyles.editButtonsRow}>
-                <TouchableOpacity style={SettingsStyles.iconButton} onPress={() => setEditMode(false)}>
+                <TouchableOpacity
+                  style={SettingsStyles.iconButton}
+                  onPress={cancelEdit}
+                  disabled={savingInfo}>
                   <FontAwesomeIcon icon={faXmark} size={16} color="#EF4444" />
                 </TouchableOpacity>
-                <TouchableOpacity style={SettingsStyles.iconButton} onPress={handleSaveInfo}>
+                <TouchableOpacity
+                  style={[
+                    SettingsStyles.iconButton,
+                    savingInfo && {opacity: 0.5},
+                  ]}
+                  onPress={handleSaveInfo}
+                  disabled={savingInfo}>
                   <FontAwesomeIcon icon={faCheck} size={16} color="#10B981" />
                 </TouchableOpacity>
               </View>
@@ -251,12 +403,16 @@ const Settings = ({ navigation }) => {
                     placeholderTextColor="rgba(255,255,255,0.3)"
                   />
                 ) : (
-                  <Text style={SettingsStyles.infoValue}>{userInformation?.name || '-'}</Text>
+                  <Text style={SettingsStyles.infoValue}>
+                    {userInformation?.name || '-'}
+                  </Text>
                 )}
               </View>
               <View style={SettingsStyles.infoItem}>
                 <Text style={SettingsStyles.infoLabel}>Email</Text>
-                <Text style={SettingsStyles.infoValue}>{userInformation?.email || '-'}</Text>
+                <Text style={SettingsStyles.infoValue}>
+                  {userInformation?.email || '-'}
+                </Text>
               </View>
             </View>
 
@@ -272,7 +428,9 @@ const Settings = ({ navigation }) => {
                     placeholderTextColor="rgba(255,255,255,0.3)"
                   />
                 ) : (
-                  <Text style={SettingsStyles.infoValue}>{userInformation?.state || '-'}</Text>
+                  <Text style={SettingsStyles.infoValue}>
+                    {userInformation?.state || '-'}
+                  </Text>
                 )}
               </View>
               <View style={SettingsStyles.infoItem}>
@@ -286,7 +444,9 @@ const Settings = ({ navigation }) => {
                     placeholderTextColor="rgba(255,255,255,0.3)"
                   />
                 ) : (
-                  <Text style={SettingsStyles.infoValue}>{userInformation?.age || '-'}</Text>
+                  <Text style={SettingsStyles.infoValue}>
+                    {userInformation?.age || '-'}
+                  </Text>
                 )}
               </View>
             </View>
@@ -295,52 +455,62 @@ const Settings = ({ navigation }) => {
 
         {/* Info Save Toast */}
         {infoSaved && (
-          <Animated.View style={{
-            opacity: infoToastOpacity,
-            backgroundColor: 'rgba(16,185,129,0.15)',
-            borderWidth: 1,
-            borderColor: 'rgba(16,185,129,0.30)',
-            borderRadius: 12,
-            paddingVertical: 10,
-            paddingHorizontal: 16,
-            marginTop: 8,
-            marginHorizontal: 16,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-          }}>
+          <Animated.View
+            style={{
+              opacity: infoToastOpacity,
+              backgroundColor: 'rgba(16,185,129,0.15)',
+              borderWidth: 1,
+              borderColor: 'rgba(16,185,129,0.30)',
+              borderRadius: 12,
+              paddingVertical: 10,
+              paddingHorizontal: 16,
+              marginTop: 8,
+              marginHorizontal: 16,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+            }}>
             <FontAwesomeIcon icon={faCheck} size={14} color="#10B981" />
-            <Text style={{ color: '#10B981', fontWeight: '600', fontSize: 14 }}>
+            <Text style={{color: '#10B981', fontWeight: '600', fontSize: 14}}>
               Informacion actualizada
             </Text>
           </Animated.View>
         )}
 
         {/* ── Elige tu Avatar ── */}
-        <Animated.View style={[SettingsStyles.sectionCard, { opacity: avatarAnim.opacity, transform: avatarAnim.transform }]}>
+        <Animated.View
+          style={[
+            SettingsStyles.sectionCard,
+            {opacity: avatarAnim.opacity, transform: avatarAnim.transform},
+          ]}>
           <View style={SettingsStyles.sectionHeader}>
             <Text style={SettingsStyles.sectionTitle}>Elige tu Avatar</Text>
           </View>
 
           <View style={SettingsStyles.avatarsGrid}>
-            {AVATARS.map((avatar, idx) => {
+            {AVATARS.map((avatar, _idx) => {
               const isSelected = avatar.backendPath === selectedAvatar;
               return (
                 <TouchableWithoutFeedback
                   key={avatar.id}
-                  onPress={() => setSelectedAvatar(avatar.backendPath)}
-                >
+                  onPress={() => setSelectedAvatar(avatar.backendPath)}>
                   <Animated.View
                     style={[
                       SettingsStyles.avatarOption,
                       isSelected && SettingsStyles.avatarOptionSelected,
-                    ]}
-                  >
-                    <Image source={avatar.source} style={SettingsStyles.avatarOptionImage} />
+                    ]}>
+                    <Image
+                      source={avatar.source}
+                      style={SettingsStyles.avatarOptionImage}
+                    />
                     {isSelected && (
                       <View style={SettingsStyles.selectedCheck}>
-                        <Text style={SettingsStyles.selectedCheckText}>✓</Text>
+                        <FontAwesomeIcon
+                          icon={faCheck}
+                          size={10}
+                          color="#fff"
+                        />
                       </View>
                     )}
                   </Animated.View>
@@ -353,9 +523,13 @@ const Settings = ({ navigation }) => {
             onPress={handleSaveAvatar}
             onPressIn={savePress.onPressIn}
             onPressOut={savePress.onPressOut}
-            disabled={savingAvatar}
-          >
-            <Animated.View style={[SettingsStyles.saveAvatarButton, savingAvatar && { opacity: 0.6 }, { transform: [{ scale: savePress.scale }] }]}>
+            disabled={savingAvatar}>
+            <Animated.View
+              style={[
+                SettingsStyles.saveAvatarButton,
+                savingAvatar && {opacity: 0.6},
+                {transform: [{scale: savePress.scale}]},
+              ]}>
               <Text style={SettingsStyles.saveAvatarButtonText}>
                 {savingAvatar ? 'Guardando...' : 'Guardar Avatar'}
               </Text>
@@ -364,22 +538,23 @@ const Settings = ({ navigation }) => {
 
           {/* Success Toast */}
           {avatarSaved && (
-            <Animated.View style={{
-              opacity: toastOpacity,
-              backgroundColor: 'rgba(16,185,129,0.15)',
-              borderWidth: 1,
-              borderColor: 'rgba(16,185,129,0.30)',
-              borderRadius: 12,
-              paddingVertical: 10,
-              paddingHorizontal: 16,
-              marginTop: 12,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-            }}>
+            <Animated.View
+              style={{
+                opacity: toastOpacity,
+                backgroundColor: 'rgba(16,185,129,0.15)',
+                borderWidth: 1,
+                borderColor: 'rgba(16,185,129,0.30)',
+                borderRadius: 12,
+                paddingVertical: 10,
+                paddingHorizontal: 16,
+                marginTop: 12,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+              }}>
               <FontAwesomeIcon icon={faCheck} size={14} color="#10B981" />
-              <Text style={{ color: '#10B981', fontWeight: '600', fontSize: 14 }}>
+              <Text style={{color: '#10B981', fontWeight: '600', fontSize: 14}}>
                 Avatar guardado exitosamente
               </Text>
             </Animated.View>
@@ -387,30 +562,51 @@ const Settings = ({ navigation }) => {
         </Animated.View>
 
         {/* ── Cuenta ── */}
-        <Animated.View style={[SettingsStyles.sectionCard, { opacity: accountAnim.opacity, transform: accountAnim.transform }]}>
+        <Animated.View
+          style={[
+            SettingsStyles.sectionCard,
+            {opacity: accountAnim.opacity, transform: accountAnim.transform},
+          ]}>
           <View style={SettingsStyles.sectionHeader}>
             <Text style={SettingsStyles.sectionTitle}>Cuenta</Text>
           </View>
 
-          <TouchableOpacity style={SettingsStyles.settingItem} onPress={() => navigation.navigate('ReportProblem')}>
+          <TouchableOpacity
+            style={SettingsStyles.settingItem}
+            onPress={() => navigation.navigate('ReportProblem')}>
             <View style={SettingsStyles.settingInfo}>
               <View style={SettingsStyles.settingIconBox}>
-                <Text style={SettingsStyles.sectionIcon}>📝</Text>
+                <FontAwesomeIcon
+                  icon={faClipboardList}
+                  size={18}
+                  color={darkTheme.purple}
+                />
               </View>
               <View style={SettingsStyles.settingTextContainer}>
-                <Text style={SettingsStyles.settingName}>Reportar un problema</Text>
-                <Text style={SettingsStyles.settingDesc}>Ayudanos a mejorar</Text>
+                <Text style={SettingsStyles.settingName}>
+                  Reportar un problema
+                </Text>
+                <Text style={SettingsStyles.settingDesc}>
+                  Ayudanos a mejorar
+                </Text>
               </View>
             </View>
-            <FontAwesomeIcon icon={faChevronRight} size={14} color="rgba(255,255,255,0.3)" />
+            <FontAwesomeIcon
+              icon={faChevronRight}
+              size={14}
+              color="rgba(255,255,255,0.3)"
+            />
           </TouchableOpacity>
 
           <TouchableWithoutFeedback
             onPress={handleLogout}
             onPressIn={logoutPress.onPressIn}
-            onPressOut={logoutPress.onPressOut}
-          >
-            <Animated.View style={[SettingsStyles.logoutButton, { transform: [{ scale: logoutPress.scale }] }]}>
+            onPressOut={logoutPress.onPressOut}>
+            <Animated.View
+              style={[
+                SettingsStyles.logoutButton,
+                {transform: [{scale: logoutPress.scale}]},
+              ]}>
               <Text style={SettingsStyles.logoutButtonText}>Cerrar Sesion</Text>
             </Animated.View>
           </TouchableWithoutFeedback>

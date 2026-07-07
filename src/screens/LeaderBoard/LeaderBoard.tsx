@@ -1,19 +1,38 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { ScrollView, View, Text, Dimensions, PixelRatio, TouchableOpacity, StatusBar, Animated } from 'react-native';
+import React, {useCallback, useEffect, useState} from 'react';
+import {
+  ScrollView,
+  View,
+  Text,
+  Dimensions,
+  PixelRatio,
+  TouchableOpacity,
+  StatusBar,
+  Animated,
+} from 'react-native';
 import LeaderBoardStyles from './style/LeaderBoardStyles';
 import LeaderBoardCard from '@components/LeaderBoardCardComponents/LeaderBoardCard';
 import PodiumSvg from '@components/PodiumChartComponent/PodiumSvg';
-import { getTopTwentyMonthly } from '@services/backend';
-import { TLeaderBoard } from 'src/types/user';
-import { calculatePercent, calculateScreenSizeInInches, splitTopTwenty } from '../../utils/helpers';
+import {getTopTwentyMonthly} from '@services/backend';
+import {TLeaderBoard} from 'src/types/user';
+import {
+  calculatePercent,
+  calculateScreenSizeInInches,
+  splitTopTwenty,
+} from '../../utils/helpers';
 import Loader from '@components/LoaderComponent/Loader';
-import { useAuth } from '../../AuthContext';
+import {useAuth} from '../../AuthContext';
 import PodiumSvg9Inches from '@components/PodiumChartComponent/PodiumSvg9Inches';
-import { darkTheme } from '../../theme/colors';
-import { useFadeInUp } from '../../utils/animations';
+import {darkTheme} from '../../theme/colors';
+import {useFadeInUp} from '../../utils/animations';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+
+const TAB_BAR_HEIGHT = 56;
 
 const LeaderBoard: React.FC = () => {
-  const { uid } = useAuth();
+  const {uid} = useAuth();
+
+  const insets = useSafeAreaInsets();
+  const bottomPadding = insets.bottom + TAB_BAR_HEIGHT;
 
   const [orientation, setOrientation] = useState('portrait');
   const [topThree, setTopThree] = useState<TLeaderBoard[]>();
@@ -26,11 +45,14 @@ const LeaderBoard: React.FC = () => {
 
   useEffect(() => {
     const updateOrientation = () => {
-      const { width, height } = Dimensions.get('window');
+      const {width, height} = Dimensions.get('window');
       setOrientation(width > height ? 'landscape' : 'portrait');
     };
 
-    const subscription = Dimensions.addEventListener('change', updateOrientation);
+    const subscription = Dimensions.addEventListener(
+      'change',
+      updateOrientation,
+    );
 
     updateOrientation();
 
@@ -53,10 +75,14 @@ const LeaderBoard: React.FC = () => {
         setTopThree(tops.topThree);
         setTopTwenty(tops.topRest);
 
-        const filterUserTop = tops.all.filter((player) => player.uid === uid);
+        const filterUserTop = tops.all.filter(player => player.uid === uid);
 
         if (filterUserTop.length > 0) {
-          const userTopPercent = calculatePercent(filterUserTop[0].position, 0, tops.all.length);
+          const userTopPercent = calculatePercent(
+            filterUserTop[0].position,
+            0,
+            tops.all.length,
+          );
           setUserPercent(Math.ceil(userTopPercent));
           setUserPosition(filterUserTop[0]);
         } else {
@@ -97,7 +123,11 @@ const LeaderBoard: React.FC = () => {
 
   if (loading) {
     return (
-      <View style={[LeaderBoardStyles.screen, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View
+        style={[
+          LeaderBoardStyles.screen,
+          {justifyContent: 'center', alignItems: 'center'},
+        ]}>
         <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />
         <Loader visible />
       </View>
@@ -110,13 +140,20 @@ const LeaderBoard: React.FC = () => {
     if (!topTwenty || topTwenty.length === 0) {
       return (
         <View style={LeaderBoardStyles.emptyState}>
-          <Text style={LeaderBoardStyles.emptyStateText}>No hay datos de clasificación disponibles</Text>
+          <Text style={LeaderBoardStyles.emptyStateText}>
+            No hay datos de clasificación disponibles
+          </Text>
         </View>
       );
     }
 
     return topTwenty.map((player: TLeaderBoard, idx: number) => (
-      <LeaderBoardCard key={player.uid} player={player} isCurrentUser={player.uid === uid} index={idx} />
+      <LeaderBoardCard
+        key={player.uid}
+        player={player}
+        isCurrentUser={player.uid === uid}
+        index={idx}
+      />
     ));
   };
 
@@ -125,65 +162,117 @@ const LeaderBoard: React.FC = () => {
       <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />
       <View style={LeaderBoardStyles.glowPurple} />
       <View style={LeaderBoardStyles.glowCyan} />
-      <ScrollView style={LeaderBoardStyles.containerScroll}>
-        <View style={orientation === 'landscape' ? LeaderBoardStyles.containerFull : null}>
-          <View style={orientation === 'landscape' ? LeaderBoardStyles.userLeaderboard : null}>
-            <Animated.View style={[LeaderBoardStyles.containerTitle, { opacity: headerAnim.opacity, transform: headerAnim.transform }]}>
+      <ScrollView
+        style={LeaderBoardStyles.containerScroll}
+        contentContainerStyle={{paddingBottom: bottomPadding}}
+        showsVerticalScrollIndicator={false}>
+        <View
+          style={
+            orientation === 'landscape' ? LeaderBoardStyles.containerFull : null
+          }>
+          <View
+            style={
+              orientation === 'landscape'
+                ? LeaderBoardStyles.userLeaderboard
+                : null
+            }>
+            <Animated.View
+              style={[
+                LeaderBoardStyles.containerTitle,
+                {opacity: headerAnim.opacity, transform: headerAnim.transform},
+              ]}>
               <Text style={LeaderBoardStyles.title}>Leaderboard</Text>
               <View style={LeaderBoardStyles.filterContainer}>
                 <TouchableOpacity
                   style={[
                     LeaderBoardStyles.filterButton,
-                    viewMode === 'monthly' && LeaderBoardStyles.filterButtonActive,
+                    viewMode === 'monthly' &&
+                      LeaderBoardStyles.filterButtonActive,
                   ]}
-                  onPress={() => setViewMode('monthly')}
-                >
-                  <Text style={[
-                    LeaderBoardStyles.filterText,
-                    viewMode === 'monthly' && LeaderBoardStyles.filterTextActive,
-                  ]}>MENSUAL</Text>
+                  onPress={() => setViewMode('monthly')}>
+                  <Text
+                    style={[
+                      LeaderBoardStyles.filterText,
+                      viewMode === 'monthly' &&
+                        LeaderBoardStyles.filterTextActive,
+                    ]}>
+                    MENSUAL
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[
                     LeaderBoardStyles.filterButton,
-                    viewMode === 'general' && LeaderBoardStyles.filterButtonActive,
+                    viewMode === 'general' &&
+                      LeaderBoardStyles.filterButtonActive,
                   ]}
-                  onPress={() => setViewMode('general')}
-                >
-                  <Text style={[
-                    LeaderBoardStyles.filterText,
-                    viewMode === 'general' && LeaderBoardStyles.filterTextActive,
-                  ]}>GENERAL</Text>
+                  onPress={() => setViewMode('general')}>
+                  <Text
+                    style={[
+                      LeaderBoardStyles.filterText,
+                      viewMode === 'general' &&
+                        LeaderBoardStyles.filterTextActive,
+                    ]}>
+                    GENERAL
+                  </Text>
                 </TouchableOpacity>
               </View>
             </Animated.View>
-            <Animated.View style={[LeaderBoardStyles.containerPosition, { opacity: headerAnim.opacity, transform: headerAnim.transform }]}>
-              {userPosition?.position && userPosition?.position > 0 &&
-                <Text style={LeaderBoardStyles.positionNumber}>#{userPosition?.position}</Text>
-              }
-              {userPercent && userPercent > 0 ?
-                <Text style={LeaderBoardStyles.positionDescription}>Tu estas entre el {userPercent}% de mejores jugadores</Text>
-                :
-                <Text style={LeaderBoardStyles.positionDescription}>No estas en el top 20, pero recuerda que puedes mejorar jugando</Text>
-              }
+            <Animated.View
+              style={[
+                LeaderBoardStyles.containerPosition,
+                {opacity: headerAnim.opacity, transform: headerAnim.transform},
+              ]}>
+              {userPosition?.position && userPosition?.position > 0 && (
+                <Text style={LeaderBoardStyles.positionNumber}>
+                  #{userPosition?.position}
+                </Text>
+              )}
+              {userPercent && userPercent > 0 ? (
+                <Text style={LeaderBoardStyles.positionDescription}>
+                  Tu estas entre el {userPercent}% de mejores jugadores
+                </Text>
+              ) : (
+                <Text style={LeaderBoardStyles.positionDescription}>
+                  No estas en el top 20, pero recuerda que puedes mejorar
+                  jugando
+                </Text>
+              )}
             </Animated.View>
             {topThree && topThree.length > 2 && (
-              <Animated.View style={{ opacity: podiumAnim.opacity, transform: podiumAnim.transform }}>
-                {sizeInInches && Number(sizeInInches) > 9 ?
-                  <PodiumSvg9Inches top3Data={topThree} /> :
-                  <PodiumSvg top3Data={topThree} />}
+              <Animated.View
+                style={{
+                  opacity: podiumAnim.opacity,
+                  transform: podiumAnim.transform,
+                }}>
+                {sizeInInches && Number(sizeInInches) > 9 ? (
+                  <PodiumSvg9Inches top3Data={topThree} />
+                ) : (
+                  <PodiumSvg top3Data={topThree} />
+                )}
               </Animated.View>
             )}
           </View>
           {orientation === 'landscape' ? (
-            <View style={sizeInInches && Number(sizeInInches) > 9 ? LeaderBoardStyles.containerPlayersList9Inches : LeaderBoardStyles.containerPlayersList}>
-              <ScrollView style={LeaderBoardStyles.playersList} scrollEnabled={true} nestedScrollEnabled={true}>
+            <View
+              style={
+                sizeInInches && Number(sizeInInches) > 9
+                  ? LeaderBoardStyles.containerPlayersList9Inches
+                  : LeaderBoardStyles.containerPlayersList
+              }>
+              <ScrollView
+                style={LeaderBoardStyles.playersList}
+                scrollEnabled={true}
+                nestedScrollEnabled={true}>
                 {renderPlayersList()}
                 <View style={LeaderBoardStyles.space} />
               </ScrollView>
             </View>
           ) : (
-            <Animated.View style={[LeaderBoardStyles.playersSection, { opacity: listAnim.opacity, transform: listAnim.transform }]}>
+            <Animated.View
+              style={[
+                LeaderBoardStyles.playersSection,
+                {opacity: listAnim.opacity, transform: listAnim.transform},
+              ]}>
               {renderPlayersList()}
             </Animated.View>
           )}

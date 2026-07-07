@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Image, TouchableWithoutFeedback, Animated, StyleSheet } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faMedal, faTrophy } from '@fortawesome/free-solid-svg-icons';
 import { darkTheme } from '../../theme/colors';
 import { TTopTwenty } from '../../types/user';
 import { getAvatarSource } from '../../utils/avatars';
@@ -13,10 +13,10 @@ type MiniLeaderboardProps = {
   onViewMore: () => void;
 };
 
-const MEDAL_CONFIG: Record<number, { emoji: string; color: string; glowColor: string }> = {
-  1: { emoji: '\u{1F947}', color: darkTheme.gold, glowColor: 'rgba(255,215,0,0.15)' },
-  2: { emoji: '\u{1F948}', color: darkTheme.silver, glowColor: 'rgba(192,192,192,0.12)' },
-  3: { emoji: '\u{1F949}', color: darkTheme.bronze, glowColor: 'rgba(205,127,50,0.12)' },
+const MEDAL_CONFIG: Record<number, { icon: any; color: string; glowColor: string }> = {
+  1: { icon: faMedal, color: darkTheme.gold, glowColor: 'rgba(255,215,0,0.15)' },
+  2: { icon: faMedal, color: darkTheme.silver, glowColor: 'rgba(192,192,192,0.12)' },
+  3: { icon: faMedal, color: darkTheme.bronze, glowColor: 'rgba(205,127,50,0.12)' },
 };
 
 type AnimatedRowProps = {
@@ -44,7 +44,7 @@ const AnimatedRow: React.FC<AnimatedRowProps> = ({ user, index, currentUid }) =>
     >
       {isTop3 ? (
         <View style={[styles.medalCircle, { borderColor: medal.color }]}>
-          <Text style={styles.medalEmoji}>{medal.emoji}</Text>
+          <FontAwesomeIcon icon={medal.icon} color={medal.color} size={16} />
         </View>
       ) : (
         <View style={styles.rankCircle}>
@@ -103,7 +103,7 @@ const MiniLeaderboard: React.FC<MiniLeaderboardProps> = ({ users, currentUid, on
   if (top5.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyEmoji}>🏆</Text>
+        <FontAwesomeIcon icon={faTrophy} color={darkTheme.textMuted} size={32} style={{ marginBottom: 8 }} />
         <Text style={styles.emptyText}>Aun no hay jugadores en el ranking</Text>
         <Text style={styles.emptySubtext}>¡Juega para ser el primero!</Text>
       </View>

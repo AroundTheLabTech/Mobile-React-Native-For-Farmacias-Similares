@@ -6,7 +6,7 @@ import authStyles from '../../theme/authStyles';
 import { getUserInformation, loginUserByEmailAndPassword, validateToken } from '../../services/backend';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../AuthContext';
-import { setSecureToken, getSecureToken, clearSecureToken } from '../../utils/secureStorage';
+import { setSecureToken, getSecureToken, clearSecureToken, setSecureRefreshToken, getSecureRefreshToken } from '../../utils/secureStorage';
 import { TUserLogin } from 'src/types/user';
 import AppMessage from '@components/AppMessage/AppMessage';
 import { ToastState, ToastType } from 'src/types/toast';
@@ -63,11 +63,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
     try {
       const user = await loginUserByEmailAndPassword(email, password);
-
       const expiresAtMs = nowMs() + secondsToMs(Number(user.expires_in || 0));
 
       // Store token securely in device keychain
       await setSecureToken(user.id_token);
+      await setSecureRefreshToken(user.refresh_token);
       await AsyncStorage.multiSet([
         [STORAGE_KEYS.expiresAt, String(expiresAtMs)],
         [STORAGE_KEYS.updateScore, 'false'],
@@ -144,8 +144,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
         const storedAccessToken = await getSecureToken();
         const storedExpiresAt = await AsyncStorage.getItem(STORAGE_KEYS.expiresAt);
+        const storedRefreshToken = await getSecureRefreshToken();
 
-        if (!storedAccessToken || !storedExpiresAt) {
+        if (!storedAccessToken || !storedExpiresAt || !storedRefreshToken) {
+          if (storedAccessToken || storedExpiresAt || storedRefreshToken) {
+            await clearExpiredSession();
+          }
           setLoading(false);
           return;
         }

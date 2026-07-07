@@ -1,146 +1,145 @@
 export type TUserRegister = {
-  email: string,
-  display_name: string,
-  password: string,
-  ubication: string,
-  age: number
-}
+  email: string;
+  display_name: string;
+  password: string;
+  ubication: string;
+  age: number;
+};
 
 export type TUserLogin = {
-  uid: string,
-  email: string,
-  gender: string,
-  age: number,
-  last_session: string,
-  ubication: string,
-  display_name: string,
-  id_token: string,
-  registered: string,
-  refresh_token: any,
-  expires_in: number,
-}
+  uid: string;
+  email: string;
+  gender: string;
+  age: number;
+  last_session: string;
+  ubication: string;
+  display_name: string;
+  id_token: string;
+  registered: string;
+  refresh_token: any;
+  expires_in: number;
+};
 
 export type TUserTokenValidate = {
-  message: string,
-  uid: string,
-  email: string,
-  valid: boolean,
-}
+  message: string;
+  uid: string;
+  email: string;
+  valid: boolean;
+};
 
 export type TTokenManager = {
-  accessToken: string,
-  expirationTime: number,
-  refreshToken: string,
-}
+  accessToken: string;
+  expirationTime: number;
+  refreshToken: string;
+};
 
 export type TUserAuth = {
-  redirectEventId: undefined,
-  apiKey: string,
-  appName: string,
-  createdAt: number,
-  displayName: undefined,
-  email: string,
-  emailVerified: boolean,
-  isAnonymous: boolean,
-  lastLoginAt: number,
-  phoneNumber: undefined,
-  photoURL: undefined,
-  providerData: [],
-  stsTokenManager: TTokenManager,
-  tenantId: undefined,
-  uid: string
-}
+  redirectEventId: undefined;
+  apiKey: string;
+  appName: string;
+  createdAt: number;
+  displayName: undefined;
+  email: string;
+  emailVerified: boolean;
+  isAnonymous: boolean;
+  lastLoginAt: number;
+  phoneNumber: undefined;
+  photoURL: undefined;
+  providerData: [];
+  stsTokenManager: TTokenManager;
+  tenantId: undefined;
+  uid: string;
+};
 
 export type TUserPoints = {
-  uid: string,
-  score_total: number
-}
+  uid: string;
+  score_total: number;
+};
 
 export type TUserSession = {
-  score: number,
-  timestamp: string
-}
+  score: number;
+  timestamp: string;
+};
 
 export type TUserCurrentMonthSession = {
-  uid: string,
-  currentMonthSessions: number,
-  sessions: TUserSession[]
-}
+  uid: string;
+  currentMonthSessions: number;
+  sessions: TUserSession[];
+};
 
 export type TUserLast3MonthInfo = {
-  uid: string,
-  last3MonthsSessions: number,
-  sessions: TUserSession[]
-}
+  uid: string;
+  last3MonthsSessions: number;
+  sessions: TUserSession[];
+};
 
 export type TGroupedSessions = {
   [month: string]: number[];
-}
+};
 
 export type TMaxScores = {
   [month: string]: number;
-}
+};
 
 export type TUserInformation = {
-  name: string,
-  email: string,
-  state: string,
-  age: number,
-  last_session: string,
-  gender: string,
-}
+  name: string;
+  email: string;
+  state: string;
+  age: string;
+  last_session: string;
+  gender: string;
+};
 
 export type TUpdateUserInformation = {
-  name: string,
-  ubication: string,
-  age: number,
-}
+  name: string;
+  ubication: string;
+  age: string;
+};
 
 export type TUserPicture = {
-  profile_picture_url: string,
-}
+  profile_picture_url: string;
+};
 
 export type TDashboardSummary = {
-  score_total: number,
-  global_ranking: number,
-  best_score: number,
-  total_games: number,
-  monthly_score: number,
-}
+  score_total: number;
+  global_ranking: number;
+  best_score: number;
+  total_games: number;
+  monthly_score: number;
+};
 
 export type TUserProfilePicture = {
-  title: string,
-  image_url: string
-}
+  title: string;
+  image_url: string;
+};
 
 export type TUserProfilePictures = {
-  current_profile_picture_url: string,
-  list_profile_pictures_avalible: TUserProfilePicture[]
-}
-
+  current_profile_picture_url: string;
+  list_profile_pictures_avalible: TUserProfilePicture[];
+};
 
 export type TBackResponse = {
-  message: string,
-}
+  message: string;
+};
 
 export type TGameCard = {
-  name: string,
-  score: number,
-  card_number: number
-}
+  name: string;
+  score: number;
+  card_number: number;
+};
 
 export type TScorePerGame = {
-  uid: string,
-  score_per_game: Record<string, number>
-}
+  uid: string;
+  score_per_game: Record<string, number>;
+};
 
 export type TTopTwenty = {
-  username: string
-  uid: string
-  total_score: number
-  profile_mini_pictures_url: string
-  flag_url: string
-}
+  username: string;
+  uid: string;
+  total_score: number;
+  profile_mini_pictures_url: string;
+  flag_url: string;
+};
 
 export type GetTopTwentyOpts = {
   monthly?: boolean;
@@ -148,10 +147,10 @@ export type GetTopTwentyOpts = {
 };
 
 export type TLeaderBoard = TTopTwenty & {
-  position: number
-}
+  position: number;
+};
 
 export type TUserBadges = {
-  badges: string[]
-  scoring_streak: number
-}
+  badges: string[];
+  scoring_streak: number;
+};

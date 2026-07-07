@@ -2,14 +2,26 @@ import React, { useMemo } from 'react';
 import { View, Text, Animated, StyleSheet } from 'react-native';
 import { darkTheme } from '../../theme/colors';
 import { useBounceIn } from '../../utils/animations';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { 
+  faGamepad, 
+  faFire, 
+  faFlagCheckered, 
+  faBullseye, 
+  faCrown, 
+  faGem, 
+  faTrophy, 
+  faCircleCheck, 
+  faLock 
+} from '@fortawesome/free-solid-svg-icons';
 
 const TROPHY_INFO = [
-  { key: 'medal1', name: 'Primera sesion', description: 'Jugaste tu primer juego', icon: '\uD83C\uDFAE' },
-  { key: 'medal2', name: '3 dias seguidos', description: 'Racha de 3 dias', icon: '\uD83D\uDD25' },
-  { key: 'medal3', name: 'Primera competencia', description: 'Entraste a una competencia', icon: '\u2694\uFE0F' },
-  { key: 'medal4', name: '10 partidas', description: 'Jugaste 10 veces', icon: '\uD83C\uDFAF' },
-  { key: 'medal5', name: 'Top 10', description: 'Entraste al top 10', icon: '\uD83D\uDC51' },
-  { key: 'medal6', name: '100 partidas', description: '100 sesiones jugadas', icon: '\uD83D\uDC8E' },
+  { key: 'medal1', name: 'Primera sesion', description: 'Jugaste tu primer juego', icon: faGamepad, color: '#3B82F6' },
+  { key: 'medal2', name: '3 dias seguidos', description: 'Racha de 3 dias', icon: faFire, color: '#EF4444' },
+  { key: 'medal3', name: 'Primera competencia', description: 'Entraste a una competencia', icon: faFlagCheckered, color: '#10B981' },
+  { key: 'medal4', name: '10 partidas', description: 'Jugaste 10 veces', icon: faBullseye, color: '#F59E0B' },
+  { key: 'medal5', name: 'Top 10', description: 'Entraste al top 10', icon: faCrown, color: '#FFD700' },
+  { key: 'medal6', name: '100 partidas', description: '100 sesiones jugadas', icon: faGem, color: '#8B5CF6' },
 ];
 
 type TrophyGridProps = {
@@ -36,9 +48,11 @@ const TrophyItem: React.FC<TrophyItemProps> = ({ trophy, unlocked, index }) => {
       ]}
     >
       <View style={[styles.iconCircle, unlocked ? styles.iconCircleUnlocked : styles.iconCircleLocked]}>
-        <Text style={[styles.trophyIcon, !unlocked && styles.trophyIconLocked]}>
-          {trophy.icon}
-        </Text>
+        <FontAwesomeIcon 
+          icon={trophy.icon} 
+          size={20} 
+          color={unlocked ? trophy.color : 'rgba(255,255,255,0.3)'} 
+        />
       </View>
       <View style={styles.trophyTextWrapper}>
         <View style={styles.nameRow}>
@@ -48,7 +62,11 @@ const TrophyItem: React.FC<TrophyItemProps> = ({ trophy, unlocked, index }) => {
           >
             {trophy.name}
           </Text>
-          <Text style={styles.statusIcon}>{unlocked ? '\u2705' : '\uD83D\uDD12'}</Text>
+          <FontAwesomeIcon 
+            icon={unlocked ? faCircleCheck : faLock} 
+            size={12} 
+            color={unlocked ? '#10B981' : 'rgba(255,255,255,0.3)'} 
+          />
         </View>
         <Text
           style={[styles.trophyDesc, !unlocked && styles.trophyDescLocked]}
@@ -82,7 +100,7 @@ const TrophyGrid: React.FC<TrophyGridProps> = ({ badges, totalGames, ranking, st
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.headerIcon}>{'\uD83C\uDFC6'}</Text>
+          <FontAwesomeIcon icon={faTrophy} color="#FFD700" size={20} />
           <Text style={styles.headerTitle}>Tus Logros</Text>
         </View>
         <View style={styles.countPill}>

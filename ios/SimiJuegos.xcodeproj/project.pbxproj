@@ -9,13 +9,14 @@
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* SimiJuegosTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* SimiJuegosTests.m */; };
 		016DC34F7FFA4448B692AFBE /* Inter-VariableFont_opsz,wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 12BE434BBB3C4594810142FC /* Inter-VariableFont_opsz,wght.ttf */; };
-		0C80B921A6F3F58F76C31292 /* libPods-SimiJuegos.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-SimiJuegos.a */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		5AA9A3DFC089439EA4AAD3B1 /* PressStart2P-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CE03063485EF4724B989E028 /* PressStart2P-Regular.ttf */; };
-		7699B88040F8A987B510C191 /* libPods-SimiJuegos-SimiJuegosTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-SimiJuegos-SimiJuegosTests.a */; };
+		68DC4C3E3362711670E7D4C8 /* libPods-SimiJuegos-SimiJuegosTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E80E80676F8E071C74FF5E0A /* libPods-SimiJuegos-SimiJuegosTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		935C29B12FB3A0AA001E3261 /* Fix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 935C29B02FB3A0AA001E3261 /* Fix.swift */; };
+		AF19AADC35F3814916DD3B2D /* libPods-SimiJuegos.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B9939D3C000980C54F00AE06 /* libPods-SimiJuegos.a */; };
 		D64A7794BB564BCFAC5ECFCE /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 92CA595DFE5B97A3D2532C1B /* PrivacyInfo.xcprivacy */; };
 		E0D98EE6ADB54C66896A5F49 /* Rubik-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F05AB7452DC7433C9BEED3EC /* Rubik-VariableFont_wght.ttf */; };
 /* End PBXBuildFile section */
@@ -42,15 +43,17 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = SimiJuegos/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = SimiJuegos/main.m; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = SimiJuegos/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		19F6CBCC0A4E27FBF8BF4A61 /* libPods-SimiJuegos-SimiJuegosTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SimiJuegos-SimiJuegosTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		3B4392A12AC88292D35C810B /* Pods-SimiJuegos.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SimiJuegos.debug.xcconfig"; path = "Target Support Files/Pods-SimiJuegos/Pods-SimiJuegos.debug.xcconfig"; sourceTree = "<group>"; };
-		5709B34CF0A7D63546082F79 /* Pods-SimiJuegos.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SimiJuegos.release.xcconfig"; path = "Target Support Files/Pods-SimiJuegos/Pods-SimiJuegos.release.xcconfig"; sourceTree = "<group>"; };
-		5B7EB9410499542E8C5724F5 /* Pods-SimiJuegos-SimiJuegosTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SimiJuegos-SimiJuegosTests.debug.xcconfig"; path = "Target Support Files/Pods-SimiJuegos-SimiJuegosTests/Pods-SimiJuegos-SimiJuegosTests.debug.xcconfig"; sourceTree = "<group>"; };
-		5DCACB8F33CDC322A6C60F78 /* libPods-SimiJuegos.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SimiJuegos.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		27EC45EC0202453D6E2278D7 /* Pods-SimiJuegos-SimiJuegosTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SimiJuegos-SimiJuegosTests.release.xcconfig"; path = "Target Support Files/Pods-SimiJuegos-SimiJuegosTests/Pods-SimiJuegos-SimiJuegosTests.release.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = SimiJuegos/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		89C6BE57DB24E9ADA2F236DE /* Pods-SimiJuegos-SimiJuegosTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SimiJuegos-SimiJuegosTests.release.xcconfig"; path = "Target Support Files/Pods-SimiJuegos-SimiJuegosTests/Pods-SimiJuegos-SimiJuegosTests.release.xcconfig"; sourceTree = "<group>"; };
 		92CA595DFE5B97A3D2532C1B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = SimiJuegos/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		935C29B02FB3A0AA001E3261 /* Fix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fix.swift; sourceTree = "<group>"; };
+		935C29B22FB3A0AD001E3261 /* SimiJuegos-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SimiJuegos-Bridging-Header.h"; sourceTree = "<group>"; };
+		A33B47A29F5CE94721092FC9 /* Pods-SimiJuegos-SimiJuegosTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SimiJuegos-SimiJuegosTests.debug.xcconfig"; path = "Target Support Files/Pods-SimiJuegos-SimiJuegosTests/Pods-SimiJuegos-SimiJuegosTests.debug.xcconfig"; sourceTree = "<group>"; };
+		A3F1659D8672655DF63D7345 /* Pods-SimiJuegos.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SimiJuegos.release.xcconfig"; path = "Target Support Files/Pods-SimiJuegos/Pods-SimiJuegos.release.xcconfig"; sourceTree = "<group>"; };
+		AE0CC6B15137B130B09A9DD5 /* Pods-SimiJuegos.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SimiJuegos.debug.xcconfig"; path = "Target Support Files/Pods-SimiJuegos/Pods-SimiJuegos.debug.xcconfig"; sourceTree = "<group>"; };
+		B9939D3C000980C54F00AE06 /* libPods-SimiJuegos.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SimiJuegos.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE03063485EF4724B989E028 /* PressStart2P-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "PressStart2P-Regular.ttf"; path = "../assets/fonts/PressStart2P-Regular.ttf"; sourceTree = "<group>"; };
+		E80E80676F8E071C74FF5E0A /* libPods-SimiJuegos-SimiJuegosTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SimiJuegos-SimiJuegosTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F05AB7452DC7433C9BEED3EC /* Rubik-VariableFont_wght.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Rubik-VariableFont_wght.ttf"; path = "../assets/fonts/Rubik-VariableFont_wght.ttf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -60,7 +63,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7699B88040F8A987B510C191 /* libPods-SimiJuegos-SimiJuegosTests.a in Frameworks */,
+				68DC4C3E3362711670E7D4C8 /* libPods-SimiJuegos-SimiJuegosTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -68,7 +71,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0C80B921A6F3F58F76C31292 /* libPods-SimiJuegos.a in Frameworks */,
+				AF19AADC35F3814916DD3B2D /* libPods-SimiJuegos.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -95,6 +98,7 @@
 		13B07FAE1A68108700A75B9A /* SimiJuegos */ = {
 			isa = PBXGroup;
 			children = (
+				935C29B02FB3A0AA001E3261 /* Fix.swift */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -103,6 +107,7 @@
 				13B07FB71A68108700A75B9A /* main.m */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
 				92CA595DFE5B97A3D2532C1B /* PrivacyInfo.xcprivacy */,
+				935C29B22FB3A0AD001E3261 /* SimiJuegos-Bridging-Header.h */,
 			);
 			name = SimiJuegos;
 			sourceTree = "<group>";
@@ -111,8 +116,8 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				5DCACB8F33CDC322A6C60F78 /* libPods-SimiJuegos.a */,
-				19F6CBCC0A4E27FBF8BF4A61 /* libPods-SimiJuegos-SimiJuegosTests.a */,
+				B9939D3C000980C54F00AE06 /* libPods-SimiJuegos.a */,
+				E80E80676F8E071C74FF5E0A /* libPods-SimiJuegos-SimiJuegosTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -162,10 +167,10 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				3B4392A12AC88292D35C810B /* Pods-SimiJuegos.debug.xcconfig */,
-				5709B34CF0A7D63546082F79 /* Pods-SimiJuegos.release.xcconfig */,
-				5B7EB9410499542E8C5724F5 /* Pods-SimiJuegos-SimiJuegosTests.debug.xcconfig */,
-				89C6BE57DB24E9ADA2F236DE /* Pods-SimiJuegos-SimiJuegosTests.release.xcconfig */,
+				AE0CC6B15137B130B09A9DD5 /* Pods-SimiJuegos.debug.xcconfig */,
+				A3F1659D8672655DF63D7345 /* Pods-SimiJuegos.release.xcconfig */,
+				A33B47A29F5CE94721092FC9 /* Pods-SimiJuegos-SimiJuegosTests.debug.xcconfig */,
+				27EC45EC0202453D6E2278D7 /* Pods-SimiJuegos-SimiJuegosTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -177,12 +182,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "SimiJuegosTests" */;
 			buildPhases = (
-				A55EABD7B0C7F3A422A6CC61 /* [CP] Check Pods Manifest.lock */,
+				8DABAD07ACFCD5FC327EAEB7 /* [CP] Check Pods Manifest.lock */,
 				00E356EA1AD99517003FC87E /* Sources */,
 				00E356EB1AD99517003FC87E /* Frameworks */,
 				00E356EC1AD99517003FC87E /* Resources */,
-				C59DA0FBD6956966B86A3779 /* [CP] Embed Pods Frameworks */,
-				F6A41C54EA430FDDC6A6ED99 /* [CP] Copy Pods Resources */,
+				00AA7BAB53C4856A427C9790 /* [CP] Embed Pods Frameworks */,
+				CF42922E801EC92CF63F5CDF /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -198,13 +203,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "SimiJuegos" */;
 			buildPhases = (
-				C38B50BA6285516D6DCD4F65 /* [CP] Check Pods Manifest.lock */,
+				C262BA4AE7066F7DAEB1CA4D /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				00EEFC60759A1932668264C0 /* [CP] Embed Pods Frameworks */,
-				E235C05ADACE081382539298 /* [CP] Copy Pods Resources */,
+				106F0BA214C49333AD3A66AA /* [CP] Embed Pods Frameworks */,
+				1BCB153D41EAA12A1E4F109D /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -228,7 +233,7 @@
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
 					13B07F861A680F5B00A75B9A = {
-						LastSwiftMigration = 1120;
+						LastSwiftMigration = 2630;
 					};
 				};
 			};
@@ -275,6 +280,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		00AA7BAB53C4856A427C9790 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SimiJuegos-SimiJuegosTests/Pods-SimiJuegos-SimiJuegosTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SimiJuegos-SimiJuegosTests/Pods-SimiJuegos-SimiJuegosTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SimiJuegos-SimiJuegosTests/Pods-SimiJuegos-SimiJuegosTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -291,7 +313,7 @@
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
 		};
-		00EEFC60759A1932668264C0 /* [CP] Embed Pods Frameworks */ = {
+		106F0BA214C49333AD3A66AA /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -308,7 +330,24 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SimiJuegos/Pods-SimiJuegos-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		A55EABD7B0C7F3A422A6CC61 /* [CP] Check Pods Manifest.lock */ = {
+		1BCB153D41EAA12A1E4F109D /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SimiJuegos/Pods-SimiJuegos-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SimiJuegos/Pods-SimiJuegos-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SimiJuegos/Pods-SimiJuegos-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		8DABAD07ACFCD5FC327EAEB7 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -330,7 +369,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		C38B50BA6285516D6DCD4F65 /* [CP] Check Pods Manifest.lock */ = {
+		C262BA4AE7066F7DAEB1CA4D /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -352,41 +391,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		C59DA0FBD6956966B86A3779 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-SimiJuegos-SimiJuegosTests/Pods-SimiJuegos-SimiJuegosTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-SimiJuegos-SimiJuegosTests/Pods-SimiJuegos-SimiJuegosTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SimiJuegos-SimiJuegosTests/Pods-SimiJuegos-SimiJuegosTests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		E235C05ADACE081382539298 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-SimiJuegos/Pods-SimiJuegos-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-SimiJuegos/Pods-SimiJuegos-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SimiJuegos/Pods-SimiJuegos-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		F6A41C54EA430FDDC6A6ED99 /* [CP] Copy Pods Resources */ = {
+		CF42922E801EC92CF63F5CDF /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -419,6 +424,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
+				935C29B12FB3A0AA001E3261 /* Fix.swift in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -436,7 +442,7 @@
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5B7EB9410499542E8C5724F5 /* Pods-SimiJuegos-SimiJuegosTests.debug.xcconfig */;
+			baseConfigurationReference = A33B47A29F5CE94721092FC9 /* Pods-SimiJuegos-SimiJuegosTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
@@ -465,7 +471,7 @@
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 89C6BE57DB24E9ADA2F236DE /* Pods-SimiJuegos-SimiJuegosTests.release.xcconfig */;
+			baseConfigurationReference = 27EC45EC0202453D6E2278D7 /* Pods-SimiJuegos-SimiJuegosTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
@@ -491,19 +497,21 @@
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B4392A12AC88292D35C810B /* Pods-SimiJuegos.debug.xcconfig */;
+			baseConfigurationReference = AE0CC6B15137B130B09A9DD5 /* Pods-SimiJuegos.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = A9T5UUZVHZ;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = SimiJuegos/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Simijuegos;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -511,6 +519,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.FDS.simijuegos;
 				PRODUCT_NAME = SimiJuegos;
+				SWIFT_OBJC_BRIDGING_HEADER = "SimiJuegos-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -519,18 +528,20 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5709B34CF0A7D63546082F79 /* Pods-SimiJuegos.release.xcconfig */;
+			baseConfigurationReference = A3F1659D8672655DF63D7345 /* Pods-SimiJuegos.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = A9T5UUZVHZ;
 				INFOPLIST_FILE = SimiJuegos/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Simijuegos;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -538,6 +549,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.FDS.simijuegos;
 				PRODUCT_NAME = SimiJuegos;
+				SWIFT_OBJC_BRIDGING_HEADER = "SimiJuegos-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -616,7 +628,10 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -689,7 +704,10 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;

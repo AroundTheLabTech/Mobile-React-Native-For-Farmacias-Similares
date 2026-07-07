@@ -5,13 +5,16 @@ import { TLeaderBoard } from 'src/types/user';
 import { getAvatarSource } from '../../utils/avatars';
 import { useFadeInUp } from '../../utils/animations';
 
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faMedal } from '@fortawesome/free-solid-svg-icons';
+
 interface LeaderBoardCardProps {
   player: TLeaderBoard;
   isCurrentUser?: boolean;
   index?: number;
 }
 
-const MEDALS = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
+const MEDAL_COLORS = ['#FFD700', '#C0C0C0', '#CD7F32'];
 
 const LeaderBoardCard: React.FC<LeaderBoardCardProps> = ({ player, isCurrentUser, index = 0 }) => {
   const anim = useFadeInUp(index * 60);
@@ -19,7 +22,7 @@ const LeaderBoardCard: React.FC<LeaderBoardCardProps> = ({ player, isCurrentUser
     <Animated.View style={[LeaderBoardCardStyles.container, isCurrentUser && LeaderBoardCardStyles.currentUserContainer, { opacity: anim.opacity, transform: anim.transform }]}>
       <View style={LeaderBoardCardStyles.containerPosition}>
         {player.position <= 3 ? (
-          <Text style={LeaderBoardCardStyles.medal}>{MEDALS[player.position - 1]}</Text>
+          <FontAwesomeIcon icon={faMedal} color={MEDAL_COLORS[player.position - 1]} size={24} />
         ) : (
           <Text style={LeaderBoardCardStyles.position}>{player.position}</Text>
         )}
