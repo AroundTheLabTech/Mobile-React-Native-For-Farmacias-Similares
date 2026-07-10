@@ -1,41 +1,84 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Image, Dimensions, PixelRatio, Animated } from 'react-native';
+import React, {useEffect, useRef, useState} from 'react';
+import {
+  View,
+  Text,
+  Image,
+  Dimensions,
+  PixelRatio,
+  Animated,
+} from 'react-native';
 
 // Styles
 import StadiscticsStyle from './style/StadiscticsStyle';
 
 import RingChart from '../../components/RingChartComponent/RingChart';
 
-import { calculatePercentage, calculateScreenSizeInInches, getMaxScore, getMaxScorePerMonth, getMonthWithHighestScore, groupSessionsByMonth } from '../../utils/helpers';
+import {
+  calculatePercentage,
+  calculateScreenSizeInInches,
+  getMaxScore,
+  getMaxScorePerMonth,
+  getMonthWithHighestScore,
+  groupSessionsByMonth,
+} from '../../utils/helpers';
 
 import MedalIcon from '../../../img/iconos/medal.svg';
 import StadisticsIcon from '../../../img/iconos/stadistics.svg';
 import BarChart from '../../components/BarChartComponent/BarChart';
 import OptionSelect from '../../components/OptionSelectComponent/OptionSelect';
-import { TUserCurrentMonthSession, TUserLast3MonthInfo } from 'src/types/user';
-import { getUserCurrentMonthSession, getUserLast3MonthsInfo } from '../../services/backend';
-import { useAuth } from '../../AuthContext';
+import {TUserCurrentMonthSession, TUserLast3MonthInfo} from 'src/types/user';
+import {
+  getUserCurrentMonthSession,
+  getUserLast3MonthsInfo,
+} from '../../services/backend';
+import {useAuth} from '../../AuthContext';
 import RingChart9Inches from '@components/RingChartComponent/RingChart9Inches';
 import BarChart9Inches from '@components/BarChartComponent/BarChart9Inches';
 
 /** Skeleton placeholder block with pulse animation */
-const SkeletonBlock = ({ width, height, style }: { width: number | string; height: number; style?: any }) => {
+const SkeletonBlock = ({
+  width,
+  height,
+  style,
+}: {
+  width: number | string;
+  height: number;
+  style?: any;
+}) => {
   const pulse = useRef(new Animated.Value(0.3)).current;
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulse, { toValue: 0.7, duration: 800, useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 0.3, duration: 800, useNativeDriver: true }),
+        Animated.timing(pulse, {
+          toValue: 0.7,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulse, {
+          toValue: 0.3,
+          duration: 800,
+          useNativeDriver: true,
+        }),
       ]),
     );
     loop.start();
     return () => loop.stop();
   }, [pulse]);
   return (
-    <Animated.View style={[{ width, height, borderRadius: 10, backgroundColor: 'rgba(106,90,224,0.15)', opacity: pulse }, style]} />
+    <Animated.View
+      style={[
+        {
+          width,
+          height,
+          borderRadius: 10,
+          backgroundColor: 'rgba(106,90,224,0.15)',
+          opacity: pulse,
+        },
+        style,
+      ]}
+    />
   );
 };
-
 
 interface IProgress {
   total: number;
@@ -52,33 +95,32 @@ type StatCategory = {
   }[];
 };
 
-const { width: windowWidth } = Dimensions.get('window');
+const {width: windowWidth} = Dimensions.get('window');
 
 const monthsInSpanish = {
-  'Enero': 0,
-  'Febrero': 1,
-  'Marzo': 2,
-  'Abril': 3,
-  'Mayo': 4,
-  'Junio': 5,
-  'Julio': 6,
-  'Agosto': 7,
-  'Septiembre': 8,
-  'Octubre': 9,
-  'Noviembre': 10,
-  'Diciembre': 11,
+  Enero: 0,
+  Febrero: 1,
+  Marzo: 2,
+  Abril: 3,
+  Mayo: 4,
+  Junio: 5,
+  Julio: 6,
+  Agosto: 7,
+  Septiembre: 8,
+  Octubre: 9,
+  Noviembre: 10,
+  Diciembre: 11,
 };
 
 const StadisticsScreen: React.FC = () => {
-
-  const { uid } = useAuth();
+  const {uid} = useAuth();
 
   const [loading, setLoading] = useState<boolean>(true);
 
   const [progress, setProgress] = useState<IProgress>({
-    'total': 0,
-    'progress': 0,
-    'progressPercent': 0,
+    total: 0,
+    progress: 0,
+    progressPercent: 0,
   });
 
   const [bestGame, setBestGame] = useState<number>();
@@ -88,17 +130,21 @@ const StadisticsScreen: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const result: TUserCurrentMonthSession = await getUserCurrentMonthSession(uid);
+      const result: TUserCurrentMonthSession = await getUserCurrentMonthSession(
+        uid,
+      );
       if (result?.sessions) {
         const highScore = getMaxScore(result.sessions);
         setBestGame(highScore);
 
-        const progressData = result?.currentMonthSessions ? result?.currentMonthSessions : 0;
+        const progressData = result?.currentMonthSessions
+          ? result?.currentMonthSessions
+          : 0;
 
         setProgress({
-          'total': 120,
-          'progress': progressData,
-          'progressPercent': calculatePercentage(120, progressData),
+          total: 120,
+          progress: progressData,
+          progressPercent: calculatePercentage(120, progressData),
         });
       }
       setLoading(false);
@@ -123,25 +169,26 @@ const StadisticsScreen: React.FC = () => {
 
       for (let i = keys.length - 1; i >= 0; i--) {
         if (controller < 3) {
-          newData.push(
-            {
-              category: i === 0 ? 'Puntajes' : null,
-              stats: [
-                {
-                  label: keys[i],
-                  value: last3MonthsScores[keys[i]],
-                  maxValue: last3MonthsScores[highestScoreMonth],
-                },
-              ],
-            }
-          );
+          newData.push({
+            category: i === 0 ? 'Puntajes' : null,
+            stats: [
+              {
+                label: keys[i],
+                value: last3MonthsScores[keys[i]],
+                maxValue: last3MonthsScores[highestScoreMonth],
+              },
+            ],
+          });
         }
         controller++;
       }
 
       if (newData.length > 0) {
         const sortData = newData.sort((a, b) => {
-          return monthsInSpanish[a.stats[0].label] - monthsInSpanish[b.stats[0].label];
+          return (
+            monthsInSpanish[a.stats[0].label] -
+            monthsInSpanish[b.stats[0].label]
+          );
         });
         setLast3MonthsInfo(sortData);
       }
@@ -154,11 +201,13 @@ const StadisticsScreen: React.FC = () => {
     }
   }, [last3MonthsInfo, uid]);
 
-  const [selectedFilter, setSelectedFilter] = useState<'monthly' | 'general'>('monthly');
+  const [selectedFilter, setSelectedFilter] = useState<'monthly' | 'general'>(
+    'monthly',
+  );
 
   const filterOptions = [
-    { label: 'Mensual', value: 'monthly' },
-    { label: 'General', value: 'general' },
+    {label: 'Mensual', value: 'monthly'},
+    {label: 'General', value: 'general'},
   ];
 
   const listOfColors = ['#FFD6DD', '#C4D0FB', '#A9ADF3'];
@@ -168,12 +217,15 @@ const StadisticsScreen: React.FC = () => {
 
   useEffect(() => {
     const updateOrientation = () => {
-      const { width, height } = Dimensions.get('window');
+      const {width, height} = Dimensions.get('window');
       setOrientation(width > height ? 'landscape' : 'portrait');
       setScreenWidth(width);
     };
 
-    const subscription = Dimensions.addEventListener('change', updateOrientation);
+    const subscription = Dimensions.addEventListener(
+      'change',
+      updateOrientation,
+    );
 
     updateOrientation();
 
@@ -185,14 +237,19 @@ const StadisticsScreen: React.FC = () => {
   if (loading) {
     return (
       <View style={StadiscticsStyle.container}>
-        <View style={{ padding: 16, gap: 12, width: '100%' }}>
+        <View style={{padding: 16, gap: 12, width: '100%'}}>
           <SkeletonBlock width="60%" height={20} />
-          <SkeletonBlock width="100%" height={160} style={{ marginTop: 8 }} />
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
+          <SkeletonBlock width="100%" height={160} style={{marginTop: 8}} />
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              marginTop: 8,
+            }}>
             <SkeletonBlock width="48%" height={80} />
             <SkeletonBlock width="48%" height={80} />
           </View>
-          <SkeletonBlock width="100%" height={140} style={{ marginTop: 12 }} />
+          <SkeletonBlock width="100%" height={140} style={{marginTop: 12}} />
         </View>
       </View>
     );
@@ -200,8 +257,10 @@ const StadisticsScreen: React.FC = () => {
 
   if (!bestGame || (!last3MonthsInfo && last3MonthsInfo?.length < 3)) {
     return (
-      <View style={StadiscticsStyle.container}  >
-        <Text style={StadiscticsStyle.noDataText}>No hay datos disponibles</Text>
+      <View style={StadiscticsStyle.container}>
+        <Text style={StadiscticsStyle.noDataText}>
+          No hay datos disponibles
+        </Text>
       </View>
     );
   }
@@ -209,50 +268,56 @@ const StadisticsScreen: React.FC = () => {
   const sizeInInches = calculateScreenSizeInInches(Dimensions, PixelRatio);
 
   return (
-    <View style={StadiscticsStyle.container}  >
+    <View style={StadiscticsStyle.container}>
       <View style={StadiscticsStyle.containerEstadistics}>
         <OptionSelect
           options={filterOptions}
-          onSelect={(value) => setSelectedFilter(value as 'monthly' | 'general')}
+          onSelect={value => setSelectedFilter(value as 'monthly' | 'general')}
         />
         <Text style={StadiscticsStyle.titleTotalGames}>
-          {selectedFilter === 'monthly' ? 'META MENSUAL DE PARTIDAS' : 'ESTADÍSTICAS GENERALES'}
+          {selectedFilter === 'monthly'
+            ? 'META MENSUAL DE PARTIDAS'
+            : 'ESTADÍSTICAS GENERALES'}
         </Text>
 
-        {selectedFilter === 'monthly' && (
-          sizeInInches && Number(sizeInInches) > 9 ?
-            <View style={[StadiscticsStyle.ringChartContainer, StadiscticsStyle.ringChartContainer9Inches]} >
+        {selectedFilter === 'monthly' &&
+          (sizeInInches && Number(sizeInInches) > 9 ? (
+            <View
+              style={[
+                StadiscticsStyle.ringChartContainer,
+                StadiscticsStyle.ringChartContainer9Inches,
+              ]}>
               <RingChart9Inches
                 progress={progress.progressPercent}
-                color="#6A5AE0"
-              >
-                <View style={StadiscticsStyle.ringChartView} >
-                  <Text style={StadiscticsStyle.ringChartText}>{Math.round(progress.progress)}/{progress.total}</Text>
-                  <Text style={StadiscticsStyle.totalText}  >Total</Text>
+                color="#6A5AE0">
+                <View style={StadiscticsStyle.ringChartView}>
+                  <Text style={StadiscticsStyle.ringChartText}>
+                    {Math.round(progress.progress)}/{progress.total}
+                  </Text>
+                  <Text style={StadiscticsStyle.totalText}>Total</Text>
                 </View>
               </RingChart9Inches>
-            </View> :
-            <View style={StadiscticsStyle.ringChartContainer} >
-              <RingChart
-                progress={progress.progressPercent}
-                color="#6A5AE0"
-              >
-                <View style={StadiscticsStyle.ringChartView} >
-                  <Text style={StadiscticsStyle.ringChartText}>{Math.round(progress.progress)}/{progress.total}</Text>
-                  <Text style={StadiscticsStyle.totalText} >Total</Text>
+            </View>
+          ) : (
+            <View style={StadiscticsStyle.ringChartContainer}>
+              <RingChart progress={progress.progressPercent} color="#6A5AE0">
+                <View style={StadiscticsStyle.ringChartView}>
+                  <Text style={StadiscticsStyle.ringChartText}>
+                    {Math.round(progress.progress)}/{progress.total}
+                  </Text>
+                  <Text style={StadiscticsStyle.totalText}>Total</Text>
                 </View>
               </RingChart>
             </View>
-        )}
+          ))}
         <View style={StadiscticsStyle.rowStadistics}>
           {/* Box */}
           <View style={StadiscticsStyle.containerBestPlay}>
             <View style={StadiscticsStyle.containerUpNumber}>
-              <Text style={StadiscticsStyle.titleNumber}>
-                {bestGame}
-              </Text>
+              <Text style={StadiscticsStyle.titleNumber}>{bestGame}</Text>
               <Image
-                source={require('../../../img/iconos/pastilla.png')} resizeMode="contain"
+                source={require('../../../img/iconos/pastilla.png')}
+                resizeMode="contain"
               />
             </View>
 
@@ -264,39 +329,53 @@ const StadisticsScreen: React.FC = () => {
           {/* Box                 */}
           <View style={StadiscticsStyle.containerBestGame}>
             <View style={StadiscticsStyle.containerUpNumber}>
-              <Text style={[StadiscticsStyle.titleNumber, StadiscticsStyle.colorPrimary]}>
+              <Text
+                style={[
+                  StadiscticsStyle.titleNumber,
+                  StadiscticsStyle.colorPrimary,
+                ]}>
                 {bestGame}
               </Text>
               <MedalIcon width={24} />
             </View>
 
-            <View >
-              <Text style={[StadiscticsStyle.textBox, StadiscticsStyle.colorPrimary]}>Mejor Partida</Text>
+            <View>
+              <Text
+                style={[
+                  StadiscticsStyle.textBox,
+                  StadiscticsStyle.colorPrimary,
+                ]}>
+                Mejor Partida
+              </Text>
             </View>
           </View>
-
         </View>
-
       </View>
       <View style={StadiscticsStyle.containerChartStadistics}>
-        <View style={StadiscticsStyle.titleContainer} >
-          <Text style={StadiscticsStyle.titleStadisticsChart} >
-            {selectedFilter === 'monthly' ? 'Estadísticas Mensuales' : 'Estadísticas Generales'}
+        <View style={StadiscticsStyle.titleContainer}>
+          <Text style={StadiscticsStyle.titleStadisticsChart}>
+            {selectedFilter === 'monthly'
+              ? 'Estadísticas Mensuales'
+              : 'Estadísticas Generales'}
           </Text>
-          <View style={StadiscticsStyle.stadisticsIconContainer} >
+          <View style={StadiscticsStyle.stadisticsIconContainer}>
             <StadisticsIcon width={24} />
           </View>
         </View>
-        <View style={StadiscticsStyle.barChartContainer} >
-          {
-            last3MonthsInfo && sizeInInches && Number(sizeInInches) > 9 ?
-              (
-                <BarChart9Inches data={last3MonthsInfo} barColor="#3498db" listOfColors={listOfColors} />
-              ) :
-              (
-                <BarChart data={last3MonthsInfo} barColor="#3498db" listOfColors={listOfColors} />
-              )
-          }
+        <View style={StadiscticsStyle.barChartContainer}>
+          {last3MonthsInfo && sizeInInches && Number(sizeInInches) > 9 ? (
+            <BarChart9Inches
+              data={last3MonthsInfo}
+              barColor="#3498db"
+              listOfColors={listOfColors}
+            />
+          ) : (
+            <BarChart
+              data={last3MonthsInfo}
+              barColor="#3498db"
+              listOfColors={listOfColors}
+            />
+          )}
         </View>
       </View>
     </View>
