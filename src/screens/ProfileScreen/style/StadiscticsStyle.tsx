@@ -1,5 +1,5 @@
-import { StyleSheet } from 'react-native';
-import { colors, fontSizes, spacing, fonts } from '../../../../global-class'; // Importa las variables globales
+import {StyleSheet} from 'react-native';
+import {colors, fontSizes, spacing, fonts} from '../../../../global-class'; // Importa las variables globales
 
 const StadiscticsStyle = StyleSheet.create({
   containerMax: {
@@ -91,8 +91,7 @@ const StadiscticsStyle = StyleSheet.create({
     fontWeight: '700',
     fontSize: fontSizes.xl,
   },
-  containerIcono: {
-  },
+  containerIcono: {},
 
   //Insignias, Estadisticas, Detalles
   containerPuntaje: {
@@ -160,7 +159,6 @@ const StadiscticsStyle = StyleSheet.create({
     padding: spacing.sm,
     marginTop: spacing.md,
     borderRadius: 15,
-
   },
   containerBestGame: {
     width: '45%',
@@ -168,7 +166,6 @@ const StadiscticsStyle = StyleSheet.create({
     padding: spacing.sm,
     marginTop: spacing.md,
     borderRadius: 15,
-
   },
   // Up Number
 
@@ -176,7 +173,6 @@ const StadiscticsStyle = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-
   },
   titleNumber: {
     fontWeight: '800',
@@ -209,11 +205,14 @@ const StadiscticsStyle = StyleSheet.create({
   },
   ringChartText: {
     fontSize: fontSizes.mxxl,
-    color: colors.secondary,
+    color: colors.primary,
     fontWeight: '800',
+    marginTop: spacing.lg,
   },
   totalText: {
     fontSize: fontSizes.lg,
+    color: 'rgba(255,255,255,0.60)',
+    fontWeight: '500',
   },
   bestGameContainer: {
     backgroundColor: colors.background2,
