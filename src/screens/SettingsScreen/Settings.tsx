@@ -46,6 +46,7 @@ const Settings = ({navigation}) => {
   const {uid, logout} = useAuth();
   const {
     profilePicture,
+    setProfilePictureUrl,
     setUpdateProfilePicture,
     userPoints,
     setUpdateUserPoints,
@@ -68,6 +69,7 @@ const Settings = ({navigation}) => {
   const [savingInfo, setSavingInfo] = useState(false);
   const toastOpacity = useRef(new Animated.Value(0)).current;
   const infoToastOpacity = useRef(new Animated.Value(0)).current;
+  const userPickedAvatarRef = useRef(false);
 
   // Section animations
   const profileAnim = useFadeInUp(0);
@@ -115,12 +117,12 @@ const Settings = ({navigation}) => {
     fetchData();
   }, [uid]);
 
-  // Sync selectedAvatar from profilePicture
+  // Sync selectedAvatar from profilePicture on initial load only (not while user is picking)
   useEffect(() => {
-    if (profilePicture) {
+    if (profilePicture && !userPickedAvatarRef.current && !selectedAvatar) {
       setSelectedAvatar(profilePicture);
     }
-  }, [profilePicture]);
+  }, [profilePicture, selectedAvatar]);
 
   const applyEditFormFromUser = useCallback(() => {
     const form = toEditForm(userInformation);
@@ -224,28 +226,31 @@ const Settings = ({navigation}) => {
     setSavingAvatar(true);
     try {
       const response = await updateUserProfilePicture(uid, selectedAvatar);
-      if (response?.message) {
-        setUpdateProfilePicture(true);
-        // Show success toast with animation
-        setAvatarSaved(true);
-        Animated.sequence([
-          Animated.timing(toastOpacity, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-          Animated.delay(2000),
-          Animated.timing(toastOpacity, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-        ]).start(() => setAvatarSaved(false));
+      if (!response) {
+        Alert.alert('Error al guardar', 'No se pudo actualizar el avatar. Intenta de nuevo.');
+        return;
       }
+      setProfilePictureUrl(selectedAvatar);
+      userPickedAvatarRef.current = false;
+      setAvatarSaved(true);
+      Animated.sequence([
+        Animated.timing(toastOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.delay(2000),
+        Animated.timing(toastOpacity, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start(() => setAvatarSaved(false));
     } catch (error) {
-      if (__DEV__) {
-        console.error('Error updating avatar:', error);
-      }
+      Alert.alert(
+        'Error al guardar',
+        error instanceof Error ? error.message : 'Intenta de nuevo.',
+      );
     } finally {
       setSavingAvatar(false);
     }
@@ -295,7 +300,7 @@ const Settings = ({navigation}) => {
           ]}>
           <View style={SettingsStyles.avatarContainer}>
             <Image
-              source={getAvatarSource(profilePicture)}
+              source={getAvatarSource(selectedAvatar || profilePicture)}
               style={SettingsStyles.avatarImage}
             />
           </View>
@@ -494,7 +499,10 @@ const Settings = ({navigation}) => {
               return (
                 <TouchableWithoutFeedback
                   key={avatar.id}
-                  onPress={() => setSelectedAvatar(avatar.backendPath)}>
+                  onPress={() => {
+                    userPickedAvatarRef.current = true;
+                    setSelectedAvatar(avatar.backendPath);
+                  }}>
                   <Animated.View
                     style={[
                       SettingsStyles.avatarOption,

@@ -62,13 +62,15 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
   const tipAnim = useFadeInUp(750, animReady);
   const ctaPress = usePressScale();
 
-  // Trigger context data fetching
+  // Trigger context data fetching (skip userInformation if hydrated at login)
   useEffect(() => {
+    if (!uid) return;
     if (!profilePicture) setUpdateProfilePicture(true);
     if (!userPoints) setUpdateUserPoints(true);
     if (!userInformation) setUpdateUserInformation(true);
     if (!last3MonthsScores) setUpdateLast3MonthsScores(true);
   }, [
+    uid,
     profilePicture, setUpdateProfilePicture,
     userPoints, setUpdateUserPoints,
     userInformation, setUpdateUserInformation,

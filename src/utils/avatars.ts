@@ -27,11 +27,44 @@ export const AVATARS: AvatarOption[] = [
 export const DEFAULT_AVATAR = require('../../img/avatars/default.png');
 
 /**
+ * Normalize backend/Firestore avatar paths to the canonical backendPath used in AVATARS.
+ * Handles full URLs, missing leading slash, and filename-only matches.
+ */
+export function normalizeAvatarBackendPath(path: string | null | undefined): string | null {
+  if (!path || path === 'null' || path === 'undefined') return null;
+
+  let normalized = path.trim();
+  try {
+    if (normalized.includes('://')) {
+      normalized = new URL(normalized).pathname;
+    }
+  } catch {
+    // keep as-is
+  }
+
+  if (!normalized.startsWith('/')) {
+    normalized = `/${normalized.replace(/^\/+/, '')}`;
+  }
+
+  const exact = AVATARS.find(a => a.backendPath === normalized);
+  if (exact) return exact.backendPath;
+
+  const filename = normalized.split('/').pop();
+  if (filename) {
+    const byFile = AVATARS.find(a => a.backendPath.split('/').pop() === filename);
+    if (byFile) return byFile.backendPath;
+  }
+
+  return normalized;
+}
+
+/**
  * Find the local avatar source for a backend path.
  * Falls back to DEFAULT_AVATAR if no match.
  */
 export function getAvatarSource(backendPath: string | null | undefined): ImageSourcePropType {
-  if (!backendPath || backendPath === 'null' || backendPath === 'undefined') return DEFAULT_AVATAR;
-  const match = AVATARS.find(a => a.backendPath === backendPath);
+  const canonical = normalizeAvatarBackendPath(backendPath);
+  if (!canonical) return DEFAULT_AVATAR;
+  const match = AVATARS.find(a => a.backendPath === canonical);
   return match?.source ?? DEFAULT_AVATAR;
 }

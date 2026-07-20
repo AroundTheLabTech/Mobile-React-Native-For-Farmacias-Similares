@@ -4,6 +4,7 @@ import { getScorePerGames, getUserInformation, getUserLast3MonthsInfo, getUserPi
 import { useAuth } from '../AuthContext';
 import { TScorePerGame, TUserInformation, TUserLast3MonthInfo, TUserPoints } from '../types/user';
 import { DEV_SKIP_LOGIN, MOCK_USER_INFORMATION, MOCK_USER_POINTS, MOCK_LAST_3_MONTHS, MOCK_SCORE_PER_GAME } from '../config/dev';
+import { normalizeAvatarBackendPath } from '../utils/avatars';
 
 // Crear el contexto
 const ProfileContext = createContext(undefined);
@@ -34,84 +35,101 @@ export const UserProvider = ({ children }) => {
 
   // Actualizar la imagen de perfil cuando `updateProfilePicture` cambie
   useEffect(() => {
-    if (updateProfilePicture) {
-      async function fetchProfilePicture() {
-        try {
-          const response = await getUserPicture(uid);
-          if(response?.profile_picture_url) {
-            setProfilePicture(response.profile_picture_url);
-          } else {
-            throw new Error('No hay URL');
-          }
-        } catch (error) {
-          // console.error('Error fetching profile picture', error);
-          return;
-        }
-      }
+    if (!updateProfilePicture) return;
 
-      fetchProfilePicture();
-      setUpdateProfilePicture(false);  // Resetear el estado de actualización después de la carga
+    async function fetchProfilePicture() {
+      try {
+        const response = await getUserPicture(uid);
+        if (response?.profile_picture_url) {
+          const normalized = normalizeAvatarBackendPath(response.profile_picture_url);
+          if (normalized) {
+            setProfilePicture(normalized);
+          }
+        }
+      } catch {
+        // ignore
+      } finally {
+        setUpdateProfilePicture(false);
+      }
     }
+
+    fetchProfilePicture();
   }, [uid, updateProfilePicture]);
 
   useEffect(() => {
-    if (updateLast3MonthsScores) {
-      async function fetchUserScore() {
-        try {
-          console.log('[DEBUG UserContext] fetching last3MonthsScores for uid:', uid);
-          const response = await getUserLast3MonthsInfo(uid);  // Obtener imagen de perfil
-          console.log('[DEBUG UserContext] last3MonthsScores response:', JSON.stringify(response));
-          console.log('[DEBUG UserContext] last3MonthsScores sessions count:', response?.sessions?.length ?? 'no sessions');
-          setLast3MonthsScores(response);  // Asumimos que `response.url` es la URL de la imagen
-        } catch (error) {
-          console.log('[DEBUG UserContext] last3MonthsScores ERROR:', error);
-          return;
-        }
-      }
+    if (!updateLast3MonthsScores) return;
 
-      fetchUserScore();
-      setUpdateLast3MonthsScores(false);  // Resetear el estado de actualización después de la carga
+    async function fetchUserScore() {
+      try {
+        if (__DEV__) console.log('[DEBUG UserContext] fetching last3MonthsScores for uid:', uid);
+        const response = await getUserLast3MonthsInfo(uid);
+        if (__DEV__) console.log('[DEBUG UserContext] last3MonthsScores sessions count:', response?.sessions?.length ?? 'no sessions');
+        if (response) {
+          setLast3MonthsScores(response);
+        }
+      } catch (error) {
+        if (__DEV__) console.log('[DEBUG UserContext] last3MonthsScores ERROR:', error);
+      } finally {
+        setUpdateLast3MonthsScores(false);
+      }
     }
+
+    fetchUserScore();
   }, [uid, updateLast3MonthsScores]);
 
   useEffect(() => {
-    if (updateScorePerGame) {
-      async function fetchUserScorePerGame() {
-        try {
-          const response = await getScorePerGames(uid);  // Obtener imagen de perfil
-          setScorePerGame(response);  // Asumimos que `response.url` es la URL de la imagen
-        } catch (error) {
-          // console.error('Error fetching profile picture', error);
-          return;
-        }
-      }
+    if (!updateScorePerGame) return;
 
-      fetchUserScorePerGame();
-      setUpdateScorePerGame(false);  // Resetear el estado de actualización después de la carga
+    async function fetchUserScorePerGame() {
+      try {
+        const response = await getScorePerGames(uid);
+        if (response) {
+          setScorePerGame(response);
+        }
+      } catch {
+        // ignore
+      } finally {
+        setUpdateScorePerGame(false);
+      }
     }
+
+    fetchUserScorePerGame();
   }, [uid, updateScorePerGame]);
 
   useEffect(() => {
-    if (updateUserPoints) {
-      async function fetchUserPoints() {
-        try {
-          console.log('[DEBUG UserContext] fetching userPoints for uid:', uid);
-          const response = await getUserPoints(uid);  // Obtener imagen de perfil
-          console.log('[DEBUG UserContext] userPoints response:', JSON.stringify(response));
-          setUserPoints(response);  // Asumimos que `response.url` es la URL de la imagen
-        } catch (error) {
-          console.log('[DEBUG UserContext] userPoints ERROR:', error);
-          return;
-        }
-      }
+    if (!updateUserPoints) return;
 
-      fetchUserPoints();
-      setUpdateUserPoints(false);  // Resetear el estado de actualización después de la carga
+    async function fetchUserPointsData() {
+      try {
+        if (__DEV__) console.log('[DEBUG UserContext] fetching userPoints for uid:', uid);
+        const response = await getUserPoints(uid);
+        if (__DEV__) console.log('[DEBUG UserContext] userPoints response:', JSON.stringify(response));
+        if (response) {
+          setUserPoints(response);
+        }
+      } catch (error) {
+        if (__DEV__) console.log('[DEBUG UserContext] userPoints ERROR:', error);
+      } finally {
+        setUpdateUserPoints(false);
+      }
     }
+
+    fetchUserPointsData();
   }, [uid, updateUserPoints]);
 
   const patchUserInformation = useCallback((patch: Partial<TUserInformation>) => {
     setUserInformation(prev => (prev ? { ...prev, ...patch } : prev));
+  }, []);
+
+  const hydrateUserInformation = useCallback((info: TUserInformation) => {
+    setUserInformation(info);
+    setUpdateUserInformation(false);
+  }, []);
+
+  const setProfilePictureUrl = useCallback((url: string) => {
+    const normalized = normalizeAvatarBackendPath(url) ?? url;
+    setProfilePicture(normalized);
+    setUpdateProfilePicture(false);
   }, []);
 
   const refreshUserInformation = useCallback(async (): Promise<TUserInformation | null> => {
@@ -172,6 +190,7 @@ export const UserProvider = ({ children }) => {
       value={
         {
           profilePicture,
+          setProfilePictureUrl,
           setUpdateProfilePicture,
           last3MonthsScores,
           setUpdateLast3MonthsScores,
@@ -183,6 +202,7 @@ export const UserProvider = ({ children }) => {
           setUpdateUserInformation,
           patchUserInformation,
           refreshUserInformation,
+          hydrateUserInformation,
         }
       }>
       {children}

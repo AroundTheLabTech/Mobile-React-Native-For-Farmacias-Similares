@@ -19,7 +19,9 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
   };
 }
 
-async function refreshAccessToken(): Promise<string | null> {
+let _refreshInFlight: Promise<string | null> | null = null;
+
+async function performRefreshAccessToken(): Promise<string | null> {
   try {
     const refreshToken = await getSecureRefreshToken();
     if (!refreshToken) return null;
@@ -34,26 +36,55 @@ async function refreshAccessToken(): Promise<string | null> {
 
     const data = (await response.json()) as {
       id_token?: string;
+      access_token?: string;
       expires_in?: number;
+      expires?: number;
       refresh_token?: string;
+      refreshToken?: string;
     };
 
-    if (!data.id_token) return null;
+    const id_token = data.id_token ?? data.access_token;
+    if (!id_token) return null;
 
-    await setSecureToken(data.id_token);
-    if (data.expires_in) {
-      const expiresAtMs = Date.now() + data.expires_in * 1000;
+    await setSecureToken(id_token);
+    const expires_in = data.expires_in ?? data.expires;
+    if (expires_in != null) {
+      const expiresAtMs = Date.now() + Number(expires_in) * 1000;
       await AsyncStorage.setItem('tokenExpiresAt', String(expiresAtMs));
     }
-    if (data.refresh_token) {
+    const newRefresh = data.refresh_token ?? data.refreshToken;
+    if (newRefresh) {
       const { setSecureRefreshToken } = await import('../utils/secureStorage');
-      await setSecureRefreshToken(data.refresh_token);
+      await setSecureRefreshToken(newRefresh);
     }
 
-    return data.id_token;
+    return id_token;
   } catch {
     return null;
   }
+}
+
+/** Single-flight refresh: parallel 401s share one refresh call. */
+async function refreshAccessToken(): Promise<string | null> {
+  if (!_refreshInFlight) {
+    _refreshInFlight = performRefreshAccessToken().finally(() => {
+      _refreshInFlight = null;
+    });
+  }
+  return _refreshInFlight;
+}
+
+function requestHadAuthorization(options: RequestInit): boolean {
+  const headers = options.headers;
+  if (!headers) return false;
+  if (headers instanceof Headers) {
+    return headers.has('Authorization');
+  }
+  if (Array.isArray(headers)) {
+    return headers.some(([key]) => key.toLowerCase() === 'authorization');
+  }
+  const record = headers as Record<string, string>;
+  return Boolean(record.Authorization ?? record.authorization);
 }
 
 let _onSessionExpired: (() => void) | null = null;
@@ -78,8 +109,8 @@ async function fetchWithTimeout(
 
   const response = await doFetch(options);
 
-  if (response.status === 401) {
-    if (__DEV__) console.log('[fetchWithTimeout] 401 detected, attempting token refresh...');
+  if (response.status === 401 && requestHadAuthorization(options)) {
+    if (__DEV__) console.log('[fetchWithTimeout] 401 on authenticated request:', url);
     const newToken = await refreshAccessToken();
 
     if (newToken) {
@@ -88,12 +119,14 @@ async function fetchWithTimeout(
         ...options,
         headers: { ...currentHeaders, Authorization: `Bearer ${newToken}` },
       };
-      if (__DEV__) console.log('[fetchWithTimeout] Token refreshed, retrying request...');
+      if (__DEV__) console.log('[fetchWithTimeout] Token refreshed, retrying:', url);
       return doFetch(updatedOptions);
     }
 
     if (__DEV__) console.log('[fetchWithTimeout] Refresh failed, session expired');
     _onSessionExpired?.();
+  } else if (response.status === 401 && __DEV__) {
+    console.log('[fetchWithTimeout] 401 on unauthenticated request (no refresh):', url);
   }
 
   return response;
@@ -167,13 +200,19 @@ export const loginUserByEmailAndPassword = async (email: string, password: strin
   // Normaliza/valida shape
   const id_token = data?.id_token ?? data?.access_token;
   const expires_in = data?.expires_in ?? data?.expires ?? null;
+  const refresh_token = data?.refresh_token ?? data?.refreshToken ?? null;
 
   if (!id_token || expires_in == null) {
     throw new Error('Respuesta de login incompleta.');
   }
 
   if (__DEV__) console.log('[LOGIN] Success! Token received');
-  return data as TUserLogin;
+  return {
+    ...data,
+    id_token,
+    expires_in: Number(expires_in),
+    refresh_token,
+  } as TUserLogin;
 };
 
 export const validateToken = async (idToken: string): Promise<TUserTokenValidate | null> => {
@@ -421,11 +460,10 @@ export const getUserCurrentMonthSession = async (uid: string): Promise<TUserCurr
       throw new Error('UID inválido');
     }
 
+    const headers = await getAuthHeaders();
     const requestOptions = {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     };
 
     const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/scores/current_month_sessions/${uid}`, requestOptions);
@@ -977,11 +1015,10 @@ export const getTopMonthlyByUser = async (uid: string): Promise<number | null> =
     if (!uid) {
       throw new Error('UID inválido');
     }
+    const headers = await getAuthHeaders();
     const requestOptions = {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     };
     const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/scores/top_monthly/${uid}`, requestOptions);
 
