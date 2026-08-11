@@ -20,9 +20,8 @@ const ProfileScreen = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState('stadistics');
   const [topGlobal, setTopGlobal] = useState<number | null>(null);
   const [topMonthly, setTopMonthly] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [animReady, setAnimReady] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const { profilePicture, setUpdateProfilePicture, userPoints, setUpdateUserPoints, userInformation } = useUser();
 
@@ -50,16 +49,19 @@ const ProfileScreen = ({ navigation }) => {
 
   useEffect(() => {
     let mounted = true;
-    async function init() {
-      await fetchRankings();
-      if (mounted) {
-        setLoading(false);
+    fetchRankings().then(() => {
+      if (mounted && !animReady) {
         setTimeout(() => setAnimReady(true), 50);
       }
-    }
-    init();
+    });
     return () => { mounted = false; };
-  }, [fetchRankings]);
+  }, [fetchRankings, animReady]);
+
+  useEffect(() => {
+    if (userInformation && !animReady) {
+      setTimeout(() => setAnimReady(true), 50);
+    }
+  }, [userInformation, animReady]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -85,7 +87,7 @@ const ProfileScreen = ({ navigation }) => {
     return `#${val}`;
   };
 
-  if (loading && !userInformation) {
+  if (!userInformation) {
     return (
       <View style={[profileStyles.screen, { justifyContent: 'center', alignItems: 'center' }]}>
         <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />

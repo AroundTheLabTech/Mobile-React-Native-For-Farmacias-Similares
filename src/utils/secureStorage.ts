@@ -23,7 +23,8 @@ export async function setSecureToken(token: string): Promise<void> {
  * Store the refresh token securely using the device keychain.
  * Falls back to AsyncStorage if Keychain is unavailable.
  */
-export async function setSecureRefreshToken(token: string): Promise<void> {
+export async function setSecureRefreshToken(token: string | null | undefined): Promise<void> {
+  if (!token) return;
   try {
     await Keychain.setGenericPassword(REFRESH_TOKEN_USERNAME, token, { service: REFRESH_TOKEN_SERVICE });
   } catch {

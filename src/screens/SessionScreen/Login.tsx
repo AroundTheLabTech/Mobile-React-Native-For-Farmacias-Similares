@@ -6,6 +6,7 @@ import authStyles from '../../theme/authStyles';
 import { getUserInformation, loginUserByEmailAndPassword, validateToken } from '../../services/backend';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../AuthContext';
+import { useUser } from '../../services/UserContext';
 import { setSecureToken, getSecureToken, clearSecureToken, setSecureRefreshToken, getSecureRefreshToken } from '../../utils/secureStorage';
 import { TUserLogin } from 'src/types/user';
 import AppMessage from '@components/AppMessage/AppMessage';
@@ -45,6 +46,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
   const { updateUserInformation, isLogout, setIsLogout } = useAuth();
+  const { hydrateUserInformation } = useUser();
   const [toast, setToast] = useState<ToastState>(null);
   const showMessage = (type: ToastType, text: string) => setToast({ type, text });
 
@@ -67,7 +69,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
       // Store token securely in device keychain
       await setSecureToken(user.id_token);
-      await setSecureRefreshToken(user.refresh_token);
+      if (user.refresh_token) {
+        await setSecureRefreshToken(user.refresh_token);
+      }
       await AsyncStorage.multiSet([
         [STORAGE_KEYS.expiresAt, String(expiresAtMs)],
         [STORAGE_KEYS.updateScore, 'false'],
@@ -110,6 +114,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       };
 
       updateUserInformation(hydratedUser);
+      hydrateUserInformation(response);
 
       showMessage('success', 'Login exitoso. Redirigiendo...');
       setLoading(false);
@@ -170,6 +175,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
         const response = await getUserInformation(validateAccessToken.uid);
 
+        if (!response) {
+          await clearExpiredSession();
+          setLoading(false);
+          return;
+        }
+
         const user: TUserLogin = {
           uid: validateAccessToken.uid,
           email: response.email,
@@ -185,6 +196,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         };
 
         updateUserInformation(user);
+        hydrateUserInformation(response);
         setLoading(false);
 
         if (!isNavigatingRef.current) {
