@@ -83,6 +83,19 @@ export function getMaxScorePerMonth(monthlyScores: TGroupedSessions): TMaxScores
   return maxScores;
 }
 
+export function getSumScorePerMonth(monthlyScores: TGroupedSessions): TMaxScores {
+  const sumScores: TMaxScores = {};
+
+  for (const month in monthlyScores) {
+    if (monthlyScores.hasOwnProperty(month)) {
+      const scores = monthlyScores[month];
+      sumScores[month] = scores.reduce((sum, score) => sum + score, 0);
+    }
+  }
+
+  return sumScores;
+}
+
 
 export function getMonthWithHighestScore(maxScores: TMaxScores): string {
   let highestMonth = '';

@@ -1,8 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, ScrollView } from 'react-native';
-import { RootStackParamList } from '../../NavigationTypes';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { putResetPassword } from '@services/backend';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ScrollView,
+} from 'react-native';
+import {RootStackParamList} from '../../NavigationTypes';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {putResetPassword} from '@services/backend';
 import Loader from '@components/LoaderComponent/Loader';
 import AppMessage from '@components/AppMessage/AppMessage';
 import authStyles from '../../theme/authStyles';
@@ -16,28 +26,38 @@ type ForgotPasswordScreenProps = {
   navigation: ForgotPasswordScreenNavigationProp;
 };
 
-type ToastState = { type: string; text: string } | null;
+type ToastState = {type: string; text: string} | null;
 
-const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation }) => {
+const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
+  navigation,
+}) => {
   const [email, setEmail] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [emailSent, setEmailSent] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
-  const [countdown, setCountdown] = useState(0);
+  const [countdown, setCountdown] = useState(60);
+  const [isActive, setIsActive] = useState(false);
 
   const [toast, setToast] = useState<ToastState>(null);
-  const showMessage = (type: string, text: string) => setToast({ type, text });
+  const showMessage = (type: string, text: string) => setToast({type, text});
 
   useEffect(() => {
-    if (countdown <= 0) return;
-    const timer = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) { clearInterval(timer); return 0; }
-        return prev - 1;
-      });
+    if (!isActive) {
+      return;
+    }
+
+    if (countdown <= 0) {
+      setIsActive(false);
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      setCountdown(prev => prev - 1);
     }, 1000);
-    return () => clearInterval(timer);
-  }, [countdown]);
+
+    // Cleanup when time changes or when leaving the screen
+    return () => clearTimeout(timeout);
+  }, [countdown, isActive]);
 
   async function handleForgotPassword() {
     if (!email || email.trim() === '') {
@@ -51,10 +71,13 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
 
       if (response && response.message) {
         setEmailSent(true);
-        setCountdown(60);
         showMessage('success', 'Correo enviado correctamente.');
+        setIsActive(true);
       } else {
-        showMessage('error', 'Correo no encontrado. Verifica que sea el correo correcto.');
+        showMessage(
+          'error',
+          'Correo no encontrado. Verifica que sea el correo correcto.',
+        );
       }
     } catch {
       showMessage('error', 'Error al enviar. Inténtalo más tarde.');
@@ -84,14 +107,14 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
 
           <ScrollView
             contentContainerStyle={authStyles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-          >
+            keyboardShouldPersistTaps="handled">
             <View style={authStyles.glassCard}>
               {/* Header */}
               <Text style={authStyles.brandText}>SimiJuegos</Text>
               <Text style={authStyles.title}>Recuperar contraseña</Text>
               <Text style={authStyles.subtitle}>
-                Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña
+                Ingresa tu correo y te enviaremos un enlace para restablecer tu
+                contraseña
               </Text>
 
               {!emailSent ? (
@@ -121,15 +144,19 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
 
                   {/* Send Button */}
                   <TouchableOpacity
-                    style={[authStyles.buttonPrimary, loading && authStyles.buttonPrimaryDisabled]}
+                    style={[
+                      authStyles.buttonPrimary,
+                      loading && authStyles.buttonPrimaryDisabled,
+                    ]}
                     onPress={handleForgotPassword}
                     disabled={loading}
-                    activeOpacity={0.8}
-                  >
+                    activeOpacity={0.8}>
                     {loading ? (
                       <Loader visible={loading} message="" size="small" />
                     ) : (
-                      <Text style={authStyles.buttonPrimaryText}>Enviar enlace</Text>
+                      <Text style={authStyles.buttonPrimaryText}>
+                        Enviar enlace
+                      </Text>
                     )}
                   </TouchableOpacity>
                 </>
@@ -138,7 +165,8 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
                   {/* Confirmation message */}
                   <View style={authStyles.confirmationContainer}>
                     <Text style={authStyles.confirmationText}>
-                      Hemos enviado un enlace de recuperación a {email}. Revisa tu bandeja de entrada.
+                      Hemos enviado un enlace de recuperación a {email}. Revisa
+                      tu bandeja de entrada.
                     </Text>
                   </View>
 
@@ -146,17 +174,18 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
                   <TouchableOpacity
                     style={[
                       authStyles.buttonOutline,
-                      countdown > 0 && { opacity: 0.4 },
+                      countdown > 0 && {opacity: 0.4},
                     ]}
                     onPress={handleForgotPassword}
                     disabled={countdown > 0 || loading}
-                    activeOpacity={0.8}
-                  >
+                    activeOpacity={0.8}>
                     {loading ? (
                       <Loader visible={loading} message="" size="small" />
                     ) : (
                       <Text style={authStyles.buttonOutlineText}>
-                        {countdown > 0 ? `Reenviar en ${countdown}s` : 'Reenviar correo'}
+                        {countdown > 0
+                          ? `Reenviar en ${countdown}s`
+                          : 'Reenviar correo'}
                       </Text>
                     )}
                   </TouchableOpacity>
@@ -166,9 +195,10 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
               {/* Back to Login */}
               <TouchableOpacity
                 style={authStyles.buttonLink}
-                onPress={() => navigation.navigate('Login')}
-              >
-                <Text style={authStyles.buttonLinkText}>Volver al inicio de sesión</Text>
+                onPress={() => navigation.navigate('Login')}>
+                <Text style={authStyles.buttonLinkText}>
+                  Volver al inicio de sesión
+                </Text>
               </TouchableOpacity>
             </View>
           </ScrollView>

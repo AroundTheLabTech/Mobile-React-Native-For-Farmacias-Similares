@@ -17,7 +17,7 @@ import {
   calculatePercentage,
   calculateScreenSizeInInches,
   getMaxScore,
-  getMaxScorePerMonth,
+  getSumScorePerMonth,
   getMonthWithHighestScore,
   groupSessionsByMonth,
 } from '../../utils/helpers';
@@ -26,7 +26,7 @@ import MedalIcon from '../../../img/iconos/medal.svg';
 import StadisticsIcon from '../../../img/iconos/stadistics.svg';
 import BarChart from '../../components/BarChartComponent/BarChart';
 import OptionSelect from '../../components/OptionSelectComponent/OptionSelect';
-import {TUserCurrentMonthSession, TUserLast3MonthInfo} from 'src/types/user';
+import {TUserCurrentMonthSession, TUserLast3MonthInfo, TUserSession} from 'src/types/user';
 import {getUserCurrentMonthSession} from '../../services/backend';
 import {useAuth} from '../../AuthContext';
 import {useUser} from '../../services/UserContext';
@@ -110,17 +110,22 @@ const monthsInSpanish = {
   Diciembre: 11,
 };
 
-const buildLast3MonthsChartData = (
+const MONTH_LABELS = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+];
+
+const buildGeneralChartData = (
   result: TUserLast3MonthInfo,
 ): StatCategory[] | undefined => {
-  if (!result?.sessions) {
+  if (!result?.sessions?.length) {
     return undefined;
   }
 
   const resultGroupByMonth = groupSessionsByMonth(result.sessions);
-  const last3MonthsScores = getMaxScorePerMonth(resultGroupByMonth);
-  const highestScoreMonth = getMonthWithHighestScore(last3MonthsScores);
-  const keys = Object.keys(last3MonthsScores);
+  const monthlyTotals = getSumScorePerMonth(resultGroupByMonth);
+  const highestScoreMonth = getMonthWithHighestScore(monthlyTotals);
+  const keys = Object.keys(monthlyTotals);
 
   const newData: StatCategory[] = [];
   let controller = 0;
@@ -132,8 +137,8 @@ const buildLast3MonthsChartData = (
         stats: [
           {
             label: keys[i],
-            value: last3MonthsScores[keys[i]],
-            maxValue: last3MonthsScores[highestScoreMonth],
+            value: monthlyTotals[keys[i]],
+            maxValue: monthlyTotals[highestScoreMonth],
           },
         ],
       });
@@ -151,6 +156,26 @@ const buildLast3MonthsChartData = (
   );
 };
 
+const buildMonthlyChartData = (
+  sessions: TUserSession[],
+): StatCategory[] => {
+  const currentMonthLabel = MONTH_LABELS[new Date().getMonth()];
+  const totalScore = sessions.reduce((sum, session) => sum + session.score, 0);
+
+  return [
+    {
+      category: 'Puntajes',
+      stats: [
+        {
+          label: currentMonthLabel,
+          value: totalScore,
+          maxValue: totalScore || 1,
+        },
+      ],
+    },
+  ];
+};
+
 const StadisticsScreen: React.FC = () => {
   const {uid} = useAuth();
   const {last3MonthsScores, setUpdateLast3MonthsScores} = useUser();
@@ -158,20 +183,67 @@ const StadisticsScreen: React.FC = () => {
   const [loadingMonth, setLoadingMonth] = useState<boolean>(true);
 
   const [progress, setProgress] = useState<IProgress>({
-    total: 0,
+    total: 120,
     progress: 0,
     progressPercent: 0,
   });
 
-  const [bestGame, setBestGame] = useState<number>();
+  const [bestGameCurrentMonth, setBestGameCurrentMonth] = useState<
+    number | undefined
+  >();
+  const [currentMonthSessions, setCurrentMonthSessions] = useState<
+    TUserSession[]
+  >([]);
 
-  const last3MonthsInfo = useMemo(
+  const generalChartData = useMemo(
     () =>
       last3MonthsScores
-        ? buildLast3MonthsChartData(last3MonthsScores)
+        ? buildGeneralChartData(last3MonthsScores)
         : undefined,
     [last3MonthsScores],
   );
+
+  const monthlyChartData = useMemo(
+    () => buildMonthlyChartData(currentMonthSessions),
+    [currentMonthSessions],
+  );
+
+  const [selectedFilter, setSelectedFilter] = useState<'monthly' | 'general'>(
+    'monthly',
+  );
+
+  const chartData =
+    selectedFilter === 'general' ? generalChartData : monthlyChartData;
+
+  const bestGameFromHistory = useMemo(() => {
+    if (!last3MonthsScores?.sessions?.length) {
+      return undefined;
+    }
+    return getMaxScore(last3MonthsScores.sessions);
+  }, [last3MonthsScores]);
+
+  const generalTotalScore = useMemo(() => {
+    if (!last3MonthsScores?.sessions?.length) {
+      return 0;
+    }
+    return last3MonthsScores.sessions.reduce(
+      (sum, session) => sum + session.score,
+      0,
+    );
+  }, [last3MonthsScores]);
+
+  const currentMonthTotalScore = useMemo(
+    () => currentMonthSessions.reduce((sum, session) => sum + session.score, 0),
+    [currentMonthSessions],
+  );
+
+  const displayBestGame =
+    selectedFilter === 'monthly' ? currentMonthTotalScore : generalTotalScore;
+
+  const displayBestSession =
+    selectedFilter === 'monthly'
+      ? bestGameCurrentMonth ?? 0
+      : bestGameFromHistory ?? 0;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -179,20 +251,22 @@ const StadisticsScreen: React.FC = () => {
       const result: TUserCurrentMonthSession = await getUserCurrentMonthSession(
         uid,
       );
-      if (result?.sessions) {
-        const highScore = getMaxScore(result.sessions);
-        setBestGame(highScore);
 
-        const progressData = result?.currentMonthSessions
-          ? result?.currentMonthSessions
-          : 0;
-
-        setProgress({
-          total: 120,
-          progress: progressData,
-          progressPercent: calculatePercentage(120, progressData),
-        });
+      if (result?.sessions?.length) {
+        setBestGameCurrentMonth(getMaxScore(result.sessions));
+        setCurrentMonthSessions(result.sessions);
+      } else {
+        setBestGameCurrentMonth(undefined);
+        setCurrentMonthSessions([]);
       }
+
+      const progressData = result?.currentMonthSessions ?? 0;
+      setProgress({
+        total: 120,
+        progress: progressData,
+        progressPercent: calculatePercentage(120, progressData),
+      });
+
       setLoadingMonth(false);
     };
 
@@ -204,10 +278,6 @@ const StadisticsScreen: React.FC = () => {
       setUpdateLast3MonthsScores(true);
     }
   }, [last3MonthsScores, setUpdateLast3MonthsScores]);
-
-  const [selectedFilter, setSelectedFilter] = useState<'monthly' | 'general'>(
-    'monthly',
-  );
 
   const filterOptions = [
     {label: 'Mensual', value: 'monthly'},
@@ -238,7 +308,7 @@ const StadisticsScreen: React.FC = () => {
     };
   }, [orientation, screenWidth]);
 
-  const loading = loadingMonth || (!last3MonthsInfo && !last3MonthsScores);
+  const loading = loadingMonth || last3MonthsScores === null;
 
   if (loading) {
     return (
@@ -261,7 +331,7 @@ const StadisticsScreen: React.FC = () => {
     );
   }
 
-  if (!bestGame || (!last3MonthsInfo && last3MonthsInfo?.length < 3)) {
+  if (!generalChartData?.length && !last3MonthsScores?.sessions?.length) {
     return (
       <View style={StadiscticsStyle.container}>
         <Text style={StadiscticsStyle.noDataText}>
@@ -320,7 +390,7 @@ const StadisticsScreen: React.FC = () => {
           {/* Box */}
           <View style={StadiscticsStyle.containerBestPlay}>
             <View style={StadiscticsStyle.containerUpNumber}>
-              <Text style={StadiscticsStyle.titleNumber}>{bestGame}</Text>
+              <Text style={StadiscticsStyle.titleNumber}>{displayBestGame}</Text>
               <Image
                 source={require('../../../img/iconos/pastilla.png')}
                 resizeMode="contain"
@@ -340,7 +410,7 @@ const StadisticsScreen: React.FC = () => {
                   StadiscticsStyle.titleNumber,
                   StadiscticsStyle.colorPrimary,
                 ]}>
-                {bestGame}
+                {displayBestSession}
               </Text>
               <MedalIcon width={24} />
             </View>
@@ -369,15 +439,15 @@ const StadisticsScreen: React.FC = () => {
           </View>
         </View>
         <View style={StadiscticsStyle.barChartContainer}>
-          {last3MonthsInfo && sizeInInches && Number(sizeInInches) > 9 ? (
+          {chartData && sizeInInches && Number(sizeInInches) > 9 ? (
             <BarChart9Inches
-              data={last3MonthsInfo}
+              data={chartData}
               barColor="#3498db"
               listOfColors={listOfColors}
             />
           ) : (
             <BarChart
-              data={last3MonthsInfo}
+              data={chartData}
               barColor="#3498db"
               listOfColors={listOfColors}
             />
