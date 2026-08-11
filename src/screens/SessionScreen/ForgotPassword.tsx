@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -28,18 +28,21 @@ type ForgotPasswordScreenProps = {
 
 type ToastState = {type: string; text: string} | null;
 
-const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
-  navigation,
-}) => {
-  const [email, setEmail] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
-  const [emailSent, setEmailSent] = useState(false);
-  const [focusedField, setFocusedField] = useState<string | null>(null);
-  const [countdown, setCountdown] = useState(60);
-  const [isActive, setIsActive] = useState(false);
+const RESEND_COOLDOWN_SECONDS = 60;
 
-  const [toast, setToast] = useState<ToastState>(null);
-  const showMessage = (type: string, text: string) => setToast({type, text});
+type EmailSentViewProps = {
+  email: string;
+  loading: boolean;
+  onResend: () => void;
+};
+
+const EmailSentView: React.FC<EmailSentViewProps> = ({
+  email,
+  loading,
+  onResend,
+}) => {
+  const [countdown, setCountdown] = useState(RESEND_COOLDOWN_SECONDS);
+  const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
     if (!isActive) {
@@ -55,9 +58,57 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
       setCountdown(prev => prev - 1);
     }, 1000);
 
-    // Cleanup when time changes or when leaving the screen
     return () => clearTimeout(timeout);
   }, [countdown, isActive]);
+
+  const handleResend = () => {
+    onResend();
+    setCountdown(RESEND_COOLDOWN_SECONDS);
+    setIsActive(true);
+  };
+
+  return (
+    <>
+      <View style={authStyles.confirmationContainer}>
+        <Text style={authStyles.confirmationText}>
+          Hemos enviado un enlace de recuperación a {email}. Revisa tu bandeja
+          de entrada.
+        </Text>
+      </View>
+
+      <TouchableOpacity
+        style={[
+          authStyles.buttonOutline,
+          countdown > 0 && {opacity: 0.4},
+        ]}
+        onPress={handleResend}
+        disabled={countdown > 0 || loading}
+        activeOpacity={0.8}>
+        {loading ? (
+          <Loader visible={loading} message="" size="small" />
+        ) : (
+          <Text style={authStyles.buttonOutlineText}>
+            {countdown > 0
+              ? `Reenviar en ${countdown}s`
+              : 'Reenviar correo'}
+          </Text>
+        )}
+      </TouchableOpacity>
+    </>
+  );
+};
+
+const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
+  navigation,
+}) => {
+  const [email, setEmail] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+
+  const [toast, setToast] = useState<ToastState>(null);
+  const showMessage = (type: string, text: string) => setToast({type, text});
+  const hideToast = useCallback(() => setToast(null), []);
 
   async function handleForgotPassword() {
     if (!email || email.trim() === '') {
@@ -70,9 +121,10 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
       const response = await putResetPassword(email);
 
       if (response && response.message) {
+        if (!emailSent) {
+          showMessage('success', 'Correo enviado correctamente.');
+        }
         setEmailSent(true);
-        showMessage('success', 'Correo enviado correctamente.');
-        setIsActive(true);
       } else {
         showMessage(
           'error',
@@ -100,7 +152,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
             <AppMessage
               type={toast.type}
               message={toast.text}
-              onHide={() => setToast(null)}
+              onHide={hideToast}
               duration={2500}
             />
           )}
@@ -161,35 +213,11 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
                   </TouchableOpacity>
                 </>
               ) : (
-                <>
-                  {/* Confirmation message */}
-                  <View style={authStyles.confirmationContainer}>
-                    <Text style={authStyles.confirmationText}>
-                      Hemos enviado un enlace de recuperación a {email}. Revisa
-                      tu bandeja de entrada.
-                    </Text>
-                  </View>
-
-                  {/* Resend button */}
-                  <TouchableOpacity
-                    style={[
-                      authStyles.buttonOutline,
-                      countdown > 0 && {opacity: 0.4},
-                    ]}
-                    onPress={handleForgotPassword}
-                    disabled={countdown > 0 || loading}
-                    activeOpacity={0.8}>
-                    {loading ? (
-                      <Loader visible={loading} message="" size="small" />
-                    ) : (
-                      <Text style={authStyles.buttonOutlineText}>
-                        {countdown > 0
-                          ? `Reenviar en ${countdown}s`
-                          : 'Reenviar correo'}
-                      </Text>
-                    )}
-                  </TouchableOpacity>
-                </>
+                <EmailSentView
+                  email={email}
+                  loading={loading}
+                  onResend={handleForgotPassword}
+                />
               )}
 
               {/* Back to Login */}
