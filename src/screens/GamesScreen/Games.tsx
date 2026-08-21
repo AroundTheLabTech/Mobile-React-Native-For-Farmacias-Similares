@@ -7,7 +7,6 @@ import {
   Dimensions,
   PixelRatio,
   Text,
-  StatusBar,
   useWindowDimensions,
 } from 'react-native';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
@@ -213,7 +212,6 @@ const Games = ({ navigation }) => {
   if (loading || !listGames) {
     return (
       <View style={[GamesStyles.screen, { justifyContent: 'center', alignItems: 'center' }]}>
-        <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />
         <Loader visible={true} />
       </View>
     );
@@ -221,7 +219,6 @@ const Games = ({ navigation }) => {
 
   return (
     <View style={GamesStyles.screen}>
-      <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />
       <View style={GamesStyles.glowPurple} />
       <View style={GamesStyles.glowCyan} />
       <FlatList

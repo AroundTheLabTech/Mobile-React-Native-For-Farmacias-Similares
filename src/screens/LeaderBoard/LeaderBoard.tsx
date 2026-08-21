@@ -6,7 +6,6 @@ import {
   Dimensions,
   PixelRatio,
   TouchableOpacity,
-  StatusBar,
   Animated,
 } from 'react-native';
 import LeaderBoardStyles from './style/LeaderBoardStyles';
@@ -128,7 +127,6 @@ const LeaderBoard: React.FC = () => {
           LeaderBoardStyles.screen,
           {justifyContent: 'center', alignItems: 'center'},
         ]}>
-        <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />
         <Loader visible />
       </View>
     );
@@ -159,7 +157,6 @@ const LeaderBoard: React.FC = () => {
 
   return (
     <View style={LeaderBoardStyles.screen}>
-      <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />
       <View style={LeaderBoardStyles.glowPurple} />
       <View style={LeaderBoardStyles.glowCyan} />
       <ScrollView

@@ -8,7 +8,6 @@ import {
   Image,
   TextInput,
   Alert,
-  StatusBar,
   Animated,
 } from 'react-native';
 import SettingsStyles from './style/SettingsStyles';
@@ -279,7 +278,6 @@ const Settings = ({navigation}) => {
 
   return (
     <View style={SettingsStyles.screen}>
-      <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />
 
       <ScrollView contentContainerStyle={SettingsStyles.scrollContent}>
         {/* ── Header ── */}
