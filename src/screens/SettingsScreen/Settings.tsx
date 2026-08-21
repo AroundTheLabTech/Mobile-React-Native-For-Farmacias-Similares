@@ -9,6 +9,8 @@ import {
   TextInput,
   Alert,
   Animated,
+  Modal,
+  ActivityIndicator,
 } from 'react-native';
 import SettingsStyles from './style/SettingsStyles';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
@@ -25,6 +27,8 @@ import {
   getGameCard,
   updateUserProfilePicture,
   putUserInformation,
+  deleteUserAccount,
+  DeleteAccountError,
 } from '../../services/backend';
 import {useAuth} from '../../AuthContext';
 import {formarGameCardNumber, formatNumber} from '../../utils/helpers';
@@ -66,6 +70,9 @@ const Settings = ({navigation}) => {
   const [savingAvatar, setSavingAvatar] = useState(false);
   const [infoSaved, setInfoSaved] = useState(false);
   const [savingInfo, setSavingInfo] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmed, setDeleteConfirmed] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
   const toastOpacity = useRef(new Animated.Value(0)).current;
   const infoToastOpacity = useRef(new Animated.Value(0)).current;
   const userPickedAvatarRef = useRef(false);
@@ -270,6 +277,69 @@ const Settings = ({navigation}) => {
         },
       },
     ]);
+  }
+
+  const redirectToLogin = useCallback(async () => {
+    await logout();
+    navigation.reset({
+      index: 0,
+      routes: [{name: 'Login'}],
+    });
+  }, [logout, navigation]);
+
+  const closeDeleteModal = useCallback(() => {
+    if (deletingAccount) {
+      return;
+    }
+    setShowDeleteModal(false);
+    setDeleteConfirmed(false);
+  }, [deletingAccount]);
+
+  function handleDeleteAccountPress() {
+    Alert.alert(
+      'Eliminar cuenta',
+      'Esta accion es permanente. Se borraran tu perfil, puntos, insignias y progreso. No se puede deshacer.',
+      [
+        {text: 'Cancelar', style: 'cancel'},
+        {
+          text: 'Continuar',
+          style: 'destructive',
+          onPress: () => {
+            setDeleteConfirmed(false);
+            setShowDeleteModal(true);
+          },
+        },
+      ],
+    );
+  }
+
+  async function handleConfirmDeleteAccount() {
+    if (!deleteConfirmed || deletingAccount) {
+      return;
+    }
+
+    setDeletingAccount(true);
+    try {
+      await deleteUserAccount();
+      setShowDeleteModal(false);
+      setDeleteConfirmed(false);
+      await redirectToLogin();
+    } catch (error) {
+      if (error instanceof DeleteAccountError && error.status === 401) {
+        setShowDeleteModal(false);
+        setDeleteConfirmed(false);
+        await redirectToLogin();
+        return;
+      }
+      Alert.alert(
+        'Error',
+        error instanceof Error
+          ? error.message
+          : 'No se pudo eliminar la cuenta. Intenta mas tarde.',
+      );
+    } finally {
+      setDeletingAccount(false);
+    }
   }
 
   if (loading) {
@@ -616,8 +686,86 @@ const Settings = ({navigation}) => {
               <Text style={SettingsStyles.logoutButtonText}>Cerrar Sesion</Text>
             </Animated.View>
           </TouchableWithoutFeedback>
+
+          <View style={SettingsStyles.deleteAccountSection}>
+            <Text style={SettingsStyles.deleteAccountHint}>
+              Cerrar sesion mantiene tu cuenta. Eliminar cuenta borra todos tus
+              datos de forma permanente.
+            </Text>
+            <TouchableOpacity
+              style={[
+                SettingsStyles.deleteAccountButton,
+                deletingAccount && SettingsStyles.deleteAccountButtonDisabled,
+              ]}
+              onPress={handleDeleteAccountPress}
+              disabled={deletingAccount}>
+              <Text style={SettingsStyles.deleteAccountButtonText}>
+                Eliminar cuenta permanentemente
+              </Text>
+            </TouchableOpacity>
+          </View>
         </Animated.View>
       </ScrollView>
+
+      <Modal
+        visible={showDeleteModal}
+        transparent
+        animationType="fade"
+        onRequestClose={closeDeleteModal}>
+        <View style={SettingsStyles.modalOverlay}>
+          <View style={SettingsStyles.modalCard}>
+            <Text style={SettingsStyles.modalTitle}>Eliminar cuenta</Text>
+            <Text style={SettingsStyles.modalBody}>
+              Perderas tu perfil, puntos, insignias y todo tu progreso. Esta
+              accion no se puede deshacer.
+            </Text>
+
+            <TouchableOpacity
+              style={SettingsStyles.checkboxRow}
+              onPress={() => setDeleteConfirmed(prev => !prev)}
+              disabled={deletingAccount}
+              activeOpacity={0.7}>
+              <View
+                style={[
+                  SettingsStyles.checkboxBox,
+                  deleteConfirmed && SettingsStyles.checkboxBoxChecked,
+                ]}>
+                {deleteConfirmed && (
+                  <FontAwesomeIcon icon={faCheck} size={12} color="#fff" />
+                )}
+              </View>
+              <Text style={SettingsStyles.checkboxLabel}>
+                Entiendo que perderé todos mis datos
+              </Text>
+            </TouchableOpacity>
+
+            <View style={SettingsStyles.modalActions}>
+              <TouchableOpacity
+                style={SettingsStyles.modalCancelButton}
+                onPress={closeDeleteModal}
+                disabled={deletingAccount}>
+                <Text style={SettingsStyles.modalCancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  SettingsStyles.modalConfirmButton,
+                  (!deleteConfirmed || deletingAccount) &&
+                    SettingsStyles.modalConfirmButtonDisabled,
+                ]}
+                onPress={handleConfirmDeleteAccount}
+                disabled={!deleteConfirmed || deletingAccount}>
+                {deletingAccount ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <Text style={SettingsStyles.modalConfirmButtonText}>
+                    Eliminar mi cuenta
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
