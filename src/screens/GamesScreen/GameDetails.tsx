@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, ScrollView, Text, Image, StatusBar, ActivityIndicator } from 'react-native';
+import { View, TouchableOpacity, ScrollView, Text, Image, ActivityIndicator } from 'react-native';
 import { faArrowLeft, faMobileScreenButton, faRotate } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useFocusEffect } from '@react-navigation/native';
@@ -94,7 +94,6 @@ const GameDetails = ({ navigation, route }) => {
 
   return (
     <View style={GameDetailsStyles.screen}>
-      <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />
       <View style={GameDetailsStyles.glowPurple} />
       <View style={GameDetailsStyles.glowCyan} />
       <ScrollView contentContainerStyle={GameDetailsStyles.scrollContent}>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, ScrollView, Image, Animated, TouchableWithoutFeedback, StatusBar, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, Image, Animated, TouchableWithoutFeedback, RefreshControl } from 'react-native';
 import { faStar, faFire, faTrophy, faGamepad, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
@@ -148,7 +148,6 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
   if (loading && !userInformation) {
     return (
       <View style={[dashboardStyles.screen, { justifyContent: 'center', alignItems: 'center' }]}>
-        <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />
         <Loader visible={true} />
       </View>
     );
@@ -156,8 +155,6 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
 
   return (
     <View style={dashboardStyles.screen}>
-      <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />
-
       {/* Decorative Glows */}
       <View style={dashboardStyles.glowPurple} />
       <View style={dashboardStyles.glowCyan} />

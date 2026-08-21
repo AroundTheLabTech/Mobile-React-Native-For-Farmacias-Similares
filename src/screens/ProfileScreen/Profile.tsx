@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, Image, TouchableOpacity, TouchableWithoutFeedback, StatusBar, Animated, RefreshControl } from 'react-native';
+import { View, Text, Image, TouchableOpacity, TouchableWithoutFeedback, Animated, RefreshControl } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faGlobe, faCalendarDays, faGear } from '@fortawesome/free-solid-svg-icons';
@@ -90,7 +90,6 @@ const ProfileScreen = ({ navigation }) => {
   if (!userInformation) {
     return (
       <View style={[profileStyles.screen, { justifyContent: 'center', alignItems: 'center' }]}>
-        <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />
         <Loader visible={true} />
       </View>
     );
@@ -98,7 +97,6 @@ const ProfileScreen = ({ navigation }) => {
 
   return (
     <View style={profileStyles.screen}>
-      <StatusBar barStyle="light-content" backgroundColor={darkTheme.bg} />
       <View style={profileStyles.glowPurple} />
       <View style={profileStyles.glowCyan} />
 
