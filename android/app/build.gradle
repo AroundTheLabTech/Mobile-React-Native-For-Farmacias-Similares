@@ -127,6 +127,12 @@ android {
         }
     }
 
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+    }
+
     applicationVariants.all { variant -> 
         variant.outputs.all { output -> 
             def newApkName = "SimiJuegos-${variant.buildType.name}-${variant.versionName}.apk"
