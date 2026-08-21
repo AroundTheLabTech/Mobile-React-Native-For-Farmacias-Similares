@@ -319,6 +319,120 @@ const SettingsStyles = StyleSheet.create({
     fontSize: 15,
     color: '#EF4444',
   },
+
+  // ─── 9. Delete account ────────────────────────────────────────────────
+  deleteAccountSection: {
+    marginTop: 20,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.08)',
+  },
+  deleteAccountHint: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.45)',
+    textAlign: 'center',
+    marginBottom: 12,
+    lineHeight: 18,
+  },
+  deleteAccountButton: {
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  deleteAccountButtonText: {
+    fontFamily: fonts.bold,
+    fontSize: 14,
+    color: '#EF4444',
+    textDecorationLine: 'underline',
+  },
+  deleteAccountButtonDisabled: {
+    opacity: 0.5,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: '#1a1035',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(239,68,68,0.35)',
+    padding: spacing.lg,
+  },
+  modalTitle: {
+    fontFamily: fonts.bold,
+    fontSize: 18,
+    color: '#EF4444',
+    marginBottom: 12,
+  },
+  modalBody: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.75)',
+    lineHeight: 21,
+    marginBottom: 16,
+  },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    marginBottom: 20,
+  },
+  checkboxBox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.35)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 1,
+  },
+  checkboxBoxChecked: {
+    backgroundColor: '#EF4444',
+    borderColor: '#EF4444',
+  },
+  checkboxLabel: {
+    flex: 1,
+    fontSize: 14,
+    color: colors.primary,
+    lineHeight: 20,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  modalCancelButton: {
+    flex: 1,
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  modalCancelButtonText: {
+    fontFamily: fonts.bold,
+    fontSize: 14,
+    color: colors.primary,
+  },
+  modalConfirmButton: {
+    flex: 1,
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    backgroundColor: '#EF4444',
+  },
+  modalConfirmButtonDisabled: {
+    backgroundColor: 'rgba(239,68,68,0.35)',
+  },
+  modalConfirmButtonText: {
+    fontFamily: fonts.bold,
+    fontSize: 13,
+    color: '#fff',
+    textAlign: 'center',
+  },
 });
 
 export default SettingsStyles;

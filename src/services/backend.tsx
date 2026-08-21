@@ -132,6 +132,55 @@ async function fetchWithTimeout(
   return response;
 }
 
+export class DeleteAccountError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'DeleteAccountError';
+    this.status = status;
+  }
+}
+
+export async function deleteUserAccount(): Promise<void> {
+  const headers = await getAuthHeaders();
+  const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/account`, {
+    method: 'DELETE',
+    headers,
+    body: JSON.stringify({ confirm: true }),
+  });
+
+  if (response.status === 204) {
+    return;
+  }
+
+  let message = 'No se pudo eliminar la cuenta. Intenta mas tarde.';
+  try {
+    const data = await response.json();
+    if (data?.message) {
+      message = String(data.message);
+    } else if (data?.detail) {
+      message = String(data.detail);
+    }
+  } catch {
+    // respuesta sin body
+  }
+
+  switch (response.status) {
+    case 400:
+      throw new DeleteAccountError(message || 'Confirmacion invalida.', 400);
+    case 401:
+      throw new DeleteAccountError('Sesion expirada. Inicia sesion de nuevo.', 401);
+    case 404:
+      throw new DeleteAccountError('Cuenta no encontrada.', 404);
+    case 429:
+      throw new DeleteAccountError('Demasiados intentos. Espera un momento.', 429);
+    case 500:
+      throw new DeleteAccountError('Error del servidor. Intenta mas tarde.', 500);
+    default:
+      throw new DeleteAccountError(message, response.status);
+  }
+}
 
 export const loginUserByEmailAndPassword = async (email: string, password: string): Promise<TUserLogin> => {
   if (!email) {
