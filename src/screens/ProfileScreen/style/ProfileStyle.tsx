@@ -1,184 +1,188 @@
 import { StyleSheet } from 'react-native';
-import { colors, fontSizes, spacing, fonts, responsiveHeight, responsiveWidth } from '../../../../global-class'; // Importa las variables globales
+import { darkTheme } from '../../../theme/colors';
 
-const ProfileStyles = StyleSheet.create({
-  //Profile Image
-  containerMax: {
+const FONT_INTER = 'Inter-VariableFont_opsz,wght';
+
+const profileStyles = StyleSheet.create({
+  screen: {
     flex: 1,
-    backgroundColor: colors.background2,
+    backgroundColor: darkTheme.bg,
   },
-  container: {
-    backgroundColor: colors.background2,
-    alignItems: 'center',
-  },
-  headerProfile: {
-    padding: spacing.sm,
-    width: '100%',
-    alignItems: 'flex-end',
+  scrollContent: {
+    paddingBottom: 40,
   },
 
-  ProfileContainer: {
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
+  // Glow blobs
+  glowPurple: {
+    position: 'absolute',
+    top: -80,
+    right: -80,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: darkTheme.glowPurple,
+    opacity: 0.55,
+  },
+  glowCyan: {
+    position: 'absolute',
+    bottom: 120,
+    left: -100,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: darkTheme.glowCyan,
+    opacity: 0.35,
   },
 
-  profileImageContainer: {
-    width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '15%',
-    flex: 0.5,
+  // Header
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 4,
   },
-  imageProfile: {
-    resizeMode: 'contain',
-    width: '100%',
-    height: responsiveHeight(150),
-    zIndex: 1000,
-  },
-
-  //Dashboard
-  containerDashboard: {
-    flex: 9,
-    width: '97%',
-    top: responsiveWidth(-48),
-    backgroundColor: colors.background3,
+  settingsButton: {
+    width: 40,
+    height: 40,
     borderRadius: 12,
-    padding: spacing.lg,
+    backgroundColor: darkTheme.bgCard,
+    borderWidth: 1,
+    borderColor: darkTheme.border,
     alignItems: 'center',
-    height: '100%',
+    justifyContent: 'center',
   },
-  TextProfile: {
-    fontSize: fontSizes.xxl,
+
+  // Avatar Section
+  avatarSection: {
+    alignItems: 'center',
+    paddingTop: 8,
+    paddingBottom: 20,
+  },
+  avatarGlow: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: 'rgba(124,58,237,0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarRing: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    borderWidth: 3,
+    borderColor: darkTheme.purple,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarImage: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+  },
+  userName: {
+    fontFamily: FONT_INTER,
+    fontSize: 22,
     fontWeight: '700',
-    color: colors.secondary,
-    fontFamily: fonts.rubik,
-    marginTop: spacing.sxxl,
+    color: darkTheme.textPrimary,
+    marginTop: 12,
   },
-  //Puntaje
-  ContainerPuntaje: {
-    backgroundColor: colors.background2,
-    padding: spacing.md,
-    width: '100%',
-    marginTop: spacing.md,
+  userEmail: {
+    fontFamily: FONT_INTER,
+    fontSize: 13,
+    color: darkTheme.textMuted,
+    marginTop: 4,
+  },
+
+  // Level Card — Full width
+  levelCard: {
+    backgroundColor: 'rgba(124,58,237,0.04)',
     borderRadius: 20,
-    flexDirection: 'row',
+    borderWidth: 1,
+    borderColor: 'rgba(124,58,237,0.12)',
+    padding: 20,
+    marginHorizontal: 20,
   },
-  puntajeBox: {
-    width: '33%',
+
+  // Stats Row — 2 cards
+  statsRow: {
+    flexDirection: 'row',
+    gap: 14,
+    marginHorizontal: 20,
+    marginTop: 16,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: darkTheme.bgCard,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: darkTheme.border,
+    padding: 18,
+    alignItems: 'center',
+    gap: 6,
+  },
+  statIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'center',
-    borderRightWidth: 1,
-    borderRightColor: 'rgba(255, 255, 255, 0.4)',
+    marginBottom: 4,
   },
-  puntajeBox2: {
-    width: '33%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  titlePuntaje: {
-    color: 'rgba(255, 255, 255, 0.4)', // Color blanco con 40% de opacidad
-    fontSize: fontSizes.sm,
-  },
-  puntajeNumber: {
-    color: colors.primary,
-    fontWeight: '700',
-    fontSize: fontSizes.xl,
-  },
-  containerIcono: {
-  },
-
-  //Insignias, Estadisticas, Detalles
-  containerPuntaje: {
-    marginTop: spacing.lg,
-    width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  containerNavBar: {
-    flexDirection: 'row',
-    width: '90%',
-    justifyContent: 'space-around',
-  },
-  //Insignias
-  containerInsignias: {
-    width: '100%',
-  },
-  rowInsignias: {
-    flexDirection: 'row',
-    marginTop: spacing.md,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  containerImage: {
-    width: '30%',
-  },
-  medalStyle: {
-    resizeMode: 'contain',
-    width: '100%',
-  },
-
-  //Estadisticas
-
-  containerEstadistics: {
-    backgroundColor: '#D9D4F7',
-    width: '100%',
-    borderRadius: 15,
-    padding: spacing.md,
-    marginTop: spacing.md,
-  },
-  titleTotalGames: {
-    textAlign: 'center',
-    color: colors.secondary,
-    fontWeight: '700',
-    padding: spacing.md,
-    fontSize: fontSizes.xxl,
-  },
-
-  // Estadisticas
-  containerBoxStadistics: {
-    width: '45%',
-    backgroundColor: '#fff',
-    padding: spacing.sm,
-    marginTop: spacing.md,
-    borderRadius: 15,
-
-  },
-  // Up Number
-
-  containerUpNumber: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-
-  },
-  titleNumber: {
+  statValue: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 22,
     fontWeight: '800',
-    fontSize: fontSizes.xxxxl,
-    color: colors.secondary,
+    color: darkTheme.textPrimary,
   },
-  textBox: {
-    color: colors.secondary,
-    fontWeight: '500',
+  statLabel: {
+    fontFamily: FONT_INTER,
+    fontSize: 12,
+    fontWeight: '600',
+    color: darkTheme.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-  rowStadistics: {
+
+  // Tabs
+  tabContainer: {
+    marginHorizontal: 20,
+    marginTop: 24,
+    marginBottom: 16,
+  },
+  tabRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    backgroundColor: darkTheme.bgCard,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: darkTheme.border,
+    padding: 3,
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 11,
+    alignItems: 'center',
+  },
+  tabButtonActive: {
+    backgroundColor: darkTheme.purple,
+  },
+  tabText: {
+    fontFamily: FONT_INTER,
+    fontSize: 14,
+    fontWeight: '600',
+    color: darkTheme.textMuted,
+  },
+  tabTextActive: {
+    color: '#FFFFFF',
   },
 
-  TabNabTitle: {
-    fontSize: fontSizes.sm,
-    textTransform: 'capitalize',
-    fontWeight: '700',
-    color: colors.third,
-  },
-
-  TabNabTitleSelected: {
-    fontSize: fontSizes.sm,
-    textTransform: 'capitalize',
-    fontWeight: '700',
-    color: colors.textThird,
+  // Content
+  contentContainer: {
+    marginHorizontal: 20,
   },
 });
 
-export default ProfileStyles;
+export default profileStyles;

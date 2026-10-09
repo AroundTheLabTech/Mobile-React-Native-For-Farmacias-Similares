@@ -1,75 +1,218 @@
 import { BACKEND_BASE_URL } from '@env';
-import { TUserCurrentMonthSession, TUserLast3MonthInfo, TUserPoints, TUserInformation, TUserPicture, TBackResponse, TGameCard, TUserLogin, TUserProfilePictures, TScorePerGame, TTopTwenty, GetTopTwentyOpts, TUserTokenValidate, TUserBadges, TUpdateUserInformation, TUserRegister } from '../types/user';
+import { TUserCurrentMonthSession, TUserLast3MonthInfo, TUserPoints, TUserInformation, TUserPicture, TBackResponse, TGameCard, TUserLogin, TUserProfilePictures, TScorePerGame, TTopTwenty, GetTopTwentyOpts, TUserTokenValidate, TUserBadges, TUpdateUserInformation, TUserRegister, TDashboardSummary } from '../types/user';
 import { TCompetition, TCompetitionSession, TCompetitiveStatus, TCreateCompetition, TScoreSessions } from '../types/competition';
 import { TGameSession, TGameCatalogResponse } from '../types/game';
 import { validateObjectValues } from '../utils/helpers';
 import { ProblemReport } from '../types/report';
+import { getSecureToken, getSecureRefreshToken, setSecureToken } from '../utils/secureStorage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const DEFAULT_TIMEOUT_MS = 10_000;
+
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  const token = await getSecureToken();
+  return {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+  };
+}
+
+let _refreshInFlight: Promise<string | null> | null = null;
+
+async function performRefreshAccessToken(): Promise<string | null> {
+  try {
+    const refreshToken = await getSecureRefreshToken();
+    if (!refreshToken) return null;
+
+    const response = await fetch(`${BACKEND_BASE_URL}/users/refresh_token`, {
+      method: 'POST',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
+
+    if (!response.ok) return null;
+
+    const data = (await response.json()) as {
+      id_token?: string;
+      access_token?: string;
+      expires_in?: number;
+      expires?: number;
+      refresh_token?: string;
+      refreshToken?: string;
+    };
+
+    const id_token = data.id_token ?? data.access_token;
+    if (!id_token) return null;
+
+    await setSecureToken(id_token);
+    const expires_in = data.expires_in ?? data.expires;
+    if (expires_in != null) {
+      const expiresAtMs = Date.now() + Number(expires_in) * 1000;
+      await AsyncStorage.setItem('tokenExpiresAt', String(expiresAtMs));
+    }
+    const newRefresh = data.refresh_token ?? data.refreshToken;
+    if (newRefresh) {
+      const { setSecureRefreshToken } = await import('../utils/secureStorage');
+      await setSecureRefreshToken(newRefresh);
+    }
+
+    return id_token;
+  } catch {
+    return null;
+  }
+}
+
+/** Single-flight refresh: parallel 401s share one refresh call. */
+async function refreshAccessToken(): Promise<string | null> {
+  if (!_refreshInFlight) {
+    _refreshInFlight = performRefreshAccessToken().finally(() => {
+      _refreshInFlight = null;
+    });
+  }
+  return _refreshInFlight;
+}
+
+function requestHadAuthorization(options: RequestInit): boolean {
+  const headers = options.headers;
+  if (!headers) return false;
+  if (headers instanceof Headers) {
+    return headers.has('Authorization');
+  }
+  if (Array.isArray(headers)) {
+    return headers.some(([key]) => key.toLowerCase() === 'authorization');
+  }
+  const record = headers as Record<string, string>;
+  return Boolean(record.Authorization ?? record.authorization);
+}
+
+let _onSessionExpired: (() => void) | null = null;
+export function setOnSessionExpiredCallback(cb: () => void) {
+  _onSessionExpired = cb;
+}
 
 async function fetchWithTimeout(
   url: string,
   options: RequestInit = {},
   timeoutMs: number = DEFAULT_TIMEOUT_MS,
 ): Promise<Response> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const response = await fetch(url, { ...options, signal: controller.signal });
-    return response;
-  } finally {
-    clearTimeout(timeout);
+  const doFetch = async (opts: RequestInit): Promise<Response> => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      return await fetch(url, { ...opts, signal: controller.signal });
+    } finally {
+      clearTimeout(timeout);
+    }
+  };
+
+  const response = await doFetch(options);
+
+  if (response.status === 401 && requestHadAuthorization(options)) {
+    if (__DEV__) console.log('[fetchWithTimeout] 401 on authenticated request:', url);
+    const newToken = await refreshAccessToken();
+
+    if (newToken) {
+      const currentHeaders = (options.headers as Record<string, string>) ?? {};
+      const updatedOptions: RequestInit = {
+        ...options,
+        headers: { ...currentHeaders, Authorization: `Bearer ${newToken}` },
+      };
+      if (__DEV__) console.log('[fetchWithTimeout] Token refreshed, retrying:', url);
+      return doFetch(updatedOptions);
+    }
+
+    if (__DEV__) console.log('[fetchWithTimeout] Refresh failed, session expired');
+    _onSessionExpired?.();
+  } else if (response.status === 401 && __DEV__) {
+    console.log('[fetchWithTimeout] 401 on unauthenticated request (no refresh):', url);
   }
+
+  return response;
 }
 
-export const loginUserByEmailAndPassword = async (email: string, password: string): Promise<TUserLogin | null> => {
-  try {
-    if (!email) {
-      throw new Error('Email inválido');
-    }
 
-    if (!password) {
-      throw new Error('Password inválido');
-    }
-
-    const requestOptions = {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: email,
-        password: password,
-      }),
-    };
-
-    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/login_with_email_and_password`, requestOptions);
-
-    if (!response.ok) {
-      let msg = `HTTP ${response.status}`;
-      try {
-        const err = await response.json();
-        if (err?.detail) msg = String(err.detail);
-        if (err?.message) msg = String(err.message);
-      } catch { }
-      throw new Error(msg);
-    }
-
-    const data = await response.json();
-
-    // Normaliza/valida shape
-    const id_token = data?.id_token ?? data?.access_token;
-    const expires_in = data?.expires_in ?? data?.expires ?? null;
-
-    if (!id_token || expires_in == null) {
-      throw new Error('Respuesta de login incompleta.');
-    }
-
-    return data as TUserLogin;
-  } catch (error) {
-    return null;
+export const loginUserByEmailAndPassword = async (email: string, password: string): Promise<TUserLogin> => {
+  if (!email) {
+    throw new Error('El correo es requerido');
   }
+
+  if (!password) {
+    throw new Error('Password inválido');
+  }
+
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      email: email,
+      password: password,
+    }),
+  };
+
+  const loginUrl = `${BACKEND_BASE_URL}/users/login_with_email_and_password`;
+  if (__DEV__) console.log('[LOGIN] URL:', loginUrl);
+  if (__DEV__) console.log('[LOGIN] Payload:', JSON.stringify({ email, password: '***' }));
+
+  let response: Response;
+  try {
+    response = await fetchWithTimeout(loginUrl, requestOptions);
+  } catch (networkError) {
+    if (__DEV__) console.error('[LOGIN] Network error:', networkError);
+    throw new Error('Error de conexion. Verifica tu internet.');
+  }
+
+  if (__DEV__) console.log('[LOGIN] Response status:', response.status);
+
+  if (!response.ok) {
+    // Try to extract backend-provided message
+    let backendMsg: string | null = null;
+    try {
+      const err = await response.json();
+      if (__DEV__) console.log('[LOGIN] Error body:', JSON.stringify(err));
+      if (err?.message) backendMsg = String(err.message);
+      else if (err?.detail) backendMsg = String(err.detail);
+    } catch { }
+
+    if (backendMsg) {
+      throw new Error(backendMsg);
+    }
+
+    // Fallback to status-based Spanish messages
+    const status = response.status;
+    if (status === 400 || status === 401) {
+      throw new Error('Credenciales incorrectas. Verifica tu correo y contraseña.');
+    } else if (status === 404) {
+      throw new Error('Usuario no encontrado. Verifica tu correo electronico.');
+    } else if (status >= 500) {
+      throw new Error('Error del servidor. Intentalo mas tarde.');
+    } else {
+      throw new Error(`Error del servidor (${status}). Intentalo mas tarde.`);
+    }
+  }
+
+  const data = await response.json();
+
+  // Normaliza/valida shape
+  const id_token = data?.id_token ?? data?.access_token;
+  const expires_in = data?.expires_in ?? data?.expires ?? null;
+  const refresh_token = data?.refresh_token ?? data?.refreshToken ?? null;
+
+  if (!id_token || expires_in == null) {
+    throw new Error('Respuesta de login incompleta.');
+  }
+
+  if (__DEV__) console.log('[LOGIN] Success! Token received');
+  return {
+    ...data,
+    id_token,
+    expires_in: Number(expires_in),
+    refresh_token,
+  } as TUserLogin;
 };
 
 export const validateToken = async (idToken: string): Promise<TUserTokenValidate | null> => {
@@ -167,11 +310,10 @@ export const getUserInformation = async (uid: string): Promise<TUserInformation 
       throw new Error('UID inválido');
     }
 
+    const headers = await getAuthHeaders();
     const requestOptions = {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     };
 
     const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/user_information/${uid}`, requestOptions);
@@ -187,29 +329,32 @@ export const getUserInformation = async (uid: string): Promise<TUserInformation 
   }
 };
 
-export const putUserInformation = async (uid: string, userInformation: TUpdateUserInformation): Promise<Record<string, string> | null> => {
-  try {
-    if (!uid) {
-      throw new Error('UID inválido');
-    }
-    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/user_information/${uid}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify(userInformation),
-    });
-
-    if (!response.ok) {
-      throw new Error('Error al rechazar la competicion');
-    }
-
-    const result = await response.json();
-    return result;
-  } catch (error) {
-    return null;
+export const putUserInformation = async (
+  uid: string,
+  userInformation: TUpdateUserInformation,
+): Promise<TBackResponse> => {
+  if (!uid) {
+    throw new Error('UID inválido');
   }
+
+  const authHeaders = await getAuthHeaders();
+  const response = await fetchWithTimeout(
+    `${BACKEND_BASE_URL}/users/user_information/${uid}`,
+    {
+      method: 'PUT',
+      headers: authHeaders,
+      body: JSON.stringify(userInformation),
+    },
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Error ${response.status} al actualizar la informacion del usuario${errorText ? `: ${errorText}` : ''}`,
+    );
+  }
+
+  return (await response.json()) as TBackResponse;
 };
 
 export const getUserPicture = async (uid: string): Promise<TUserPicture | null> => {
@@ -218,11 +363,10 @@ export const getUserPicture = async (uid: string): Promise<TUserPicture | null> 
       throw new Error('UID inválido');
     }
 
+    const headers = await getAuthHeaders();
     const requestOptions = {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     };
 
     const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/user_profile_picture/${uid}`, requestOptions);
@@ -244,11 +388,10 @@ export const getUserProfilePictures = async (uid: string): Promise<TUserProfileP
       throw new Error('UID inválido');
     }
 
+    const headers = await getAuthHeaders();
     const requestOptions = {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     };
 
     const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/profile_pictures/${uid}`, requestOptions);
@@ -266,12 +409,10 @@ export const getUserProfilePictures = async (uid: string): Promise<TUserProfileP
 
 export const updateUserProfilePicture = async (uid: string, url: string): Promise<TBackResponse | null> => {
   try {
+    const authHeaders = await getAuthHeaders();
     const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/update_profile_picture/${uid}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+      headers: { ...authHeaders, 'Accept': 'application/json' },
       body: JSON.stringify({
         profile_picture_url: url,
       }),
@@ -284,6 +425,7 @@ export const updateUserProfilePicture = async (uid: string, url: string): Promis
     const data = await response.json();
     return data as TBackResponse;
   } catch (error) {
+    return null;
   }
 };
 
@@ -293,11 +435,10 @@ export const getUserPoints = async (uid: string): Promise<TUserPoints | null> =>
       throw new Error('UID inválido');
     }
 
+    const headers = await getAuthHeaders();
     const requestOptions = {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     };
 
     const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/scores/score_user/${uid}`, requestOptions);
@@ -319,11 +460,10 @@ export const getUserCurrentMonthSession = async (uid: string): Promise<TUserCurr
       throw new Error('UID inválido');
     }
 
+    const headers = await getAuthHeaders();
     const requestOptions = {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     };
 
     const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/scores/current_month_sessions/${uid}`, requestOptions);
@@ -345,22 +485,26 @@ export const getUserLast3MonthsInfo = async (uid: string): Promise<TUserLast3Mon
       throw new Error('UID inválido');
     }
 
+    const headers = await getAuthHeaders();
     const requestOptions = {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     };
 
-    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/scores/last_3_months_info/${uid}`, requestOptions);
+    const url = `${BACKEND_BASE_URL}/scores/last_3_months_info/${uid}`;
+    if (__DEV__) console.log('[DEBUG backend] getUserLast3MonthsInfo URL:', url);
+    const response = await fetchWithTimeout(url, requestOptions);
 
+    if (__DEV__) console.log('[DEBUG backend] getUserLast3MonthsInfo status:', response.status);
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
     }
 
     const result = await response.json();
+    if (__DEV__) console.log('[DEBUG backend] getUserLast3MonthsInfo result:', JSON.stringify(result));
     return result as TUserLast3MonthInfo;
   } catch (error) {
+    if (__DEV__) console.log('[DEBUG backend] getUserLast3MonthsInfo ERROR:', error);
     return null;
   }
 };
@@ -402,11 +546,10 @@ export const getGameCard = async (uid: string): Promise<TGameCard | null> => {
       throw new Error('UID inválido');
     }
 
+    const headers = await getAuthHeaders();
     const requestOptions = {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     };
 
     const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/user_game_card/${uid}`, requestOptions);
@@ -428,11 +571,10 @@ export const getScorePerGames = async (uid: string): Promise<TScorePerGame | nul
       throw new Error('UID inválido');
     }
 
+    const headers = await getAuthHeaders();
     const requestOptions = {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     };
 
     const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/scores/score_per_game/${uid}`, requestOptions);
@@ -466,7 +608,7 @@ export const updateScoreGame = async (uid: string, game_id: string, score: numbe
     });
 
     if (!response.ok) {
-      throw new Error('Error al actualizar la el score del juego de perfil');
+      throw new Error('Error al actualizar el score del juego');
     }
 
     const data = await response.json();
@@ -478,22 +620,26 @@ export const updateScoreGame = async (uid: string, game_id: string, score: numbe
 
 export const getTopTwenty = async (): Promise<TTopTwenty[] | null> => {
   try {
+    const headers = await getAuthHeaders();
     const requestOptions = {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     };
 
-    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/scores/top_twenty`, requestOptions);
+    const url = `${BACKEND_BASE_URL}/scores/top_twenty`;
+    if (__DEV__) console.log('[DEBUG backend] getTopTwenty URL:', url);
+    const response = await fetchWithTimeout(url, requestOptions);
 
+    if (__DEV__) console.log('[DEBUG backend] getTopTwenty status:', response.status);
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
     }
 
     const result = await response.json();
+    if (__DEV__) console.log('[DEBUG backend] getTopTwenty result count:', Array.isArray(result) ? result.length : 'not-array');
     return result as TTopTwenty[];
   } catch (error) {
+    if (__DEV__) console.log('[DEBUG backend] getTopTwenty ERROR:', error);
     return null;
   }
 };
@@ -505,9 +651,10 @@ export const getTopTwentyMonthly = async (opts?: GetTopTwentyOpts): Promise<TTop
     : `${BACKEND_BASE_URL}/scores/top_twenty`;
 
   try {
+    const authHeaders = await getAuthHeaders();
     const res = await fetchWithTimeout(endpoint, {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders,
     }, timeoutMs);
 
     if (!res.ok) { throw new Error(`HTTP ${res.status}`); }
@@ -520,22 +667,26 @@ export const getTopTwentyMonthly = async (opts?: GetTopTwentyOpts): Promise<TTop
 
 export const getUserBadges = async (uid: string): Promise<TUserBadges | null> => {
   try {
+    const headers = await getAuthHeaders();
     const requestOptions = {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     };
 
-    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/users/user_badges/${uid}`, requestOptions);
+    const url = `${BACKEND_BASE_URL}/users/user_badges/${uid}`;
+    if (__DEV__) console.log('[DEBUG backend] getUserBadges URL:', url);
+    const response = await fetchWithTimeout(url, requestOptions);
 
+    if (__DEV__) console.log('[DEBUG backend] getUserBadges status:', response.status);
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
     }
 
     const result = await response.json();
+    if (__DEV__) console.log('[DEBUG backend] getUserBadges result:', JSON.stringify(result));
     return result as TUserBadges;
   } catch (error) {
+    if (__DEV__) console.log('[DEBUG backend] getUserBadges ERROR:', error);
     return null;
   }
 };
@@ -697,7 +848,7 @@ export const putCompetitionSession = async (competitionSession: TCompetitionSess
     const isValidObject = validateObjectValues(competitionSession);
 
     if (!isValidObject) {
-      throw new Error('Objecto no valido');
+      throw new Error('Objeto no valido');
     }
 
     const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/competition/competition_session`, {
@@ -818,21 +969,43 @@ export const getTopGlobalByUser = async (uid: string): Promise<number | null> =>
     if (!uid) {
       throw new Error('UID inválido');
     }
+    const headers = await getAuthHeaders();
     const requestOptions = {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     };
-    const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/scores/top_global/${uid}`, requestOptions);
+    const url = `${BACKEND_BASE_URL}/scores/top_global/${uid}`;
+    if (__DEV__) console.log('[DEBUG backend] getTopGlobalByUser URL:', url);
+    const response = await fetchWithTimeout(url, requestOptions);
 
+    if (__DEV__) console.log('[DEBUG backend] getTopGlobalByUser status:', response.status);
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status}`);
     }
     const result = await response.json();
+    if (__DEV__) console.log('[DEBUG backend] getTopGlobalByUser result:', JSON.stringify(result));
 
     return result as number;
   } catch (error) {
+    if (__DEV__) console.log('[DEBUG backend] getTopGlobalByUser ERROR:', error);
+    return null;
+  }
+};
+
+export const getDashboardSummary = async (uid: string): Promise<TDashboardSummary | null> => {
+  try {
+    if (!uid) throw new Error('UID inválido');
+    const headers = await getAuthHeaders();
+    const url = `${BACKEND_BASE_URL}/scores/dashboard_summary/${uid}`;
+    if (__DEV__) console.log('[DEBUG backend] getDashboardSummary URL:', url);
+    const response = await fetchWithTimeout(url, { method: 'GET', headers });
+    if (__DEV__) console.log('[DEBUG backend] getDashboardSummary status:', response.status);
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    const result = await response.json();
+    if (__DEV__) console.log('[DEBUG backend] getDashboardSummary result:', JSON.stringify(result));
+    return result as TDashboardSummary;
+  } catch (error) {
+    if (__DEV__) console.log('[DEBUG backend] getDashboardSummary ERROR:', error);
     return null;
   }
 };
@@ -842,11 +1015,10 @@ export const getTopMonthlyByUser = async (uid: string): Promise<number | null> =
     if (!uid) {
       throw new Error('UID inválido');
     }
+    const headers = await getAuthHeaders();
     const requestOptions = {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     };
     const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/scores/top_monthly/${uid}`, requestOptions);
 
@@ -886,20 +1058,24 @@ export const getProblemReports = async (uid: string): Promise<ProblemReport[] | 
 
 export const getGamesCatalog = async (): Promise<TGameCatalogResponse | null> => {
   try {
+    const headers = await getAuthHeaders();
     const requestOptions = {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     };
 
     const response = await fetchWithTimeout(`${BACKEND_BASE_URL}/games/catalog`, requestOptions);
 
+    // if (__DEV__) console.log('[DEBUG backend] getGamesCatalog URL:', `${BACKEND_BASE_URL}/games/catalog`);
+    // if (__DEV__) console.log('[DEBUG backend] getGamesCatalog status:', response.status);
+    // if (__DEV__) console.log('[DEBUG backend] getGamesCatalog response:', response);
     if (!response.ok) {
+      if (__DEV__) console.log('[DEBUG backend] getGamesCatalog ERROR:', `Error en la solicitud: ${response.status}`);
       throw new Error(`Error en la solicitud: ${response.status}`);
     }
 
     const result = await response.json();
+    // if (__DEV__) console.log('[DEBUG backend] getGamesCatalog result:', JSON.stringify(result));
     return result as TGameCatalogResponse;
   } catch (error) {
     return null;

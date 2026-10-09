@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TUserLogin } from 'src/types/user';
+import { clearSecureToken } from './utils/secureStorage';
 
 type AuthContextType = {
   uid: string | null;
@@ -53,7 +54,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setScoreTotal(null);
     setIsLogout(true);
 
-    await AsyncStorage.multiRemove(['userAccessToken', 'tokenExpirationTime']);
+    await clearSecureToken();
+    await AsyncStorage.multiRemove(['tokenExpirationTime', 'tokenExpiresAt']);
     await AsyncStorage.clear();
   };
 

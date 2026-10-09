@@ -1,5 +1,5 @@
-import { colors, fontSizes } from '../../../../global-class';
-import { StyleSheet } from 'react-native';
+import {colors, fontSizes} from '../../../../global-class';
+import {StyleSheet} from 'react-native';
 
 const OptionSelectStyle = StyleSheet.create({
   container: {
@@ -41,6 +41,7 @@ const OptionSelectStyle = StyleSheet.create({
   },
   optionText: {
     fontSize: 16,
+    color: colors.secondary,
   },
 });
 

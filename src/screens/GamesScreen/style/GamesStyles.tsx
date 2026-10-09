@@ -1,49 +1,121 @@
 import { StyleSheet } from 'react-native';
-import { colors, spacing } from '../../../../global-class'; // Importa las variables globales
+import { darkTheme } from '../../../theme/colors';
 
 const GamesStyles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: colors.background2,
+    backgroundColor: darkTheme.bg,
   },
-  containerMax: {
-    backgroundColor: colors.background2,
+  scrollContent: {
+    paddingBottom: 40,
   },
-  containerGoBack: {
-    marginTop: spacing.md,
-    marginLeft: spacing.lg,
-    width: '100%',
+  glowPurple: {
+    position: 'absolute',
+    top: -80,
+    right: -80,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: darkTheme.glowPurple,
+    opacity: 0.55,
   },
-  containerGames: {
-    marginTop: spacing.lg,
-    height: '100%',
+  glowCyan: {
+    position: 'absolute',
+    bottom: 120,
+    left: -100,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: darkTheme.glowCyan,
+    opacity: 0.35,
+  },
+  header: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: spacing.sm,
-    alignContent: 'flex-start',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: darkTheme.bgCard,
+    borderWidth: 1,
+    borderColor: darkTheme.border,
+    alignItems: 'center',
     justifyContent: 'center',
+  },
+  headerTitle: {
+    fontFamily: 'Inter-VariableFont_opsz,wght',
+    fontSize: 24,
+    fontWeight: '700',
+    color: darkTheme.textPrimary,
+    marginLeft: 14,
+  },
+  columnWrapper: {
+    paddingHorizontal: 20,
+    marginTop: 10,
   },
   gameCard: {
-    width: 120,
-    height: 120,
-    marginHorizontal: spacing.sm,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  gameCard9Inche: {
-    width: 210,
-    height: 210,
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.md,
+    backgroundColor: darkTheme.bgCard,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: darkTheme.border,
+    overflow: 'hidden',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   coverImage: {
-    width: 110,
-    height: 110,
-    borderRadius: 10,
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
   },
-  coverImage9Inches: {
-    width: 200,
-    height: 200,
+  cardInfo: {
+    paddingVertical: 6,
+    paddingHorizontal: 6,
+    alignItems: 'center',
+  },
+  gameTitle: {
+    fontFamily: 'Inter-VariableFont_opsz,wght',
+    fontSize: 11,
+    fontWeight: '600',
+    color: darkTheme.textSecondary,
+    textAlign: 'center',
+  },
+  scoreBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: darkTheme.purple,
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  scoreBadgeText: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  scoreBadgeNew: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  scoreBadgeNewText: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 9,
+    fontWeight: '700',
+    color: 'rgba(255, 255, 255, 0.7)',
   },
 });
 
