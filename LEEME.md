@@ -65,16 +65,16 @@ Lo que ya está resuelto en el repo (no hace falta hacer nada a mano):
 
 La web explica los duelos en `docs/RETOS-ENTRE-AMIGOS.md` (repo de la web). Aquí está la parte de la app.
 
-**Esta rama abre el enlace de pruebas de comunidad**, no el de los juegos (`src/config/web.ts`):
-https://simijuegos-comunidad.late-limit-0cf9.workers.dev. Ahí se publica la rama
-`actualizacion-de-comunidad` de la web, que es donde están los duelos. Cada rama de la web tiene su enlace
-porque publicar reemplaza el sitio completo (el 11 de octubre las dos ramas se borraban una a la otra).
+**Los duelos ya están en el sitio de pruebas de siempre** (la web los juntó con `plataforma-nueva` el 11 de
+octubre), así que los dos builds abren el mismo sitio (`src/config/web.ts`) y los dos los muestran:
 
-- **Build 30** (TestFlight, `release/1.0.2`): abre el enlace de los juegos. No tiene duelos y un enlace de
-  duelo le abre el navegador, no la app.
-- **Build 31** (esta rama): abre el enlace de comunidad, comparte con la hoja del teléfono y los enlaces
-  de duelo abren la app. **Falta compilarlo en una Mac:** `bash subir-a-testflight.sh`.
-- Al juntar comunidad con `plataforma-nueva` en la web, `WEB_BASE_URL` regresa al enlace de los juegos.
+- **Build 30** (TestFlight, `release/1.0.2`): se ven y se juegan los duelos. Pero un enlace de duelo le
+  abre el navegador, no la app (ahí hay que iniciar sesión otra vez), y al compartir sale la hoja de la
+  web, sin imagen.
+- **Build 31** (esta rama): además, los enlaces de duelo abren la app y se comparte con la hoja del
+  teléfono, con la tarjeta como imagen. **Falta compilarlo en una Mac:** `bash subir-a-testflight.sh`.
+- Hay otro enlace, `simijuegos-comunidad`, donde la web prueba cambios de comunidad antes de pasarlos al
+  sitio de pruebas. La app no lo abre, pero acepta sus enlaces de duelo.
 
 **Compartir.** `WebShell.tsx` atiende `simi:app-share` y avisa a la web que sabe hacerlo
 (`window.__simiApp.share`).
