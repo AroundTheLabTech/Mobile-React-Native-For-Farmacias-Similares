@@ -34,6 +34,16 @@ cd ios && pod install && cd ..
 
 Y en Xcode: abrir `ios/SimiJuegos.xcworkspace` → Product → Archive.
 
+**En un solo paso (compila y sube a TestFlight):**
+
+```bash
+bash subir-a-testflight.sh
+```
+
+Instala dependencias, corre `pod install`, archiva y sube el build con la firma automática del equipo
+`A9T5UUZVHZ` (Xcode tiene que tener iniciada la sesión de ese equipo en Settings → Accounts). Usa el
+número de build del proyecto; para otro: `BUILD=32 bash subir-a-testflight.sh`.
+
 Lo que ya está resuelto en el repo (no hace falta hacer nada a mano):
 
 - **Arquitectura clásica** (`ENV['RCT_NEW_ARCH_ENABLED'] = '0'` en el `Podfile`), igual que Android.
@@ -90,6 +100,9 @@ el repo de la web, `public/.well-known/assetlinks.json` queda así:
 
 No se puso la huella de la llave de depuración (la de «SimiJuegos QA»): esa llave es pública y cualquiera
 podría firmar una app que recibiera los enlaces del sitio.
+
+**Versión de esta rama:** 1.0.2, build 31 en iOS y `versionCode` 12 en Android (el 30 y el 11 eran los
+de `release/1.0.2`).
 
 **Sin probar en teléfono.** Esto se escribió en una PC con Windows: Android compila (variante QA), iOS no
 se pudo compilar ahí y nada se probó en un dispositivo. Al probar: compartir una tarjeta con imagen en
