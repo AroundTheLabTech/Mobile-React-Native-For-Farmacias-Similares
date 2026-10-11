@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:simijuegos.com.mx</string>
+		<string>applinks:www.simijuegos.com.mx</string>
+		<string>applinks:simijuegos-pruebas.late-limit-0cf9.workers.dev</string>
+	</array>
+</dict>
+</plist>

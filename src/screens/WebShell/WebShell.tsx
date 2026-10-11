@@ -4,7 +4,9 @@ import {
   AppState,
   BackHandler,
   Linking,
+  NativeModules,
   Platform,
+  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -21,12 +23,79 @@ import {WEB_BASE_URL} from '../../config/web';
 // Lo que solo puede hacer la app, la web se lo pide con mensajes (src/utils/appShell.js en la web):
 //   simi:app-orientation  -> fijar la pantalla en vertical u horizontal según el juego
 //   simi:app-back         -> respuesta al botón Atrás de Android (ver PREGUNTAR_ATRAS)
+//   simi:app-share        -> abrir la hoja de compartir del teléfono (texto, enlace e imagen)
+// Y la app abre los enlaces de duelo (https://<sitio>/reto?c=... o simijuegos://reto?c=...) en la
+// sala de ese duelo, dentro de la app (ver destinoDeEnlace).
 // Este archivo no depende de ninguna otra pantalla de la app.
 const BASE = WEB_BASE_URL;
 const FONDO = '#0E0A1F'; // fondo de la web
 
 // La web sabe que está dentro de la app por esto (y por el nombre agregado al navegador).
-const ANTES_DE_CARGAR = `window.__simiApp = { shell: true, v: 1, os: '${Platform.OS}' }; true;`;
+// share: true = esta versión de la app ya tiene la hoja de compartir (la web deja de usar su respaldo).
+const ANTES_DE_CARGAR = `window.__simiApp = { shell: true, v: 2, share: true, os: '${Platform.OS}' }; true;`;
+
+// ---------- Enlaces que abren la app (duelos entre amigos) ----------
+// Solo se acepta la sala de un duelo, en los sitios de SimiJuegos o con el esquema propio. Del enlace
+// se toma nada más el código del duelo y el juego: nunca se manda al WebView a una dirección de fuera.
+const SITIOS = [
+  'simijuegos.com.mx',
+  'www.simijuegos.com.mx',
+  'simijuegos-pruebas.late-limit-0cf9.workers.dev',
+];
+function destinoDeEnlace(url: string | null | undefined): string | null {
+  if (!url) {
+    return null;
+  }
+  const m =
+    /^(?:https:\/\/([^/?#]+)\/reto|simijuegos:\/\/reto)\/?(?:\?([^#]*))?/i.exec(
+      url,
+    );
+  if (!m) {
+    return null;
+  }
+  if (m[1] && !SITIOS.includes(m[1].toLowerCase())) {
+    return null;
+  }
+  const consulta = m[2] || '';
+  const codigo = /(?:^|&)c=([A-Za-z0-9]{6,12})(?:&|$)/.exec(consulta);
+  if (!codigo) {
+    return null;
+  }
+  const juego = /(?:^|&)j=([a-z0-9-]{1,40})(?:&|$)/.exec(consulta);
+  return (
+    BASE + '/reto?c=' + codigo[1].toUpperCase() + (juego ? '&j=' + juego[1] : '')
+  );
+}
+
+// ---------- Hoja de compartir del teléfono ----------
+// La web manda { title, text, url, image }: image es la tarjeta (data:image/jpeg;base64,...) o ''.
+// iPhone: la hoja nativa acepta la imagen tal cual. Android: el módulo SimiShare (android/.../
+// SimiShareModule.kt) guarda la imagen en la caché y la comparte; sin imagen, la hoja normal de texto.
+type MensajeCompartir = {title?: string; text?: string; url?: string; image?: string};
+async function compartir(msg: MensajeCompartir) {
+  const texto = [msg.text, msg.url].filter(Boolean).join(' ');
+  const imagen =
+    typeof msg.image === 'string' && msg.image.startsWith('data:image/')
+      ? msg.image
+      : '';
+  try {
+    if (imagen && Platform.OS === 'android' && NativeModules.SimiShare) {
+      await NativeModules.SimiShare.shareImage(imagen, texto, 'Compartir');
+      return;
+    }
+    if (imagen && Platform.OS === 'ios') {
+      await Share.share({url: imagen, message: texto});
+      return;
+    }
+    if (Platform.OS === 'ios') {
+      await Share.share({message: msg.text || '', url: msg.url || undefined});
+    } else {
+      await Share.share({message: texto}, {dialogTitle: 'Compartir'});
+    }
+  } catch (e) {
+    // El jugador cerró la hoja o el teléfono no pudo abrirla: no hay nada que hacer
+  }
+}
 
 // Atrás de Android: la página decide. true = ya lo atendió; false = cerrar la app; sin función = regresar.
 const PREGUNTAR_ATRAS = `(function(){
@@ -62,10 +131,46 @@ const WebShell: React.FC = () => {
   const canGoBack = useRef(false);
   const [failed, setFailed] = useState(false);
   const [key, setKey] = useState(0);
+  // Primera página: el inicio, o la sala del duelo si la app se abrió desde un enlace de reto.
+  // null = todavía se está preguntando con qué enlace se abrió la app.
+  const [inicio, setInicio] = useState<string | null>(null);
 
   // La app arranca en vertical; cada juego pide su orientación al abrirse.
   useEffect(() => {
     Orientation.lockToPortrait();
+  }, []);
+
+  // Enlaces de duelo: con la app cerrada deciden la primera página; con la app abierta, la llevan a la sala.
+  useEffect(() => {
+    let vivo = true;
+    const porOmision = () => setInicio(actual => actual || BASE + '/');
+    Linking.getInitialURL()
+      .then(url => {
+        if (vivo) {
+          setInicio(actual => actual || destinoDeEnlace(url) || BASE + '/');
+        }
+      })
+      .catch(() => vivo && porOmision());
+    // Si el teléfono no contesta, la app abre de todos modos en el inicio
+    const espera = setTimeout(() => vivo && porOmision(), 1500);
+    const sub = Linking.addEventListener('url', ({url}) => {
+      const destino = destinoDeEnlace(url);
+      if (!destino) {
+        return;
+      }
+      if (webRef.current) {
+        webRef.current.injectJavaScript(
+          `window.location.href = ${JSON.stringify(destino)}; true;`,
+        );
+      } else {
+        setInicio(destino);
+      }
+    });
+    return () => {
+      vivo = false;
+      clearTimeout(espera);
+      sub.remove();
+    };
   }, []);
 
   useEffect(() => {
@@ -89,13 +194,15 @@ const WebShell: React.FC = () => {
   }, []);
 
   const onMessage = useCallback((event: WebViewMessageEvent) => {
-    let msg: {type?: string; value?: string; result?: string} = {};
+    let msg: {type?: string; value?: string; result?: string} & MensajeCompartir = {};
     try {
       msg = JSON.parse(event.nativeEvent.data);
     } catch (e) {
       return;
     }
-    if (msg.type === 'simi:app-orientation') {
+    if (msg.type === 'simi:app-share') {
+      compartir(msg);
+    } else if (msg.type === 'simi:app-orientation') {
       if (msg.value === 'landscape') {
         Orientation.lockToLandscape();
       } else if (msg.value === 'free') {
@@ -169,13 +276,21 @@ const WebShell: React.FC = () => {
     );
   }
 
+  if (inicio === null) {
+    return (
+      <View style={styles.container}>
+        <Cargando />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <WebView
         key={key}
         ref={webRef}
         style={styles.web}
-        source={{uri: BASE + '/'}}
+        source={{uri: inicio}}
         applicationNameForUserAgent="SimiJuegosApp/1"
         injectedJavaScriptBeforeContentLoaded={ANTES_DE_CARGAR}
         onMessage={onMessage}

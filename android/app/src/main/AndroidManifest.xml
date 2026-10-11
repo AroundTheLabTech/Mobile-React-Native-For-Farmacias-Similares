@@ -21,6 +21,37 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
+        <!-- Enlaces de duelo que abren la app (WebShell.tsx los lleva a la sala del duelo).
+             Enlaces web: Android los entrega a la app sin preguntar solo si el sitio publica
+             /.well-known/assetlinks.json con la huella de la firma de esta app (está en el repo de
+             la web, public/.well-known/). Mientras no, el jugador puede elegir abrirlos con la app. -->
+        <intent-filter android:autoVerify="true">
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+            <data android:host="simijuegos.com.mx" />
+            <data android:host="www.simijuegos.com.mx" />
+            <data android:host="simijuegos-pruebas.late-limit-0cf9.workers.dev" />
+            <data android:pathPrefix="/reto" />
+        </intent-filter>
+        <!-- Esquema propio: simijuegos://reto?c=CÓDIGO (botón «Abrir en la app» de la web) -->
+        <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="simijuegos" android:host="reto" />
+        </intent-filter>
       </activity>
+      <!-- Para compartir la tarjeta de redes como imagen (SimiShareModule.kt) -->
+      <provider
+        android:name=".SimiShareFileProvider"
+        android:authorities="${applicationId}.simishare"
+        android:exported="false"
+        android:grantUriPermissions="true">
+        <meta-data
+          android:name="android.support.FILE_PROVIDER_PATHS"
+          android:resource="@xml/simi_share_paths" />
+      </provider>
     </application>
 </manifest>
