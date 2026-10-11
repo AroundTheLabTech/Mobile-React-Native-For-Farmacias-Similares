@@ -33,6 +33,7 @@
             <data android:host="simijuegos.com.mx" />
             <data android:host="www.simijuegos.com.mx" />
             <data android:host="simijuegos-pruebas.late-limit-0cf9.workers.dev" />
+            <data android:host="simijuegos-comunidad.late-limit-0cf9.workers.dev" />
             <data android:pathPrefix="/reto" />
         </intent-filter>
         <!-- Esquema propio: simijuegos://reto?c=CÓDIGO (botón «Abrir en la app» de la web) -->

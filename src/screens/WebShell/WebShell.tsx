@@ -41,6 +41,7 @@ const SITIOS = [
   'simijuegos.com.mx',
   'www.simijuegos.com.mx',
   'simijuegos-pruebas.late-limit-0cf9.workers.dev',
+  'simijuegos-comunidad.late-limit-0cf9.workers.dev',
 ];
 function destinoDeEnlace(url: string | null | undefined): string | null {
   if (!url) {

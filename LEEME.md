@@ -65,6 +65,17 @@ Lo que ya está resuelto en el repo (no hace falta hacer nada a mano):
 
 La web explica los duelos en `docs/RETOS-ENTRE-AMIGOS.md` (repo de la web). Aquí está la parte de la app.
 
+**Esta rama abre el enlace de pruebas de comunidad**, no el de los juegos (`src/config/web.ts`):
+https://simijuegos-comunidad.late-limit-0cf9.workers.dev. Ahí se publica la rama
+`actualizacion-de-comunidad` de la web, que es donde están los duelos. Cada rama de la web tiene su enlace
+porque publicar reemplaza el sitio completo (el 11 de octubre las dos ramas se borraban una a la otra).
+
+- **Build 30** (TestFlight, `release/1.0.2`): abre el enlace de los juegos. No tiene duelos y un enlace de
+  duelo le abre el navegador, no la app.
+- **Build 31** (esta rama): abre el enlace de comunidad, comparte con la hoja del teléfono y los enlaces
+  de duelo abren la app. **Falta compilarlo en una Mac:** `bash subir-a-testflight.sh`.
+- Al juntar comunidad con `plataforma-nueva` en la web, `WEB_BASE_URL` regresa al enlace de los juegos.
+
 **Compartir.** `WebShell.tsx` atiende `simi:app-share` y avisa a la web que sabe hacerlo
 (`window.__simiApp.share`).
 
@@ -74,7 +85,9 @@ La web explica los duelos en `docs/RETOS-ENTRE-AMIGOS.md` (repo de la web). Aqu�
   comparte con `SimiShareFileProvider` (declarado en `AndroidManifest.xml`). No agrega librerías.
 
 **Enlaces que abren la app.** `WebShell.tsx` (`destinoDeEnlace`) solo acepta la sala de un duelo y solo
-toma del enlace el código y el juego.
+toma del enlace el código y el juego. Sitios aceptados (los mismos en `SimiJuegos.entitlements` y en
+`AndroidManifest.xml`): `simijuegos.com.mx`, `www.simijuegos.com.mx` y los dos enlaces de pruebas
+(`simijuegos-pruebas` y `simijuegos-comunidad`).
 
 | Enlace | Qué hace falta para que abra la app |
 |---|---|
