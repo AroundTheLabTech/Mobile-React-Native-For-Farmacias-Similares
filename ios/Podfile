@@ -7,6 +7,10 @@ require Pod::Executable.execute_command('node', ['-p',
 
 platform :ios, min_ios_version_supported
 
+# Arquitectura clásica, igual que Android (newArchEnabled=false en android/gradle.properties). Con la
+# nueva, la app compila pero truena al abrir (RCTEventEmitter … not registered as callable).
+ENV['RCT_NEW_ARCH_ENABLED'] = '0'
+
 prepare_react_native_project!
 
 linkage = ENV['USE_FRAMEWORKS']
@@ -46,6 +50,12 @@ target 'SimiJuegos' do
         
         # Alternativa: si lo anterior no funciona, descomenta esta línea
         # config.build_settings['OTHER_LDFLAGS'] << '-lswiftCompatibilityDynamicLookup'
+
+        # fmt 11.0.2 (React Native 0.77) no compila con el clang de Xcode 26 en C++20
+        # ("call to consteval function ... is not a constant expression"): se compila en C++17.
+        if target.name == 'fmt'
+          config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+        end
       end
     end
   end

@@ -1,0 +1,4 @@
+<resources>
+    <!-- Nombre de la variante de pruebas (gradlew assemblePlayQa). La app de tienda usa src/main. -->
+    <string name="app_name">SimiJuegos QA</string>
+</resources>
