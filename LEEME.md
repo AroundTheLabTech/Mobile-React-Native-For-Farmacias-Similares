@@ -68,7 +68,7 @@ toma del enlace el código y el juego.
 
 | Enlace | Qué hace falta para que abra la app |
 |---|---|
-| `simijuegos://reto?c=CÓDIGO` | Nada más: va en `Info.plist` y en `AndroidManifest.xml`. La web lo ofrece con «¿Tienes la app? Ábrelo ahí». |
+| `simijuegos://reto?c=CÓDIGO` | Nada más: va en `Info.plist` y en `AndroidManifest.xml`. La web lo ofrece con «Abrir en la app». |
 | `https://<sitio>/reto?c=CÓDIGO` en iPhone | El permiso *Associated Domains* (`ios/SimiJuegos/SimiJuegos.entitlements`) y que el sitio publique `/.well-known/apple-app-site-association` (ya está en la web, con `A9T5UUZVHZ.com.FDS.simijuegos`). |
 | `https://<sitio>/reto?c=CÓDIGO` en Android | Que el sitio publique `/.well-known/assetlinks.json` con la huella SHA-256 de la firma de la app. Hoy está vacío: ver abajo. |
 
