@@ -88,8 +88,9 @@ async function compartir(msg: MensajeCompartir) {
       await Share.share({url: imagen, message: texto});
       return;
     }
+    // El enlace va dentro del texto: si va aparte, «Copiar» del iPhone pega solo el texto
     if (Platform.OS === 'ios') {
-      await Share.share({message: msg.text || '', url: msg.url || undefined});
+      await Share.share({message: texto});
     } else {
       await Share.share({message: texto}, {dialogTitle: 'Compartir'});
     }
