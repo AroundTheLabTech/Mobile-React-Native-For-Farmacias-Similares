@@ -4,6 +4,7 @@ import {
   AppState,
   BackHandler,
   Linking,
+  NativeEventEmitter,
   NativeModules,
   Platform,
   Share,
@@ -24,6 +25,9 @@ import {WEB_BASE_URL} from '../../config/web';
 //   simi:app-orientation  -> fijar la pantalla en vertical u horizontal según el juego
 //   simi:app-back         -> respuesta al botón Atrás de Android (ver PREGUNTAR_ATRAS)
 //   simi:app-share        -> abrir la hoja de compartir del teléfono (texto, enlace e imagen)
+//   simi:avisos-estado    -> ¿hay permiso de avisos? (contesta con el evento simi:avisos en la web)
+//   simi:avisos-pedir     -> la pregunta de iOS para mandar avisos; con el sí llega la dirección del teléfono
+//   simi:avisos-ajustes   -> abrir los ajustes de la app (si dijo que no a los avisos)
 // Y la app abre los enlaces de duelo (https://<sitio>/reto?c=... o simijuegos://reto?c=...) en la
 // sala de ese duelo, dentro de la app (ver destinoDeEnlace).
 // Este archivo no depende de ninguna otra pantalla de la app.
@@ -32,7 +36,13 @@ const FONDO = '#0E0A1F'; // fondo de la web
 
 // La web sabe que está dentro de la app por esto (y por el nombre agregado al navegador).
 // share: true = esta versión de la app ya tiene la hoja de compartir (la web deja de usar su respaldo).
-const ANTES_DE_CARGAR = `window.__simiApp = { shell: true, v: 2, share: true, os: '${Platform.OS}' }; true;`;
+// avisos: true = esta versión de la app manda avisos al teléfono (módulo SimiAvisos, AppDelegate.mm).
+const Avisos = Platform.OS === 'ios' ? NativeModules.SimiAvisos : null;
+const ANTES_DE_CARGAR = `window.__simiApp = { shell: true, v: 3, share: true, avisos: ${!!Avisos}, os: '${Platform.OS}' }; true;`;
+
+// Respuestas a la web sobre los avisos: { estado: 'permitido' | 'negado' | 'pendiente', token, entorno }
+const avisoParaLaWeb = (detalle: object) =>
+  `window.dispatchEvent(new CustomEvent('simi:avisos', { detail: ${JSON.stringify(detalle)} })); true;`;
 
 // ---------- Enlaces que abren la app (duelos entre amigos) ----------
 // Solo se acepta la sala de un duelo, en los sitios de SimiJuegos o con el esquema propio. Del enlace
@@ -136,6 +146,21 @@ const WebShell: React.FC = () => {
   // Primera página: el inicio, o la sala del duelo si la app se abrió desde un enlace de reto.
   // null = todavía se está preguntando con qué enlace se abrió la app.
   const [inicio, setInicio] = useState<string | null>(null);
+  const yaHayInicio = useRef(false);
+  useEffect(() => {
+    yaHayInicio.current = inicio !== null;
+  }, [inicio]);
+
+  // Lleva la app a un duelo: si la página ya cargó, ahí mismo; si no, como primera página
+  const irA = useCallback((destino: string) => {
+    if (webRef.current && yaHayInicio.current) {
+      webRef.current.injectJavaScript(
+        `window.location.href = ${JSON.stringify(destino)}; true;`,
+      );
+    } else {
+      setInicio(destino);
+    }
+  }, []);
 
   // La app arranca en vertical; cada juego pide su orientación al abrirse.
   useEffect(() => {
@@ -148,8 +173,15 @@ const WebShell: React.FC = () => {
     const porOmision = () => setInicio(actual => actual || BASE + '/');
     Linking.getInitialURL()
       .then(url => {
-        if (vivo) {
-          setInicio(actual => actual || destinoDeEnlace(url) || BASE + '/');
+        if (!vivo) {
+          return;
+        }
+        const destino = destinoDeEnlace(url);
+        // Si el teléfono tardó más de lo que se esperó, la app ya abrió el inicio: ahora se va al duelo
+        if (destino && yaHayInicio.current) {
+          irA(destino);
+        } else {
+          setInicio(actual => actual || destino || BASE + '/');
         }
       })
       .catch(() => vivo && porOmision());
@@ -160,13 +192,7 @@ const WebShell: React.FC = () => {
       if (!destino) {
         return;
       }
-      if (webRef.current) {
-        webRef.current.injectJavaScript(
-          `window.location.href = ${JSON.stringify(destino)}; true;`,
-        );
-      } else {
-        setInicio(destino);
-      }
+      irA(destino);
     });
     return () => {
       vivo = false;
@@ -174,6 +200,31 @@ const WebShell: React.FC = () => {
       sub.remove();
     };
   }, []);
+
+  // Avisos: la dirección del teléfono va a la web (que la registra) y tocar un aviso abre su duelo
+  useEffect(() => {
+    if (!Avisos) {
+      return undefined;
+    }
+    const abrirAviso = (url?: string) => {
+      const destino = url ? destinoDeEnlace(BASE + url) : null;
+      if (destino) {
+        irA(destino);
+      }
+    };
+    const emisor = new NativeEventEmitter(Avisos);
+    const subs = [
+      emisor.addListener('simiAvisosToken', (d: {token: string; entorno: string}) => {
+        webRef.current?.injectJavaScript(avisoParaLaWeb({estado: 'permitido', ...d}));
+      }),
+      emisor.addListener('simiAvisosTocado', (d: {url?: string}) => abrirAviso(d && d.url)),
+    ];
+    // La app se abrió tocando un aviso
+    Avisos.tocadoPendiente()
+      .then((url: string | null) => abrirAviso(url || undefined))
+      .catch(() => {});
+    return () => subs.forEach(s => s.remove());
+  }, [irA]);
 
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -204,6 +255,17 @@ const WebShell: React.FC = () => {
     }
     if (msg.type === 'simi:app-share') {
       compartir(msg);
+    } else if (msg.type === 'simi:avisos-estado' || msg.type === 'simi:avisos-pedir') {
+      if (!Avisos) {
+        return;
+      }
+      const pedir: Promise<unknown> = msg.type === 'simi:avisos-pedir' ? Avisos.pedir() : Promise.resolve();
+      pedir
+        .then(() => Avisos.estado())
+        .then((d: object) => webRef.current?.injectJavaScript(avisoParaLaWeb(d)))
+        .catch(() => {});
+    } else if (msg.type === 'simi:avisos-ajustes') {
+      Linking.openSettings().catch(() => {});
     } else if (msg.type === 'simi:app-orientation') {
       if (msg.value === 'landscape') {
         Orientation.lockToLandscape();
