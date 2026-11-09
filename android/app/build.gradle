@@ -98,6 +98,24 @@ android {
         ndk {
             abiFilters "arm64-v8a"
         }
+
+        // Firebase para los avisos de los duelos (#173). En vez del plugin de Google Services se leen aquí
+        // los datos de com.simijuegos del google-services.json (proyecto simi-27671), para todas las
+        // variantes: el plugin rechaza la variante de pruebas (com.simijuegos.qa) porque no está dada de
+        // alta en Firebase. Firebase arranca solo con estos valores (FirebaseInitProvider).
+        def googleServices = file("google-services.json")
+        if (googleServices.exists()) {
+            def gs = new groovy.json.JsonSlurper().parse(googleServices)
+            def cliente = gs.client.find { it.client_info.android_client_info.package_name == "com.simijuegos" }
+            if (cliente != null) {
+                resValue "string", "google_app_id", cliente.client_info.mobilesdk_app_id
+                resValue "string", "google_api_key", cliente.api_key[0].current_key
+                resValue "string", "google_crash_reporting_api_key", cliente.api_key[0].current_key
+                resValue "string", "gcm_defaultSenderId", gs.project_info.project_number
+                resValue "string", "project_id", gs.project_info.project_id
+                resValue "string", "google_storage_bucket", gs.project_info.storage_bucket
+            }
+        }
     }
     flavorDimensions "store"
     productFlavors {
@@ -166,6 +184,8 @@ dependencies {
     implementation("com.facebook.react:react-android")
     implementation 'com.android.billingclient:billing:5.0.0'
     implementation 'com.google.android.gms:play-services-base:18.0.0'
+    // Avisos de los duelos (#173)
+    implementation 'com.google.firebase:firebase-messaging:24.1.0'
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

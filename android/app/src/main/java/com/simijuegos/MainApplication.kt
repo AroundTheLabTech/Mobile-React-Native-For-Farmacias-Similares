@@ -22,6 +22,8 @@ class MainApplication : Application(), ReactApplication {
               // add(MyReactNativePackage())
               // Compartir imágenes con la hoja del teléfono (tarjetas de duelos, niveles e insignias)
               add(SimiSharePackage())
+              // Avisos de los duelos en el teléfono (#173)
+              add(SimiAvisosPackage())
             }
 
         override fun getJSMainModuleName(): String = "index"
@@ -41,6 +43,11 @@ class MainApplication : Application(), ReactApplication {
     if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
       // If you opted-in for the New Architecture, we load the native entry point for this app.
       load()
+    }
+    // Avisos (#173): el canal «Duelos» y, si ya dio permiso, la dirección del teléfono (puede cambiar)
+    SimiAvisosModule.crearCanal(this)
+    if (androidx.core.app.NotificationManagerCompat.from(this).areNotificationsEnabled()) {
+      SimiAvisosModule.pedirToken()
     }
   }
 }
