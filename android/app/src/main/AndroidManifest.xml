@@ -24,16 +24,24 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
         <!-- Enlaces de duelo que abren la app (WebShell.tsx los lleva a la sala del duelo).
-             Enlaces web: Android los entrega a la app sin preguntar solo si el sitio publica
-             /.well-known/assetlinks.json con la huella de la firma de esta app (está en el repo de
-             la web, public/.well-known/). Mientras no, el jugador puede elegir abrirlos con la app. -->
+             Enlaces web: Android los entrega a la app sin preguntar porque simijuegos.com.mx publica
+             /.well-known/assetlinks.json con la huella de la firma de Play (repo de la web, desde el 9 nov 2026).
+             Va sola en su filtro: en Android 11 o anterior, si UNA dirección del filtro no se puede verificar,
+             no se verifica ninguna (www.simijuegos.com.mx no existe y tumbaba todo). -->
         <intent-filter android:autoVerify="true">
             <action android:name="android.intent.action.VIEW" />
             <category android:name="android.intent.category.DEFAULT" />
             <category android:name="android.intent.category.BROWSABLE" />
             <data android:scheme="https" />
             <data android:host="simijuegos.com.mx" />
-            <data android:host="www.simijuegos.com.mx" />
+            <data android:pathPrefix="/reto" />
+        </intent-filter>
+        <!-- Sitios de prueba: sin verificar (Android pregunta con qué abrirlos; para probar basta). -->
+        <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
             <data android:host="simijuegos-pruebas.late-limit-0cf9.workers.dev" />
             <data android:host="simijuegos-comunidad.late-limit-0cf9.workers.dev" />
             <data android:pathPrefix="/reto" />
