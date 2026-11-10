@@ -194,7 +194,7 @@ dependencies {
         implementation jscFlavor
     }
 
-    implementation(project(path: ":react-native-iap", configuration: "default"))
+    // react-native-iap ya no entra en Android (react-native.config.js): traía la Biblioteca de Facturación Play 7.
 }
 
 // Importa el script de fuentes de react-native-vector-icons 
