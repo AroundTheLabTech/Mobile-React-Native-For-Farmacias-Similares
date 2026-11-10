@@ -36,8 +36,10 @@ const FONDO = '#0E0A1F'; // fondo de la web
 
 // La web sabe que está dentro de la app por esto (y por el nombre agregado al navegador).
 // share: true = esta versión de la app ya tiene la hoja de compartir (la web deja de usar su respaldo).
-// avisos: true = esta versión de la app manda avisos al teléfono (módulo SimiAvisos, AppDelegate.mm).
-const Avisos = Platform.OS === 'ios' ? NativeModules.SimiAvisos : null;
+// avisos: true = esta versión de la app manda avisos al teléfono (módulo SimiAvisos: AppDelegate.mm en
+// iPhone y SimiAvisosModule.kt en Android, con los mismos métodos y eventos; en Android el token es de
+// Firebase y llega con entorno 'fcm').
+const Avisos = NativeModules.SimiAvisos || null;
 const ANTES_DE_CARGAR = `window.__simiApp = { shell: true, v: 3, share: true, avisos: ${!!Avisos}, os: '${Platform.OS}' }; true;`;
 
 // Respuestas a la web sobre los avisos: { estado: 'permitido' | 'negado' | 'pendiente', token, entorno }

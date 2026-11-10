@@ -1,9 +1,11 @@
 buildscript {
     ext {
-        buildToolsVersion = "35.0.0"
+        // Google Play pide Android 16 (API 36) desde el 31 ago 2026 (#179). Con API 36 la app siempre va de
+        // borde a borde: el SafeAreaView de App.tsx deja el contenido fuera de las barras.
+        buildToolsVersion = "36.0.0"
         minSdkVersion = 24
-        compileSdkVersion = 35
-        targetSdkVersion = 35
+        compileSdkVersion = 36
+        targetSdkVersion = 36
         ndkVersion = "28.0.13004108"
         kotlinVersion = "2.0.21"
     }

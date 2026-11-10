@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- Color del ícono de los avisos de duelos (#173) -->
+  <color name="simi_aviso">#7B2CBF</color>
+</resources>
