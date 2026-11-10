@@ -11,4 +11,6 @@
 // pruebas. La app no lo abre, pero sí acepta sus enlaces de duelo: ver SITIOS en WebShell.tsx.)
 // Antes de mandar a la App Store se cambia a https://simijuegos.com.mx en otro build, una vez que la web
 // nueva esté en master.
-export const WEB_BASE_URL = 'https://simijuegos-pruebas.late-limit-0cf9.workers.dev';
+// Rama version-1.0.5-android (Google Play, versión 14): la web nueva ya está en master (PR #75 y #76,
+// 9 nov 2026), así que la versión de la tienda abre el sitio oficial.
+export const WEB_BASE_URL = 'https://simijuegos.com.mx';
